@@ -1,0 +1,35 @@
+# Core FastAPI
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database
+sqlalchemy
+psycopg2-binary
+alembic
+
+# Authentication
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic[email]
+
+# Templates & Static Files
+jinja2
+aiofiles
+
+# Sessions
+itsdangerous
+
+# Environment Variables
+python-dotenv
+
+# Production Server
+gunicorn
+
+# Development & Testing
+pytest
+httpx
+pytest-asyncio
+
+bcrypt==4.3.0
+
