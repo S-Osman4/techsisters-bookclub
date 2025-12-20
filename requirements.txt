@@ -31,5 +31,9 @@ pytest
 httpx
 pytest-asyncio
 
-bcrypt==4.3.0
+#additional imports
+werkzeug
+pytest
+pytest-asyncio
+httpx
 

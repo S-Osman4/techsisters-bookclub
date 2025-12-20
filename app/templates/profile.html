@@ -1,0 +1,304 @@
+{% extends "base.html" %} {% block title %}My Profile - TechSisters Book Club{%
+endblock %} {% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
+    <p class="text-gray-600">Manage your account settings</p>
+  </div>
+
+  <!-- Profile Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
+      <div class="text-3xl font-bold text-purple-600">
+        {{ stats.completed_books }}
+      </div>
+      <div class="text-sm text-gray-600 mt-1">Books Read</div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
+      <div class="text-3xl font-bold text-blue-600">
+        {{ stats.currently_reading }}
+      </div>
+      <div class="text-sm text-gray-600 mt-1">Reading Now</div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
+      <div class="text-3xl font-bold text-green-600">
+        {{ stats.approved_suggestions }}
+      </div>
+      <div class="text-sm text-gray-600 mt-1">Approved</div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
+      <div class="text-3xl font-bold text-orange-600">
+        {{ stats.total_suggestions }}
+      </div>
+      <div class="text-sm text-gray-600 mt-1">Suggested</div>
+    </div>
+  </div>
+
+  <!-- Account Information -->
+  <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Account Information</h2>
+
+    <div class="space-y-4">
+      <!-- Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+        <form
+          hx-put="/api/profile/name"
+          hx-target="#name-result"
+          class="flex gap-2"
+        >
+          <input
+            type="text"
+            name="new_name"
+            value="{{ current_user.name }}"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            required
+            minlength="2"
+            maxlength="50"
+          />
+          <button
+            type="submit"
+            class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 whitespace-nowrap"
+          >
+            Update
+          </button>
+        </form>
+        <div id="name-result" class="mt-2"></div>
+      </div>
+
+      <!-- Email (Read-only) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Email</label
+        >
+        <input
+          type="email"
+          value="{{ current_user.email }}"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+          disabled
+        />
+        <p class="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+      </div>
+
+      <!-- Role Badge -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+        <div class="flex items-center">
+          {% if current_user.is_admin %}
+          <span
+            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
+          >
+            ⭐ Administrator
+          </span>
+          {% else %}
+          <span
+            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+          >
+            👤 Member
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Member Since -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Member Since</label
+        >
+        <input
+          type="text"
+          value="{{ current_user.created_at.strftime('%B %d, %Y') }}"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+          disabled
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password -->
+  <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">🔒 Change Password</h2>
+
+    <form
+      hx-put="/api/profile/password"
+      hx-target="#password-result"
+      class="space-y-4"
+    >
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Current Password</label
+        >
+        <input
+          type="password"
+          name="current_password"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          required
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >New Password</label
+        >
+        <input
+          type="password"
+          name="new_password"
+          minlength="8"
+          maxlength="100"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          required
+        />
+        <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+      </div>
+
+      <div id="password-result"></div>
+
+      <button
+        type="submit"
+        class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700"
+      >
+        Change Password
+      </button>
+    </form>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="bg-white rounded-xl shadow-sm border border-red-200 p-6">
+    <h2 class="text-xl font-bold text-red-600 mb-4">⚠️ Danger Zone</h2>
+
+    {% if is_only_admin %}
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+      <p class="text-sm text-yellow-800 font-medium">
+        ⚠️ Cannot Delete Account
+      </p>
+      <p class="text-sm text-yellow-700 mt-2">
+        You are the only administrator. Please assign another admin before
+        deleting your account, or contact support for assistance.
+      </p>
+    </div>
+    {% else %}
+    <p class="text-gray-600 mb-4">
+      Once you delete your account, there is no going back. All your data will
+      be permanently deleted:
+    </p>
+    <ul class="text-gray-600 mb-4 ml-6 list-disc">
+      <li>Book suggestions</li>
+      <li>Reading progress</li>
+      <li>Account information</li>
+    </ul>
+
+    <button
+      onclick="document.getElementById('delete-modal').classList.remove('hidden')"
+      class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700"
+    >
+      Delete Account
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div
+  id="delete-modal"
+  class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-backdrop"
+>
+  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 modal-content">
+    <h3 class="text-xl font-bold text-red-600 mb-4">⚠️ Delete Account</h3>
+
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <p class="text-sm text-red-800 font-medium">
+        This action cannot be undone!
+      </p>
+      <p class="text-sm text-red-700 mt-2">
+        All your data will be permanently deleted.
+      </p>
+    </div>
+
+    <form
+      hx-delete="/api/profile/account"
+      hx-target="#delete-result"
+      class="space-y-4"
+    >
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Enter your password to confirm
+        </label>
+        <input
+          type="password"
+          name="password"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+          required
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Type "delete my account" to confirm
+        </label>
+        <input
+          type="text"
+          name="confirmation"
+          placeholder="delete my account"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+          required
+        />
+      </div>
+
+      <div id="delete-result"></div>
+
+      <div class="flex space-x-2">
+        <button
+          type="submit"
+          class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 font-medium"
+        >
+          Yes, Delete My Account
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('delete-modal').classList.add('hidden')"
+          class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 font-medium"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Handle profile updates
+  document.addEventListener("htmx:afterSwap", function (event) {
+    const targetId = event.detail.target.id;
+
+    if (targetId === "name-result") {
+      showToast("Name updated successfully!", "success");
+      setTimeout(() => location.reload(), 1500);
+    }
+
+    if (targetId === "password-result") {
+      showToast("Password changed! Please login again.", "success");
+      setTimeout(() => {
+        window.location.href = "/auth/logout";
+      }, 2000);
+    }
+
+    if (targetId === "delete-result") {
+      showToast("Account deleted. Goodbye! 👋", "success");
+      setTimeout(() => {
+        window.location.href = "/auth/logout";
+      }, 2000);
+    }
+  });
+
+  // Close modal on escape key
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      const modal = document.getElementById("delete-modal");
+      if (!modal.classList.contains("hidden")) {
+        modal.classList.add("hidden");
+      }
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}TechSisters Book Club{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- HTMX for dynamic updates -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Custom styles -->
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(102, 126, 234, 0.4);
+      }
+
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body class="bg-gray-50">
+    <!-- Navigation -->
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <!-- Logo -->
+          <div class="flex items-center">
+            <a
+              href="{% if request.session.get('user_id') %}/dashboard{% else %}/{% endif %}"
+              class="flex items-center"
+            >
+              <span
+                class="text-2xl font-bold gradient-bg bg-clip-text text-transparent"
+              >
+                📚 TechSisters Book Club
+              </span>
+            </a>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-4">
+            {% if request.session.get('user_id') %}
+            <!-- Logged in -->
+            <span class="text-sm text-gray-600">
+              Hi,
+              <span class="font-semibold"
+                >{{ request.session.get('user_name') }}</span
+              >
+            </span>
+
+            {% if request.session.get('is_admin') %}
+            <a
+              href="/admin"
+              class="text-sm text-purple-600 hover:text-purple-800 font-medium"
+            >
+              Admin Panel
+            </a>
+            {% endif %}
+
+            <a
+              href="/profile"
+              class="text-sm text-gray-600 hover:text-gray-900"
+            >
+              My Profile
+            </a>
+
+            <form method="POST" action="/auth/logout" class="inline">
+              <button
+                type="submit"
+                class="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Logout
+              </button>
+            </form>
+
+            {% elif request.session.get('code_verified') %}
+            <!-- Guest with code -->
+            <a
+              href="/register"
+              class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              Create Account
+            </a>
+            <a href="/login" class="text-sm text-gray-600 hover:text-gray-900">
+              Login
+            </a>
+
+            {% else %}
+            <!-- No access -->
+            <a href="/login" class="text-sm text-gray-600 hover:text-gray-900">
+              Login
+            </a>
+            <a
+              href="/"
+              class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              Enter Code
+            </a>
+            {% endif %}
+          </div>
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden flex items-center">
+            <button
+              onclick="toggleMobileMenu()"
+              class="text-gray-600 hover:text-gray-900 focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              <svg
+                id="menu-icon"
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <svg
+                id="close-icon"
+                class="w-6 h-6 hidden"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Menu -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden border-t border-gray-200 bg-white"
+      >
+        <div class="px-4 pt-2 pb-3 space-y-1">
+          {% if request.session.get('user_id') %}
+          <!-- Logged in mobile menu -->
+          <div class="px-3 py-2 text-sm text-gray-600 border-b border-gray-200">
+            Hi,
+            <span class="font-semibold"
+              >{{ request.session.get('user_name') }}</span
+            >
+          </div>
+
+          {% if request.session.get('is_admin') %}
+          <a
+            href="/admin"
+            class="block px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-md font-medium"
+          >
+            🔧 Admin Panel
+          </a>
+          {% endif %}
+
+          <a
+            href="/profile"
+            class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+          >
+            👤 My Profile
+          </a>
+
+          <form method="POST" action="/auth/logout" class="mt-2">
+            <button
+              type="submit"
+              class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+            >
+              🚪 Logout
+            </button>
+          </form>
+
+          {% elif request.session.get('code_verified') %}
+          <!-- Guest mobile menu -->
+          <a
+            href="/register"
+            class="block px-3 py-2 text-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-md font-medium text-center"
+          >
+            Create Account
+          </a>
+          <a
+            href="/login"
+            class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+          >
+            Login
+          </a>
+
+          {% else %}
+          <!-- No access mobile menu -->
+          <a
+            href="/login"
+            class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+          >
+            Login
+          </a>
+          <a
+            href="/"
+            class="block px-3 py-2 text-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-md font-medium text-center"
+          >
+            Enter Code
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">{% block content %}{% endblock %}</main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center text-gray-600">
+          <p>
+            &copy; 2024 TechSisters Book Club. Made with ❤️ for the community.
+          </p>
+          <p class="mt-2 text-sm">
+            <a
+              href="https://TechSisters.org"
+              target="_blank"
+              class="text-purple-600 hover:text-purple-800"
+            >
+              Join TechSisters Kenya
+            </a>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- JavaScript -->
+    <script>
+      // Improved Toast System
+      function showToast(message, type = "success", duration = 5000) {
+        const toast = document.createElement("div");
+        const icon =
+          type === "success"
+            ? "✅"
+            : type === "error"
+            ? "❌"
+            : type === "warning"
+            ? "⚠️"
+            : "ℹ️";
+
+        const bgColor =
+          type === "success"
+            ? "bg-green-500"
+            : type === "error"
+            ? "bg-red-500"
+            : type === "warning"
+            ? "bg-yellow-500"
+            : "bg-blue-500";
+
+        toast.className = `toast ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2`;
+        toast.innerHTML = `
+        <span class="text-lg">${icon}</span>
+        <span class="flex-1">${message}</span>
+        <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+            ×
+        </button>
+    `;
+
+        const container = document.getElementById("toast-container");
+        container.appendChild(toast);
+
+        // Auto-remove after duration
+        setTimeout(() => {
+          if (toast.parentElement === container) {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(100%)";
+            setTimeout(() => toast.remove(), 300);
+          }
+        }, duration);
+      }
+      // Mobile menu toggle
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        const menuIcon = document.getElementById("menu-icon");
+        const closeIcon = document.getElementById("close-icon");
+
+        menu.classList.toggle("hidden");
+        menuIcon.classList.toggle("hidden");
+        closeIcon.classList.toggle("hidden");
+      }
+
+      // Close mobile menu when clicking outside
+      document.addEventListener("click", function (event) {
+        const menu = document.getElementById("mobile-menu");
+        const menuButton = event.target.closest(
+          'button[aria-label="Toggle menu"]'
+        );
+
+        if (
+          !menuButton &&
+          !menu.contains(event.target) &&
+          !menu.classList.contains("hidden")
+        ) {
+          toggleMobileMenu();
+        }
+      });
+
+      // Close mobile menu on window resize to desktop
+      window.addEventListener("resize", function () {
+        if (window.innerWidth >= 768) {
+          // md breakpoint
+          const menu = document.getElementById("mobile-menu");
+          const menuIcon = document.getElementById("menu-icon");
+          const closeIcon = document.getElementById("close-icon");
+
+          if (!menu.classList.contains("hidden")) {
+            menu.classList.add("hidden");
+            menuIcon.classList.remove("hidden");
+            closeIcon.classList.add("hidden");
+          }
+        }
+      });
+
+      // Form validation helper
+      function validateForm(form) {
+        let isValid = true;
+        const errors = [];
+
+        form.querySelectorAll("[required]").forEach((input) => {
+          if (!input.value.trim()) {
+            input.classList.add("border-red-500", "ring-2", "ring-red-200");
+            errors.push(`${input.name || input.id} is required`);
+            isValid = false;
+          } else {
+            input.classList.remove("border-red-500", "ring-2", "ring-red-200");
+          }
+
+          // Email validation
+          if (input.type === "email" && input.value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+              input.classList.add("border-red-500", "ring-2", "ring-red-200");
+              errors.push("Please enter a valid email address");
+              isValid = false;
+            }
+          }
+
+          // Password validation
+          if (input.type === "password" && input.value) {
+            if (input.value.length < 8) {
+              input.classList.add("border-red-500", "ring-2", "ring-red-200");
+              errors.push("Password must be at least 8 characters");
+              isValid = false;
+            }
+          }
+        });
+
+        return { isValid, errors };
+      }
+
+      // Global error handler for HTMX
+      document.addEventListener("htmx:responseError", function (event) {
+        const xhr = event.detail.xhr;
+        const url = event.detail.requestConfig.path;
+
+        // Skip if we already handled it elsewhere
+        if (event.detail.shouldSwap) return;
+
+        try {
+          const response = JSON.parse(xhr.response);
+          const errorMsg = response.detail || "An error occurred";
+
+          // Different handling based on status code
+          switch (xhr.status) {
+            case 400:
+              showToast(`❌ ${errorMsg}`, "error");
+              break;
+            case 401:
+              showToast("🔒 Please login to continue", "error");
+              // Redirect to login for auth errors
+              if (!url.includes("/auth/login")) {
+                setTimeout(
+                  () => (window.location.href = "/login?error=auth_required"),
+                  1500
+                );
+              }
+              break;
+            case 403:
+              showToast(
+                "⛔ Access denied. You need proper permissions.",
+                "error"
+              );
+              break;
+            case 404:
+              showToast("🔍 Resource not found", "error");
+              break;
+            case 422:
+              showToast(`📝 ${errorMsg}`, "warning");
+              break;
+            default:
+              showToast(`🚨 ${errorMsg}`, "error");
+          }
+        } catch (e) {
+          // If response is not JSON
+          showToast(
+            "🚨 An unexpected error occurred. Please try again.",
+            "error"
+          );
+        }
+      });
+
+      // Handle successful responses
+      document.addEventListener("htmx:afterSwap", function (event) {
+        const target = event.detail.target;
+
+        // If there's a result div, check for success messages
+        if (target.id && target.id.includes("result")) {
+          try {
+            const response = JSON.parse(target.innerHTML);
+            if (response.message) {
+              showToast(
+                response.message,
+                response.success ? "success" : "error"
+              );
+            }
+          } catch (e) {
+            // Not JSON, ignore
+          }
+        }
+      });
+
+      // Handle form submissions
+      document.addEventListener("htmx:beforeRequest", function (event) {
+        const form = event.detail.elt;
+
+        if (form.tagName === "FORM") {
+          // Clear previous errors
+          form.querySelectorAll(".border-red-500").forEach((el) => {
+            el.classList.remove("border-red-500", "ring-2", "ring-red-200");
+          });
+
+          // Validate form
+          const { isValid, errors } = validateForm(form);
+
+          if (!isValid && errors.length > 0) {
+            event.preventDefault();
+            errors.forEach((error) => showToast(error, "warning"));
+            return false;
+          }
+
+          // Add loading state
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.innerHTML = "⏳ Processing...";
+            submitBtn.disabled = true;
+          }
+        }
+      });
+
+      // Restore button state after request
+      document.addEventListener("htmx:afterRequest", function (event) {
+        const form = event.detail.elt;
+        if (form && form.tagName === "FORM") {
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn && submitBtn.innerHTML === "⏳ Processing...") {
+            submitBtn.innerHTML =
+              submitBtn.getAttribute("data-original-text") || "Submit";
+            submitBtn.disabled = false;
+          }
+        }
+      });
+
+      // On page load, check for URL error parameters
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get("error");
+
+        const errorMessages = {
+          access_required: "🔒 Please enter the access code first",
+          verify_code_first: "🔑 Please verify access code before registering",
+          login_required: "🔒 Please login to continue",
+          access_denied: "⛔ Access denied. You need proper permissions.",
+          page_not_found: "🔍 Page not found",
+          validation_error: "📝 Please check your input and try again",
+          server_error: "🚨 An unexpected error occurred. Please try again.",
+          auth_required: "🔒 Authentication required. Please login.",
+          invalid_credentials: "❌ Invalid email or password",
+        };
+
+        if (error && errorMessages[error]) {
+          showToast(
+            errorMessages[error],
+            error === "access_required" || error === "verify_code_first"
+              ? "warning"
+              : "error"
+          );
+
+          // Clean URL (remove error parameter)
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+        }
+
+        // Store original button text
+        document.querySelectorAll('button[type="submit"]').forEach((btn) => {
+          btn.setAttribute("data-original-text", btn.innerHTML);
+        });
+      });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

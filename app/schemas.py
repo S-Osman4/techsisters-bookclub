@@ -29,6 +29,7 @@ class UserResponse(UserBase):
 class BookBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     pdf_url: str
+    cover_image_url: Optional[str] = None
 
 class BookCreate(BookBase):
     total_chapters: Optional[int] = None
@@ -37,6 +38,7 @@ class BookCreate(BookBase):
 class BookUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=200)
     pdf_url: Optional[str] = None
+    cover_image_url: Optional[str] = None 
     current_chapters: Optional[str] = Field(None, max_length=100)
     total_chapters: Optional[int] = None
 
@@ -45,6 +47,7 @@ class BookResponse(BookBase):
     status: str
     current_chapters: Optional[str] = None
     total_chapters: Optional[int] = None
+    cover_image_url: Optional[str] = None
     completed_date: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime

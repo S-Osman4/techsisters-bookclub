@@ -68,6 +68,7 @@ def seed_database():
             current_book = Book(
                 title="The Pragmatic Programmer",
                 pdf_url="https://example.com/pragmatic-programmer.pdf",
+                cover_image_url="https://m.media-amazon.com/images/I/71f1jieYHNL._SL1500_.jpg",
                 status="current",
                 current_chapters="Chapters 1-2",
                 total_chapters=10
@@ -83,11 +84,13 @@ def seed_database():
             {
                 "title": "Clean Code",
                 "pdf_url": "https://example.com/clean-code.pdf",
+                "cover_image_url": "https://m.media-amazon.com/images/I/51E2055ZGUL._SL1000_.jpg",
                 "total_chapters": 15
             },
             {
                 "title": "Atomic Habits",
                 "pdf_url": "https://example.com/atomic-habits.pdf",
+                "cover_image_url": "https://m.media-amazon.com/images/I/91bYsX41DVL._SL1500_.jpg",
                 "total_chapters": 12
             }
         ]
@@ -102,6 +105,7 @@ def seed_database():
                 queued_book = Book(
                     title=book_data["title"],
                     pdf_url=book_data["pdf_url"],
+                    cover_image_url=book_data.get("cover_image_url"),
                     status="queued",
                     total_chapters=book_data["total_chapters"]
                 )
@@ -121,6 +125,7 @@ def seed_database():
             past_book = Book(
                 title="Thinking, Fast and Slow",
                 pdf_url="https://example.com/thinking-fast-slow.pdf",
+                cover_image_url="https://m.media-amazon.com/images/I/71TKuIEn-uL._SL1500_.jpg",
                 status="completed",
                 total_chapters=8,
                 completed_date=datetime(2024, 11, 15)

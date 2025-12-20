@@ -49,7 +49,6 @@ def create_tables():
     """Create all database tables"""
     Base.metadata.create_all(bind=engine)
     print("✅ Database tables created!")
-    print("CURRENT DATABASE_URL:", DATABASE_URL)
 
 
 # Test connection

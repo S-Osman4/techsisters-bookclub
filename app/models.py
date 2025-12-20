@@ -6,10 +6,21 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from passlib.context import CryptContext
 from app.database import Base
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+try:
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+except Exception:
+    # Fallback for bcrypt issues    
+    class BcryptFallback:
+        def verify(self, plain_password, hashed_password):
+            return check_password_hash(hashed_password, plain_password)
+        
+        def hash(self, password):
+            return generate_password_hash(password)
+    
+    pwd_context = BcryptFallback()
 
 class AccessCode(Base):
     """Single active access code for guest access"""
@@ -66,6 +77,7 @@ class Book(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     pdf_url = Column(String(500), nullable=False)
+    cover_image_url = Column(String(500), nullable=True)
     total_chapters = Column(Integer, nullable=True)
     status = Column(String(20), nullable=False, index=True)  # 'current', 'queued', 'completed'
     current_chapters = Column(String(100), nullable=True)  # e.g., "Chapters 3-4" (only for current)
@@ -133,3 +145,18 @@ class ReadingProgress(Base):
     
     def __repr__(self):
         return f"<ReadingProgress(user_id={self.user_id}, book_id={self.book_id}, chapter={self.chapter})>"
+
+class AdminAction(Base):
+    """Audit log for admin actions"""
+    __tablename__ = "admin_actions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    admin_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
+    action = Column(String(100), nullable=False)
+    target = Column(String(200), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    admin = relationship("User")
+
+    def __repr__(self):
+        return f"<AdminAction(admin_id={self.admin_id}, action='{self.action}')>"

@@ -1,8 +1,9 @@
 """
 Authentication routes - login, register, code verification
 """
+import re
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
 
@@ -12,6 +13,13 @@ from app.schemas import UserResponse, MessageResponse
 from app.dependencies import get_current_user
 
 router = APIRouter()
+
+# ===== Helper Functions =====
+def validate_email(email: str) -> bool:
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
 
 # ===== Code Verification =====
 @router.post("/verify-code", response_model=MessageResponse)
@@ -25,15 +33,37 @@ async def verify_code(
     
     This allows users to browse content without creating an account
     """
+     # Clean and validate input
+    code = code.strip()
+    if not code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Access code cannot be empty"
+        )
+    
     # Get stored code from database
     stored_code = db.query(AccessCode).first()
     
-    if not stored_code or code.lower().strip() != stored_code.code.lower():
+    if not stored_code:
+        # This shouldn't happen, but handle it gracefully
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid access code. Please check the code and try again."
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Access code not configured. Please contact admin."
         )
     
+    # Now compare codes
+    if code.lower() != stored_code.code.lower():
+        # Give a hint if close
+        if len(code) == len(stored_code.code):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid access code. Please check the code and try again."
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid access code. The code should be {len(stored_code.code)} characters long."
+            )
     # Set session
     request.session["code_verified"] = True
     request.session["verified_at"] = datetime.utcnow().isoformat()
@@ -67,46 +97,78 @@ async def register(
             detail="Please verify access code first"
         )
     
+    # Clean inputs
+    name = name.strip()
+    email = email.strip().lower()
+    
     # Validate input
-    if not name or not name.strip():
+    # Validate name
+    if not name or len(name) < 2:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Name is required"
+            detail="Name must be at least 2 characters long"
         )
     
+    if len(name) > 50:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Name cannot exceed 50 characters"
+        )
+    
+    # Validate email
+    if not validate_email(email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please enter a valid email address"
+        )
+    
+    # Validate password
     if len(password) < 8:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 8 characters"
+            detail="Password must be at least 8 characters long"
+        )
+    
+    if len(password) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password cannot exceed 100 characters"
         )
     
     # Check if email exists
-    existing_user = db.query(User).filter(User.email == email.lower()).first()
+    existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered. Please login instead."
+            detail="This email is already registered. Please login instead."
         )
     
     # Create user
-    hashed_password = User.hash_password(password)
-    new_user = User(
-        name=name.strip(),
-        email=email.lower(),
-        password_hash=hashed_password,
-        is_admin=False
-    )
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    # Auto-login by setting session
-    request.session["user_id"] = new_user.id
-    request.session["user_name"] = new_user.name
-    request.session["is_admin"] = new_user.is_admin
-    
-    return new_user
+    try:
+        hashed_password = User.hash_password(password)
+        new_user = User(
+            name=name,
+            email=email,
+            password_hash=hashed_password,
+            is_admin=False
+        )
+        
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+        # Auto-login by setting session
+        request.session["user_id"] = new_user.id
+        request.session["user_name"] = new_user.name
+        request.session["is_admin"] = new_user.is_admin
+        
+        return new_user
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Registration failed. Please try again."
+        )
 
 # ===== Login =====
 @router.post("/login", response_model=MessageResponse)
@@ -121,10 +183,35 @@ async def login(
     
     Creates a session that persists across requests
     """
-    # Find user
-    user = db.query(User).filter(User.email == email.lower()).first()
+
+    # Clean inputs
+    email = email.strip().lower()
     
-    if not user or not user.verify_password(password):
+    # Validate email
+    if not validate_email(email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please enter a valid email address"
+        )
+    
+    # Find user
+    user = db.query(User).filter(User.email == email).first()
+    
+    if not user:
+        # Don't reveal if user exists (security)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    try:
+        if not user.verify_password(password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+    except Exception:
+        # Handle password verification errors
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
@@ -147,10 +234,7 @@ async def logout(request: Request):
     Logout user and clear session
     """
     request.session.clear()
-    return {
-        "message": "Logged out successfully",
-        "success": True
-    }
+    return RedirectResponse(url="/", status_code=303)
 
 # ===== Get Current User =====
 @router.get("/me", response_model=UserResponse)

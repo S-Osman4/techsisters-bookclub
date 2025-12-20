@@ -1,14 +1,14 @@
 """
 Admin API - manage code, books, suggestions, meetings
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, Form, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
 from datetime import datetime, timedelta
 from typing import List
 
 from app.database import get_db
-from app.models import User, Book, BookSuggestion, Meeting, AccessCode, ReadingProgress
+from app.models import User, Book, BookSuggestion, Meeting, AccessCode, ReadingProgress, AdminAction
 from app.schemas import (
     BookUpdate, MeetingUpdate, CodeUpdate, CodeResponse, MessageResponse
 )
@@ -33,7 +33,7 @@ async def get_access_code(
 
 @router.put("/code", response_model=MessageResponse)
 async def update_access_code(
-    code_data: CodeUpdate,
+    new_code: str = Form(...), 
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -45,12 +45,20 @@ async def update_access_code(
     code = db.query(AccessCode).first()
     
     if not code:
-        # Create new if doesn't exist
-        code = AccessCode(code=code_data.new_code)
+        code = AccessCode(code=new_code)
         db.add(code)
     else:
-        code.code = code_data.new_code
+        old_code = code.code
+        code.code = new_code
     
+    # Log the admin action
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="update_access_code",
+        target=f"new_code={new_code}"
+    )
+
+    db.add(admin_action)
     db.commit()
     db.refresh(code)
     
@@ -62,10 +70,11 @@ async def update_access_code(
 # ===== Current Book Management =====
 @router.put("/books/current", response_model=MessageResponse)
 async def update_current_book(
-    title: str = Body(None),
-    pdf_url: str = Body(None),
-    current_chapters: str = Body(None),
-    total_chapters: int = Body(None),
+    title: str = Form(None),
+    pdf_url: str = Form(None),
+    cover_image_url: str = Form(None),
+    current_chapters: str = Form(None),
+    total_chapters: int = Form(None),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -79,15 +88,25 @@ async def update_current_book(
         )
     
     # Update fields if provided
-    if title:
+    if title is not None:
         current_book.title = title.strip()
-    if pdf_url:
+    if pdf_url is not None:
         current_book.pdf_url = pdf_url
-    if current_chapters:
+    if cover_image_url is not None:
+        current_book.cover_image_url = cover_image_url
+    if current_chapters is not None:
         current_book.current_chapters = current_chapters
     if total_chapters is not None:
         current_book.total_chapters = total_chapters
     
+    # Log the admin action
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="update_current_book",
+        target=f"book_id={current_book.id}"
+    )
+    db.add(admin_action)
+
     db.commit()
     
     return {
@@ -99,6 +118,7 @@ async def update_current_book(
 async def set_current_book(
     book_id: int,
     current_chapters: str = Body(..., embed=True),
+    cover_image_url: str = Body(None, embed=True),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -130,6 +150,17 @@ async def set_current_book(
     # Set as current
     book.status = "current"
     book.current_chapters = current_chapters
+    if cover_image_url:
+        book.cover_image_url = cover_image_url
+    
+    # Log the admin action  ← ADD THIS
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="set_current_book",
+        target=f"book_id={book_id}, title={book.title}"
+    )
+    db.add(admin_action)
+
     db.commit()
     
     return {
@@ -160,6 +191,14 @@ async def complete_current_book(
     current_book.completed_date = datetime.utcnow()
     current_book.current_chapters = None
     
+    # Log the admin action  ← ADD THIS
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="complete_book",
+        target=f"book_id={current_book.id}, title={current_book.title}"
+    )
+    db.add(admin_action)
+
     db.commit()
     
     return {
@@ -179,7 +218,9 @@ async def get_meeting(
 
 @router.put("/meeting", response_model=MessageResponse)
 async def update_meeting(
-    meeting_data: MeetingUpdate,
+    date: str = Form(...),
+    time: str = Form(...),
+    meet_link: str = Form(...),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -187,17 +228,24 @@ async def update_meeting(
     meeting = db.query(Meeting).first()
     
     if not meeting:
-        # Create new if doesn't exist
         meeting = Meeting(
-            date=meeting_data.date,
-            time=meeting_data.time,
-            meet_link=meeting_data.meet_link
+            date=date,
+            time=time,
+            meet_link=meet_link
         )
         db.add(meeting)
     else:
-        meeting.date = meeting_data.date
-        meeting.time = meeting_data.time
-        meeting.meet_link = meeting_data.meet_link
+        meeting.date = date
+        meeting.time = time
+        meeting.meet_link = meet_link
+    
+    # Log the admin action  ← ADD THIS
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="update_meeting",
+        target=f"date={date}, time={time}"
+    )
+    db.add(admin_action)
     
     db.commit()
     
@@ -235,6 +283,7 @@ async def get_pending_suggestions(
 @router.put("/suggestions/{suggestion_id}/approve", response_model=MessageResponse)
 async def approve_suggestion(
     suggestion_id: int,
+    cover_image_url: str = Body(None, embed=True),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -266,9 +315,18 @@ async def approve_suggestion(
     new_book = Book(
         title=suggestion.title,
         pdf_url=suggestion.pdf_url,
+        cover_image_url=cover_image_url,
         status="queued"
     )
     db.add(new_book)
+
+    # Log the admin action
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="approve_suggestion",
+        target=f"suggestion_id={suggestion.id}"
+    )
+    db.add(admin_action)
     
     db.commit()
     
@@ -301,6 +359,13 @@ async def reject_suggestion(
         )
     
     suggestion.status = "rejected"
+    # Log the admin action
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="reject_suggestion",
+        target=f"suggestion_id={suggestion.id}"
+    )
+    db.add(admin_action)
     db.commit()
     
     return {
@@ -360,3 +425,125 @@ async def get_admin_stats(
         "pending_suggestions": pending_suggestions,
         "current_book_engagement": engagement
     }
+
+ # ===== Admin User Management =====
+
+@router.get("/users")
+async def get_all_users(
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all users with their roles"""
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    
+    result = []
+    for user in users:
+        result.append({
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "is_admin": user.is_admin,
+            "created_at": user.created_at
+        })
+    
+    return result
+
+
+@router.put("/users/{user_id}/promote", response_model=MessageResponse)
+async def promote_to_admin(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Promote a user to admin"""
+    
+    # Get the user to promote
+    user = db.query(User).filter(User.id == user_id).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{user.name} is already an admin"
+        )
+    
+    # Promote user
+    user.is_admin = True
+    
+    # Log the action
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="promote_admin",
+        target=f"user_id={user.id}, email={user.email}"
+    )
+    db.add(admin_action)
+    
+    db.commit()
+    
+    return {
+        "message": f"✅ {user.name} has been promoted to admin",
+        "success": True
+    }
+
+
+@router.put("/users/{user_id}/demote", response_model=MessageResponse)
+async def demote_from_admin(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Demote an admin to regular user"""
+    
+    # Prevent self-demotion
+    if user_id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot demote yourself. Ask another admin to do this."
+        )
+    
+    # Get the user to demote
+    user = db.query(User).filter(User.id == user_id).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{user.name} is not an admin"
+        )
+    
+    # Check if this is the last admin
+    admin_count = db.query(func.count(User.id)).filter(User.is_admin == True).scalar()
+    
+    if admin_count <= 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot demote the last admin. Promote another user to admin first."
+        )
+    
+    # Demote user
+    user.is_admin = False
+    
+    # Log the action
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="demote_admin",
+        target=f"user_id={user.id}, email={user.email}"
+    )
+    db.add(admin_action)
+    
+    db.commit()
+    
+    return {
+        "message": f"⚠️ {user.name} has been demoted to regular member",
+        "success": True
+    }   

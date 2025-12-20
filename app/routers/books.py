@@ -2,6 +2,7 @@
 Books API - current book, queue, past books, suggestions, progress
 """
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.params import Form
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
@@ -10,7 +11,7 @@ from app.database import get_db
 from app.models import Book, Meeting, BookSuggestion, ReadingProgress, User
 from app.schemas import (
     BookResponse, SuggestionCreate, SuggestionResponse, 
-    ProgressUpdate, ProgressResponse, MessageResponse
+    ProgressUpdate, ProgressResponse, MessageResponse, SuggestionUpdate
 )
 from app.dependencies import (
     get_current_user, get_current_user_optional, 
@@ -75,7 +76,8 @@ async def get_past_books(
 # ===== Book Suggestions =====
 @router.post("/suggestions", response_model=SuggestionResponse)
 async def create_suggestion(
-    suggestion: SuggestionCreate,
+    title: str = Form(...),
+    pdf_url: str = Form(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -84,9 +86,12 @@ async def create_suggestion(
     
     Suggestions go to pending status and require admin approval
     """
+      # Validate using schema
+    suggestion_data = SuggestionCreate(title=title, pdf_url=pdf_url)
+    
     new_suggestion = BookSuggestion(
-        title=suggestion.title.strip(),
-        pdf_url=suggestion.pdf_url,
+        title=suggestion_data.title.strip(),
+        pdf_url=suggestion_data.pdf_url,
         user_id=current_user.id,
         status="pending"
     )
@@ -116,7 +121,8 @@ async def get_my_suggestions(
 # ===== Reading Progress =====
 @router.put("/progress", response_model=ProgressResponse)
 async def update_progress(
-    progress_data: ProgressUpdate,
+    book_id: int = Form(...),
+    chapter: int = Form(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -128,6 +134,9 @@ async def update_progress(
     - 1+ = current chapter
     - -1 = completed
     """
+      # Validate using schema
+    progress_data = ProgressUpdate(book_id=book_id, chapter=chapter)
+    
     # Verify book exists
     book = db.query(Book).filter(Book.id == progress_data.book_id).first()
     if not book:
@@ -135,21 +144,19 @@ async def update_progress(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Book not found"
         )
-    
-    # Find existing progress
+   
+       # Find existing progress
     existing = db.query(ReadingProgress).filter(
         ReadingProgress.user_id == current_user.id,
         ReadingProgress.book_id == progress_data.book_id
     ).first()
     
     if existing:
-        # Update existing
         existing.chapter = progress_data.chapter
         db.commit()
         db.refresh(existing)
         return existing
     else:
-        # Create new
         new_progress = ReadingProgress(
             user_id=current_user.id,
             book_id=progress_data.book_id,
@@ -159,6 +166,7 @@ async def update_progress(
         db.commit()
         db.refresh(new_progress)
         return new_progress
+    
 
 @router.get("/progress/my")
 async def get_my_progress(
