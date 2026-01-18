@@ -1,48 +1,72 @@
-{% extends "base.html" %} {% block title %}My Profile - TechSisters Book Club{%
+{% extends "base.html" %} {% block title %}Profile - TechSisters Book Club{%
 endblock %} {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <!-- Header -->
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
-    <p class="text-gray-600">Manage your account settings</p>
+  {% if current_user %}
+  <!-- Hero Section -->
+  <div class="text-center mb-12">
+    <div
+      class="w-28 h-28 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-white"
+      style="background: var(--gradient-primary)"
+    >
+      <span class="text-4xl font-bold text-white"
+        >{{ current_user.name[0].upper() }}</span
+      >
+    </div>
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">
+      {{ current_user.name }}
+    </h1>
+    <p class="text-xl text-gray-600 mb-4">{{ current_user.email }}</p>
+    <div
+      class="flex flex-wrap gap-4 justify-center text-sm bg-gray-50 px-6 py-3 rounded-2xl"
+    >
+      <span
+        >👤 Member since {{ current_user.created_at.strftime('%B %d, %Y')
+        }}</span
+      >
+      {% if current_user.is_admin %}
+      <span class="badge badge-primary text-white">⭐ Admin</span>
+      {% endif %}
+    </div>
   </div>
 
-  <!-- Profile Stats -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
     <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
-      <div class="text-3xl font-bold text-purple-600">
+      <div class="text-3xl font-bold" style="color: var(--primary)">
         {{ stats.completed_books }}
       </div>
       <div class="text-sm text-gray-600 mt-1">Books Read</div>
     </div>
     <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
-      <div class="text-3xl font-bold text-blue-600">
+      <div class="text-3xl font-bold" style="color: var(--secondary)">
         {{ stats.currently_reading }}
       </div>
       <div class="text-sm text-gray-600 mt-1">Reading Now</div>
     </div>
     <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
-      <div class="text-3xl font-bold text-green-600">
+      <div class="text-3xl font-bold" style="color: var(--accent)">
         {{ stats.approved_suggestions }}
       </div>
       <div class="text-sm text-gray-600 mt-1">Approved</div>
     </div>
     <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
-      <div class="text-3xl font-bold text-orange-600">
+      <div class="text-3xl font-bold" style="color: var(--primary)">
         {{ stats.total_suggestions }}
       </div>
       <div class="text-sm text-gray-600 mt-1">Suggested</div>
     </div>
   </div>
 
-  <!-- Account Information -->
-  <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">Account Information</h2>
+  <!-- Account Information Card -->
+  <div class="bg-white rounded-2xl shadow-xl border p-8 mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Account Information</h2>
 
-    <div class="space-y-4">
-      <!-- Name -->
+    <div class="space-y-6">
+      <!-- Name Update Form -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Full Name</label
+        >
         <form
           hx-put="/api/profile/name"
           hx-target="#name-result"
@@ -52,16 +76,16 @@ endblock %} {% block content %}
             type="text"
             name="new_name"
             value="{{ current_user.name }}"
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             required
             minlength="2"
             maxlength="50"
+            class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent"
           />
           <button
             type="submit"
-            class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 whitespace-nowrap"
+            class="btn-primary text-white px-6 py-3 rounded-xl font-semibold whitespace-nowrap"
           >
-            Update
+            Update Name
           </button>
         </form>
         <div id="name-result" class="mt-2"></div>
@@ -75,7 +99,7 @@ endblock %} {% block content %}
         <input
           type="email"
           value="{{ current_user.email }}"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
           disabled
         />
         <p class="text-xs text-gray-500 mt-1">Email cannot be changed</p>
@@ -86,17 +110,9 @@ endblock %} {% block content %}
         <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
         <div class="flex items-center">
           {% if current_user.is_admin %}
-          <span
-            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
-          >
-            ⭐ Administrator
-          </span>
+          <span class="badge badge-primary text-white"> ⭐ Administrator </span>
           {% else %}
-          <span
-            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-          >
-            👤 Member
-          </span>
+          <span class="badge badge-secondary text-white"> 👤 Member </span>
           {% endif %}
         </div>
       </div>
@@ -109,62 +125,64 @@ endblock %} {% block content %}
         <input
           type="text"
           value="{{ current_user.created_at.strftime('%B %d, %Y') }}"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
           disabled
         />
       </div>
     </div>
   </div>
 
-  <!-- Change Password -->
-  <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">🔒 Change Password</h2>
+  <!-- Password Update Card (Separate!) -->
+  <div class="bg-white rounded-2xl shadow-xl border p-8 mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">🔒 Change Password</h2>
 
     <form
       hx-put="/api/profile/password"
       hx-target="#password-result"
-      class="space-y-4"
+      class="space-y-6"
     >
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2"
-          >Current Password</label
-        >
-        <input
-          type="password"
-          name="current_password"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          required
-        />
-      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Current Password</label
+          >
+          <input
+            type="password"
+            name="current_password"
+            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent"
+            required
+          />
+        </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2"
-          >New Password</label
-        >
-        <input
-          type="password"
-          name="new_password"
-          minlength="8"
-          maxlength="100"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          required
-        />
-        <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >New Password</label
+          >
+          <input
+            type="password"
+            name="new_password"
+            minlength="8"
+            maxlength="100"
+            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent"
+            required
+          />
+          <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+        </div>
       </div>
 
       <div id="password-result"></div>
 
       <button
         type="submit"
-        class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700"
+        class="w-full btn-primary text-white py-4 rounded-xl font-bold text-lg"
       >
-        Change Password
+        Update Password
       </button>
     </form>
   </div>
 
   <!-- Danger Zone -->
-  <div class="bg-white rounded-xl shadow-sm border border-red-200 p-6">
+  <div class="bg-white rounded-xl shadow-sm border border-red-200 p-6 mb-6">
     <h2 class="text-xl font-bold text-red-600 mb-4">⚠️ Danger Zone</h2>
 
     {% if is_only_admin %}
@@ -190,12 +208,54 @@ endblock %} {% block content %}
 
     <button
       onclick="document.getElementById('delete-modal').classList.remove('hidden')"
-      class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700"
+      class="text-white px-6 py-3 rounded-xl font-semibold transition-all"
+      style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
     >
       Delete Account
     </button>
     {% endif %}
   </div>
+
+  {% else %}
+  <!-- Guest Upgrade -->
+  <div class="text-center py-20">
+    <div
+      class="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-8"
+    >
+      <svg
+        class="w-12 h-12 text-gray-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Create Profile</h1>
+    <p class="text-xl text-gray-600 mb-8 max-w-md mx-auto">
+      Verify your access code to unlock progress tracking + suggestions
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+      <a
+        href="/register?from=profile"
+        class="flex-1 btn-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+      >
+        Create Account
+      </a>
+      <a
+        href="/login?from=profile"
+        class="flex-1 btn-secondary text-white py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all"
+      >
+        Sign In
+      </a>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <!-- Delete Account Modal -->
@@ -227,7 +287,7 @@ endblock %} {% block content %}
         <input
           type="password"
           name="password"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
           required
         />
       </div>
@@ -240,7 +300,7 @@ endblock %} {% block content %}
           type="text"
           name="confirmation"
           placeholder="delete my account"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
           required
         />
       </div>
@@ -272,26 +332,47 @@ endblock %} {% block content %}
     const targetId = event.detail.target.id;
 
     if (targetId === "name-result") {
-      showToast("Name updated successfully!", "success");
-      setTimeout(() => location.reload(), 1500);
+      const response = JSON.parse(event.detail.xhr.responseText);
+      if (response.success) {
+        showToast("Name updated successfully!", "success");
+        // Update the hero section name dynamically
+        document.querySelector("h1.text-4xl").textContent =
+          response.message.split("'")[3] ||
+          document.querySelector('input[name="new_name"]').value;
+        // Update user name in the member badge
+        const memberSpan = document.querySelector(
+          ".bg-gray-50 span:first-child"
+        );
+        if (memberSpan) {
+          memberSpan.textContent = `👤 ${
+            document.querySelector('input[name="new_name"]').value
+          }`;
+        }
+      }
     }
 
     if (targetId === "password-result") {
-      showToast("Password changed! Please login again.", "success");
-      setTimeout(() => {
-        window.location.href = "/auth/logout";
-      }, 2000);
+      const response = JSON.parse(event.detail.xhr.responseText);
+      if (response.success) {
+        showToast("Password changed! Please login again.", "success");
+        setTimeout(() => {
+          window.location.href = "/auth/logout";
+        }, 2000);
+      }
     }
 
     if (targetId === "delete-result") {
-      showToast("Account deleted. Goodbye! 👋", "success");
-      setTimeout(() => {
-        window.location.href = "/auth/logout";
-      }, 2000);
+      const response = JSON.parse(event.detail.xhr.responseText);
+      if (response.success) {
+        showToast("Account deleted. Goodbye! 👋", "success");
+        setTimeout(() => {
+          window.location.href = "/auth/logout";
+        }, 2000);
+      }
     }
   });
 
-  // Close modal on escape key
+  // Close modal on escape key or backdrop click
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") {
       const modal = document.getElementById("delete-modal");
@@ -299,6 +380,21 @@ endblock %} {% block content %}
         modal.classList.add("hidden");
       }
     }
+  });
+
+  // Close modal when clicking on backdrop
+  document.addEventListener("click", function (event) {
+    const modal = document.getElementById("delete-modal");
+    if (event.target.classList.contains("modal-backdrop")) {
+      modal.classList.add("hidden");
+    }
+  });
+
+  // Prevent modal from closing when clicking inside modal content
+  document.querySelectorAll(".modal-content").forEach((element) => {
+    element.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
   });
 </script>
 {% endblock %}

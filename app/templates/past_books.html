@@ -1,0 +1,59 @@
+{% extends "base.html" %} {% block title %}Past Books - TechSisters Book Club{%
+endblock %} {% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+  <!-- Header + Search -->
+  <div class="text-center mb-12">
+    <h1
+      class="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2"
+    >
+      <i data-lucide="book-copy" class="icon icon-lg icon-primary"></i>
+      Past Books
+    </h1>
+    <p class="text-xl text-gray-600 mb-8">{{ total_count }} books completed</p>
+
+    <form
+      hx-get="/past-books"
+      hx-target="#books-list"
+      hx-swap="innerHTML"
+      class="max-w-md mx-auto"
+    >
+      <div class="flex gap-2">
+        <input
+          type="text"
+          name="search"
+          value="{{ search or '' }}"
+          placeholder="Search by title"
+          class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-400"
+        />
+        <button
+          type="submit"
+          class="btn-secondary text-white px-6 py-3 rounded-xl font-medium"
+        >
+          Search
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Books Grid -->
+  <div id="books-list">{% include "partials/books_grid.html" %}</div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  <div class="flex justify-center mt-12 gap-2">
+    {% for p in range(1, total_pages + 1) %}
+    <!-- Change regular links to HTMX links -->
+    <a
+      href="/past-books?page={{ p }}{% if search %}&search={{ search }}{% endif %}"
+      hx-get="/past-books?page={{ p }}{% if search %}&search={{ search }}{% endif %}"
+      hx-target="#books-list"
+      hx-push-url="true"
+      class="px-4 py-2 rounded-lg font-medium {% if p == page %}bg-purple-600 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}"
+    >
+      {{ p }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

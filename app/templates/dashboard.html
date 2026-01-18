@@ -1,382 +1,651 @@
-{% extends "base.html" %}
-
-{% block title %}Dashboard - TechWomen Book Club{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Dashboard - TechWomen Book Club{%
+endblock %} {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- Guest Banner (if not logged in) -->
-    {% if is_guest %}
-    <div class="bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500 p-6 rounded-lg mb-8 shadow-sm">
-        <div class="flex items-center justify-between">
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                    👋 Browsing as Guest
-                </h3>
-                <p class="text-gray-700">
-                    Create an account to suggest books, track your progress, and unlock more features!
-                </p>
-            </div>
-            <a href="/register" class="btn-primary text-white px-6 py-3 rounded-lg font-semibold whitespace-nowrap ml-4">
-                Create Account
-            </a>
-        </div>
+  <!-- Dashboard Header -->
+  <div
+    class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+  >
+    <div>
+      {% if current_user %}
+      <h1 class="text-3xl font-bold text-gray-900">
+        <span class="inline-flex items-center gap-2">
+          <i data-lucide="hand" class="w-6 h-6 text-teal-600"></i>
+          Welcome back, {{ current_user.name }}
+        </span>
+      </h1>
+      <p class="text-gray-600 mt-1">
+        Track your progress and stay in sync with the community.
+      </p>
+      {% else %}
+      <h1 class="text-3xl font-bold text-gray-900">
+        <span class="inline-flex items-center gap-2">
+          <i data-lucide="book-open" class="w-7 h-7 text-teal-600"></i>
+          Book Club Dashboard
+        </span>
+      </h1>
+      <p class="text-gray-600 mt-1">
+        Explore what we're reading and join when you're ready.
+      </p>
+      {% endif %}
     </div>
-    {% endif %}
-    
-    <!-- Current Book Section -->
-    <div class="mb-8">
-    <h2 class="text-2xl font-bold text-gray-900 mb-4">📖 Currently Reading</h2>
-    
+  </div>
+
+  <!-- Guest Banner (if not logged in) -->
+  {% if not current_user %}
+  <div
+    class="mb-6 text-sm text-gray-600 bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4"
+  >
+    👀 You're viewing the dashboard as a guest.
+    <a
+      href="/login"
+      class="font-semibold underline"
+      style="color: var(--primary)"
+    >
+      Log in
+    </a>
+    to track your progress, suggest books, and manage your profile.
+  </div>
+  {% endif %}
+
+  <!-- Current Book Section -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <i data-lucide="book-marked" class="w-6 h-6 text-teal-600"></i>
+      Currently Reading
+    </h2>
+
     {% if current_book %}
-    <div class="bg-white rounded-xl shadow-sm border p-6 card-hover featured-book">
-        <div class="flex flex-col md:flex-row gap-6">
-        
+    <div
+      class="rounded-2xl shadow-md p-8 bg-gradient-to-br from-white to-teal-50 card-hover featured-book"
+    >
+      <div class="flex flex-col sm:flex-row gap-6">
         <!-- Book Cover -->
         <div class="flex-shrink-0">
-            {% if current_book.cover_image_url %}
-            <img 
-                src="{{ current_book.cover_image_url }}" 
-                alt="{{ current_book.title }}" 
-                class="w-40 h-56 object-cover rounded-lg shadow-lg"
-                onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22224%22%3E%3Crect width=%22160%22 height=%22224%22 fill=%22%23667eea%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2240%22 fill=%22white%22%3E📚%3C/text%3E%3C/svg%3E';"
-            >
-            {% else %}
-            <!-- Fallback gradient placeholder -->
-            <div class="w-40 h-56 bg-gradient-to-br from-purple-400 via-pink-400 to-purple-600 rounded-lg shadow-lg flex items-center justify-center">
-                <span class="text-white text-5xl">📚</span>
-            </div>
-            {% endif %}
+          {% if current_book.cover_image_url %}
+          <img
+            src="{{ current_book.cover_image_url }}"
+            alt="{{ current_book.title }}"
+            class="w-40 h-56 object-contain rounded-lg shadow-lg"
+            onerror="
+              this.onerror = null;
+              this.src =
+                'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22224%22%3E%3Crect width=%22160%22 height=%22224%22 fill=%22%23667eea%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2240%22 fill=%22white%22%3E📚%3C/text%3E%3C/svg%3E';
+            "
+          />
+          {% else %}
+          <!-- Fallback gradient placeholder -->
+          <div
+            class="w-40 h-56 bg-gradient-to-br from-purple-400 via-pink-400 to-purple-600 rounded-lg shadow-lg flex items-center justify-center"
+          >
+            <span class="text-white text-5xl">📚</span>
+          </div>
+          {% endif %}
         </div>
-        
+
         <!-- Book Details -->
         <div class="flex-1">
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ current_book.title }}</h3>
-            <p class="text-purple-600 font-medium mb-4">{{ current_book.current_chapters }}</p>
-            
-            {% if meeting %}
-            <div class="space-y-2 text-gray-600 mb-4">
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">
+            {{ current_book.title }}
+          </h3>
+          <p class="font-medium mb-4" style="color: var(--secondary)">
+            {{ current_book.current_chapters }}
+          </p>
+
+          {% if meeting %} {% set uk_time = meeting.start_at.astimezone(uk_tz)
+          %}
+          <div class="space-y-2 text-gray-600 mb-4">
             <p class="flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
-                </svg>
-                <strong>Next Meeting:</strong>&nbsp;{{ meeting.date }} at {{ meeting.time }}
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                />
+              </svg>
+              <strong>Next Meeting:</strong> {{ uk_time.strftime("%d %B %Y at
+              %H:%M") }} UK time
             </p>
-            <a href="{{ meeting.meet_link }}" target="_blank" 
-                class="inline-flex items-center text-blue-600 hover:text-blue-800">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
-                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
-                </svg>
-                Join Google Meet
+            <a
+              href="{{ meeting.meet_link }}"
+              target="_blank"
+              class="inline-flex items-center font-medium transition-colors"
+              style="color: var(--secondary)"
+            >
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"
+                />
+                <path
+                  d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"
+                />
+              </svg>
+              Join Google Meet
             </a>
-            </div>
-            {% endif %}
-            
-            <a href="{{ current_book.pdf_url }}" target="_blank" 
-            class="btn-primary text-white px-6 py-3 rounded-lg font-semibold inline-block">
+          </div>
+          {% endif %}
+
+          <a
+            href="{{ current_book.pdf_url }}"
+            target="_blank"
+            class="btn-primary text-white px-6 py-3 rounded-lg font-semibold inline-block"
+          >
             📥 Download PDF
-            </a>
+          </a>
         </div>
-        </div>
+      </div>
     </div>
     {% else %}
     <div class="empty-state">
-        <div class="empty-state-icon">📚</div>
-        <p class="text-gray-500">No book currently selected. Check back soon!</p>
+      <div class="empty-state-icon">📚</div>
+      <p class="text-gray-500">No book currently selected. Check back soon!</p>
     </div>
     {% endif %}
-    </div>
-    
-    <!-- Progress Section -->
-    {% if current_book %}
-    <div class="grid md:grid-cols-2 gap-8 mb-8">
-        <!-- Your Progress -->
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Your Progress</h3>
+  </div>
 
-            {% if current_user %}
-                <!-- Existing member form stays the same -->
-                <form
-                    hx-put="/api/books/progress"
-                    hx-target="#progress-result"
-                    hx-swap="innerHTML"
-                    class="space-y-4"
-                >
-                    <input type="hidden" name="book_id" value="{{ current_book.id }}">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Current Chapter
-                        </label>
-                        <select
-                            name="chapter"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                        >
-                            <option value="0"
-                                {% if not user_progress or user_progress.chapter == 0 %}selected{% endif %}
-                            >
-                                Not Started
-                            </option>
+  <!-- Progress Section -->
+  {% if current_book %}
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+      <i data-lucide="activity" class="w-6 h-6 text-teal-600"></i>
+      Reading Progress
+    </h2>
 
-                            {% if current_book.total_chapters %}
-                                {% for i in range(1, current_book.total_chapters + 1) %}
-                                    <option value="{{ i }}"
-                                        {% if user_progress and user_progress.chapter == i %}selected{% endif %}
-                                    >
-                                        Chapter {{ i }}
-                                    </option>
-                                {% endfor %}
-                            {% else %}
-                                {% for i in range(1, 11) %}
-                                    <option value="{{ i }}"
-                                        {% if user_progress and user_progress.chapter == i %}selected{% endif %}
-                                    >
-                                        Chapter {{ i }}
-                                    </option>
-                                {% endfor %}
-                            {% endif %}
-
-                            <option value="-1"
-                                {% if user_progress and user_progress.chapter == -1 %}selected{% endif %}
-                            >
-                                Completed
-                            </option>
-                        </select>
-                    </div>
-
-                    <div id="progress-result"></div>
-
-                    <button
-                        type="submit"
-                        class="w-full bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700"
-                    >
-                        Update Progress
-                    </button>
-                </form>
-            {% else %}
-                <!-- Guest locked state -->
-                <p class="text-gray-600 mb-4">
-                    Create an account to track your reading for this book.
-                </p>
-                <a
-                    href="/register"
-                    class="inline-flex items-center justify-center w-full bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700"
-                >
-                    Create Account to Track Progress
-                </a>
-            {% endif %}
-        </div>
-
-        <!-- Community Progress -->
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Community Progress</h3>
-
-            {% if community_stats %}
-                <div class="space-y-3">
-                    {% for stat in community_stats %}
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-medium text-gray-700">{{ stat.range }}</span>
-                                <span class="text-gray-600">
-                                    {{ stat.count }} members · {{ stat.percentage }}%
-                                </span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div
-                                    class="bg-purple-600 h-2 rounded-full"
-                                    style="width: {{ stat.percentage }}%;"
-                                ></div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="text-gray-500 text-center py-4">
-                    No progress data yet. Be the first to update your chapter.
-                </p>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-    
-    <!-- Book Suggestion Form -->
-    <div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
-        <h3 class="text-xl font-bold text-gray-900 mb-4">Suggest a Book</h3>
+    <div class="grid sm:grid-cols-2 gap-8">
+      <!-- Your Progress (locked for guests) -->
+      <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">
+          Your Reading Progress
+        </h3>
 
         {% if current_user %}
-            <form hx-post="/api/books/suggestions" 
-                hx-target="#suggestion-result"
-                hx-swap="innerHTML"
-                class="space-y-4">
-                
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Book Title
-                        </label>
-                        <input type="text" 
-                            name="title" 
-                            placeholder="e.g., Atomic Habits"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                            required>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            PDF URL
-                        </label>
-                        <input type="url" 
-                            name="pdf_url" 
-                            placeholder="https://example.com/book.pdf"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                            required>
-                    </div>
-                </div>
-                
-                <div id="suggestion-result"></div>
-                
-                <button type="submit" 
-                        class="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700">
-                    Submit Suggestion
-                </button>
-            </form>
+        <!-- Member: existing form (unchanged) -->
+        <form
+          hx-put="/api/books/progress"
+          hx-target="#progress-result"
+          hx-swap="innerHTML"
+          class="space-y-4"
+        >
+          <input type="hidden" name="book_id" value="{{ current_book.id }}" />
+          <div>
+  <label class="block text-sm font-medium text-gray-700 mb-2">
+    Current Chapter
+  </label>
+  <select
+    name="chapter"
+    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+  >
+    <option
+      value="0"
+      {% if not user_progress or user_progress.chapter == 0 %}selected{% endif %}
+    >
+      Not Started
+    </option>
+
+    {% if current_book.total_chapters %} 
+    {% for i in range(1, current_book.total_chapters + 1) %}
+    <option
+      value="{{ i }}"
+      {% if user_progress and user_progress.chapter == i %}selected{% endif %}
+    >
+      Chapter {{ i }}
+    </option>
+    {% endfor %} 
+    {% else %} 
+    {% for i in range(1, 11) %}
+    <option
+      value="{{ i }}"
+      {% if user_progress and user_progress.chapter == i %}selected{% endif %}
+    >
+      Chapter {{ i }}
+    </option>
+    {% endfor %} 
+    {% endif %}
+
+    <option
+      value="-1"
+      {% if user_progress and user_progress.chapter == -1 %}selected{% endif %}
+    >
+      Completed
+    </option>
+  </select>
+</div>
+
+          <div id="progress-result"></div>
+
+          <button
+            type="submit"
+            class="w-full btn-primary text-white py-3 rounded-xl font-semibold"
+          >
+            Update Progress
+          </button>
+        </form>
         {% else %}
-            <p class="text-gray-600 mb-4">
-                Only members can suggest books for the club.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <a
-                    href="/register"
-                    class="flex-1 bg-purple-600 text-white px-6 py-2 rounded-lg font-medium text-center hover:bg-purple-700"
-                >
-                    Create Account
-                </a>
-                <a
-                    href="/login"
-                    class="flex-1 border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium text-center hover:bg-gray-50"
-                >
-                    Login
-                </a>
-            </div>
-        {% endif %}
+        <!-- Guest: locked state with CTA -->
+        <div class="text-center py-8">
+          <div
+            class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <svg
+              class="w-8 h-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          </div>
+          <p class="text-gray-600 mb-4">
+            Tracking progress is a member feature.
+          </p>
+          <a
+            href="/login?from=dashboard"
+            class="block w-full btn-primary text-white py-3 rounded-xl font-semibold mb-2"
+          >
+            Log in to track progress
+          </a>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
-    {% if current_user and user_suggestions %}
-        <!-- Your Suggestions -->
-        <div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">📝 Your Suggestions</h3>
-            
-            <div class="space-y-3">
-                {% for suggestion in user_suggestions %}
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                        <h4 class="font-semibold text-gray-900">{{ suggestion.title }}</h4>
-                        <a href="{{ suggestion.pdf_url }}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800">
-                            View PDF →
-                        </a>
-                    </div>
-                    <div>
-                        {% if suggestion.status == 'pending' %}
-                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                                ⏳ Pending
-                            </span>
-                        {% elif suggestion.status == 'approved' %}
-                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                                ✓ Approved
-                            </span>
-                        {% else %}
-                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
-                                ✗ Rejected
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
-    
-    <!-- Upcoming Books -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">📚 Upcoming Books</h2>
-        
-        {% if upcoming_books %}
-        <div class="grid md:grid-cols-3 gap-4">
-            {% for book in upcoming_books %}
-            <div class="bg-white rounded-lg shadow-sm border p-4 card-hover">
-                <h4 class="font-semibold text-gray-900 mb-2">{{ book.title }}</h4>
-                <p class="text-sm text-gray-600">In queue</p>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <p class="text-gray-500">No upcoming books yet.</p>
-        </div>
-        {% endif %}
-    </div>
-    
-    <!-- Past Books -->
-    <div>
-    <h2 class="text-2xl font-bold text-gray-900 mb-4">📖 Past Books</h2>
-    
-    {% if past_books %}
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for book in past_books %}
-        <div class="bg-white rounded-lg shadow-sm border p-4 card-hover">
-        <div class="flex gap-4">
-            <!-- Book Cover Thumbnail -->
-            <div class="flex-shrink-0">
-            {% if book.cover_image_url %}
-                <img 
-                src="{{ book.cover_image_url }}" 
-                alt="{{ book.title }}" 
-                class="w-16 h-24 object-cover rounded shadow-sm"
-                onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-16 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded shadow-sm flex items-center justify-center\'><span class=\'text-white text-xl\'>📚</span></div>';"
-                >
-            {% else %}
-                <div class="w-16 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded shadow-sm flex items-center justify-center">
-                <span class="text-white text-xl">📚</span>
-                </div>
-            {% endif %}
-            </div>
-            
-            <!-- Book Info -->
-            <div class="flex-1">
-            <h4 class="font-semibold text-gray-900 mb-2">{{ book.title }}</h4>
-            <p class="text-sm text-gray-600 mb-3">
-                Completed: {{ book.completed_date.strftime('%B %Y') if book.completed_date else 'N/A' }}
-            </p>
-            <a href="{{ book.pdf_url }}" target="_blank" 
-                class="text-sm text-purple-600 hover:text-purple-800 font-medium">
-                📥 Download PDF
-            </a>
-            </div>
-        </div>
+    <!-- Community Progress (always visible) -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">
+        How the community is progressing
+      </h3>
+      {% if community_stats %}
+      <div class="space-y-3">
+        {% for stat in community_stats %}
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="font-medium text-gray-700">{{ stat.range }}</span>
+            <span class="text-gray-600">
+              {{ stat.count }} members · {{ stat.percentage }}%
+            </span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+            <div
+              class="progress-bar h-2.5 rounded-full"
+              style="width: {{ stat.percentage }}%;"
+            ></div>
+          </div>
         </div>
         {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-gray-500 text-center py-8">
+        No progress data yet. Be the first!
+      </p>
+      {% endif %}
     </div>
+  </div>
+  {% endif %}
+
+  <!-- Book Suggestion Form -->
+  <div class="bg-gray-50 p-6 mb-12">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">
+      Suggest a book for a future reading cycle
+    </h3>
+    <p class="text-sm text-gray-500 mb-4">
+      All suggestions are reviewed by admins before being added to the queue.
+    </p>
+
+    {% if current_user %}
+    <form
+      hx-post="/api/books/suggestions"
+      hx-target="#suggestion-result"
+      hx-swap="innerHTML"
+      class="space-y-4"
+    >
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Book Title *
+          </label>
+          <input
+            type="text"
+            name="title"
+            placeholder="e.g., Atomic Habits"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            PDF URL *
+          </label>
+          <input
+            type="url"
+            name="pdf_url"
+            placeholder="https://example.com/book.pdf"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Cover Image URL Field -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Cover Image URL (optional)
+        </label>
+        <input
+          type="url"
+          name="cover_image_url"
+          placeholder="https://example.com/cover.jpg"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400"
+        />
+        <p class="text-xs text-gray-500 mt-1">
+          💡 Add a book cover to make your suggestion stand out! Find covers on
+          Google Books or Amazon.
+        </p>
+      </div>
+
+      <div id="suggestion-result"></div>
+
+      <button
+        type="submit"
+        class="btn-primary text-white px-6 py-3 rounded-xl font-semibold"
+      >
+        Submit Suggestion
+      </button>
+    </form>
     {% else %}
-    <div class="empty-state">
-        <div class="empty-state-icon">📖</div>
-        <p class="text-gray-500">No past books yet.</p>
+    <!-- Guest locked state -->
+    <div class="text-center py-8">
+      <div
+        class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+      >
+        <svg
+          class="w-8 h-8 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.486.682 6 6 0 01-3.486-.682l-.318-.158 6"
+          />
+        </svg>
+      </div>
+      <p class="text-gray-600 mb-6">Suggesting books is a member perk.</p>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <a
+          href="/login?from=suggest"
+          class="flex-1 btn-primary text-white py-3 rounded-xl font-semibold text-center"
+        >
+          Login to Suggest a book
+        </a>
+      </div>
     </div>
     {% endif %}
+  </div>
+
+  {% if current_user and user_suggestions %}
+  <!-- Your Suggestions -->
+  <div class="bg-white rounded-xl border p-6 mb-8">
+    <h3
+      class="text-xl font-semibold text-gray-900 mb-1 flex items-center gap-2"
+    >
+      <i data-lucide="file-text" class="w-5 h-5 text-teal-600"></i>
+      Your submitted suggestions
+    </h3>
+    <p class="text-sm text-gray-500 mb-4">
+      Suggestions are reviewed by admins. You’ll see the status here.
+    </p>
+
+    <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+      {% for suggestion in user_suggestions %}
+      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div class="flex-1">
+          <h4 class="font-semibold text-gray-900">{{ suggestion.title }}</h4>
+          <a
+            href="{{ suggestion.pdf_url }}"
+            target="_blank"
+            class="text-sm text-blue-600 hover:text-blue-800"
+          >
+            View PDF →
+          </a>
+        </div>
+        <div class="text-right">
+          {% if suggestion.status == 'pending' %}
+          <span class="badge badge-accent">⏳ Pending review</span>
+          <p class="text-xs text-gray-500 mt-1">Awaiting admin decision</p>
+          {% elif suggestion.status == 'approved' %}
+          <span class="badge badge-secondary text-white">✓ Approved</span>
+          <p class="text-xs text-gray-500 mt-1">Added to the reading queue</p>
+          {% else %}
+          <span class="badge bg-red-600 text-white">✗ Rejected</span>
+          <p class="text-xs text-gray-500 mt-1">Not selected this time</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
     </div>
+  </div>
+
+  {% endif %}
+
+  <!-- Books Tab Section -->
+  <div class="bg-gray-50  p-8 mb-8">
+    <h3
+      class="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2"
+    >
+      <i data-lucide="library" class="w-5 h-5 text-teal-600"></i>
+      Reading Queue & History
+    </h3>
+
+    <!-- Tab Navigation -->
+    <div class="relative mb-12">
+      <div
+        class="flex bg-gray-50/50 rounded-full p-1 border border-gray-200 shadow-sm"
+      >
+        <button
+          class="tab-button flex-1 py-3 px-6 rounded-full font-semibold text-sm transition-all duration-200 relative z-10 bg-white shadow-sm data-[active=true]:text-[var(--primary)] data-[active=false]:text-gray-600 hover:data-[active=false]:bg-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+          data-tab="upcoming"
+          data-active="true"
+        >
+          Upcoming
+        </button>
+
+        <button
+          class="tab-button flex-1 py-3 px-6 rounded-full font-semibold text-sm transition-all duration-200 relative z-10 bg-transparent data-[active=true]:bg-white data-[active=true]:text-[var(--primary)] data-[active=false]:text-gray-600 hover:data-[active=false]:bg-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+          data-tab="past"
+          data-active="false"
+        >
+          Past
+        </button>
+      </div>
+
+      <!-- Animated indicator -->
+      <div
+        class="absolute -bottom-1 left-1 w-1/2 h-0.5 rounded-full transition-all duration-300 ease-out"
+        style="background: var(--gradient-primary)"
+        id="tab-indicator"
+      ></div>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="books-tabs">
+      <!-- Upcoming Books -->
+      <div class="tab-content" id="upcoming">
+        {% if upcoming_books %}
+        <div
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8"
+        >
+          {% for book in upcoming_books[:4] %}
+<div class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+  <!-- Top accent bar for status -->
+  <div class="absolute top-0 left-0 w-full h-1 rounded-t-xl bg-[var(--secondary)]"></div>
+
+  <!-- Cover -->
+  <div class="w-full h-28 rounded-lg overflow-hidden mb-3 flex items-center justify-center bg-gray-50">
+    {% if book.cover_image_url %}
+    <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200"/>
+    {% else %}
+    <div class="text-2xl">📚</div>
+    {% endif %}
+  </div>
+
+  <!-- Title -->
+  <h4 class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-3 leading-tight min-h-[2.5rem] mb-2">{{ book.title }}</h4>
+
+  <!-- Status badge -->
+  <span class="badge badge-secondary">In queue</span>
+
+  <!-- PDF link -->
+  {% if book.pdf_url %}
+  <a href="{{ book.pdf_url }}" target="_blank" class="mt-3 inline-flex items-center text-xs font-medium text-gray-600 hover:text-[var(--secondary)] transition-colors">📄 Preview</a>
+  {% endif %}
+</div>
+{% endfor %}
+
+
+        </div>
+        {% if upcoming_books|length > 4 %}
+        <div class="pt-8 border-t border-gray-100 flex justify-center">
+          <a href="/upcoming-books" class="btn-secondary inline-flex items-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group">
+  View All Upcoming ({{ upcoming_books|length }})
+  →
+</a>
+
+        </div>
+        {% endif %} {% else %}
+        <div class="text-center py-12">
+          <div
+            class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6"
+          >
+            <span class="text-3xl">📚</span>
+          </div>
+          <p class="text-gray-500 text-lg font-medium mb-2">
+            No upcoming books
+          </p>
+          <p class="text-gray-400 text-sm">
+            Check back soon for our next read!
+          </p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Past Books -->
+      <div class="tab-content hidden" id="past">
+        {% if past_books %}
+        <div
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8"
+        >
+          {% for book in past_books[:4] %}
+<div class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+  <!-- Top accent bar for status -->
+  <div class="absolute top-0 left-0 w-full h-1 rounded-t-xl bg-[var(--primary)]"></div>
+
+  <!-- Cover -->
+  <div class="w-full h-28 rounded-lg overflow-hidden mb-3 flex items-center justify-center bg-gray-50">
+    {% if book.cover_image_url %}
+    <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200"/>
+    {% else %}
+    <div class="text-2xl">📚</div>
+    {% endif %}
+  </div>
+
+  <!-- Title -->
+  <h4 class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-3 leading-tight min-h-[2.5rem] mb-2">{{ book.title }}</h4>
+
+  <!-- Status badge -->
+  <span class="badge badge-primary">Completed {{ book.completed_date.strftime('%b %Y') }}</span>
+
+  <!-- PDF link -->
+  {% if book.pdf_url %}
+  <a href="{{ book.pdf_url }}" target="_blank" class="mt-3 inline-flex items-center text-xs font-medium text-gray-600 hover:text-[var(--primary)] transition-colors">📄 Read PDF</a>
+  {% endif %}
+</div>
+{% endfor %}
+
+
+        </div>
+        {% if past_books|length > 4 %}
+        <div class="pt-8 border-t border-gray-100 flex justify-center">
+          <a href="/past-books" class="btn-primary inline-flex items-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group">
+  View All Past ({{ past_books|length }})
+  →
+</a>
+
+        </div>
+        {% endif %} {% else %}
+        <div class="text-center py-12">
+          <div
+            class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6"
+          >
+            <span class="text-3xl">📖</span>
+          </div>
+          <p class="text-gray-500 text-lg font-medium mb-2">No past books</p>
+          <p class="text-gray-400 text-sm">Be the first to complete a book!</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    // Handle progress update
-    document.addEventListener('htmx:afterSwap', function(event) {
-        if (event.detail.target.id === 'progress-result') {
-            showToast('Progress updated successfully!', 'success');
-            setTimeout(() => location.reload(), 1000);
-        }
-        
-        if (event.detail.target.id === 'suggestion-result') {
-            showToast('Book suggestion submitted!', 'success');
-            setTimeout(() => location.reload(), 1500);
-        }
+  // Handle progress update
+  document.addEventListener("htmx:afterSwap", function (event) {
+    if (event.detail.target.id === "progress-result") {
+      showToast("Progress updated successfully!", "success");
+      setTimeout(() => location.reload(), 1000);
+    }
+
+    if (event.detail.target.id === "suggestion-result") {
+      showToast("Book suggestion submitted!", "success");
+      setTimeout(() => location.reload(), 1500);
+    }
+  });
+
+  // Enhanced tabs with smooth animations
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
+  const tabIndicator = document.getElementById("tab-indicator");
+
+  tabButtons.forEach((button, index) => {
+    button.addEventListener("click", () => {
+      const target = button.getAttribute("data-tab");
+
+      // Update button states
+      tabButtons.forEach((btn) => {
+        btn.setAttribute("data-active", "false");
+      });
+      button.setAttribute("data-active", "true");
+
+      // Animate indicator
+      const indicator = tabIndicator;
+      const buttonRect = button.getBoundingClientRect();
+      const containerRect =
+        button.parentElement.parentElement.getBoundingClientRect();
+      const percentage =
+        ((buttonRect.left - containerRect.left + 4) / containerRect.width) *
+        100;
+
+      indicator.style.left = `${percentage}%`;
+
+      // Toggle content with smooth transition
+      tabContents.forEach((content) => {
+        content.classList.add("hidden");
+      });
+      const targetContent = document.getElementById(target);
+      targetContent.classList.remove("hidden");
     });
+  });
+
+  // Set initial active state
+  document
+    .querySelector('.tab-button[data-tab="upcoming"]')
+    .setAttribute("data-active", "true");
+  document.querySelector('.tab-button[data-tab="upcoming"]').click();
 </script>
 {% endblock %}

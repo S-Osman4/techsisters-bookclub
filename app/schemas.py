@@ -59,6 +59,7 @@ class BookResponse(BookBase):
 class SuggestionCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     pdf_url: str
+    cover_image_url: Optional[str] = None
 
 class SuggestionUpdate(BaseModel):
     status: Literal["approved", "rejected"]
@@ -67,6 +68,7 @@ class SuggestionResponse(BaseModel):
     id: int
     title: str
     pdf_url: str
+    cover_image_url: Optional[str] = None
     status: str
     user_id: int
     created_at: datetime
@@ -76,14 +78,13 @@ class SuggestionResponse(BaseModel):
 
 # ===== Meeting Schemas =====
 class MeetingUpdate(BaseModel):
-    date: str = Field(..., min_length=1, max_length=50)
-    time: str = Field(..., min_length=1, max_length=50)
-    meet_link: str
+    start_at_local: datetime = Field(..., description="Local meeting datetime")
+    timezone: str = Field(..., min_length=1, max_length=50)  # e.g. "Africa/Nairobi"
+    meet_link: HttpUrl
 
 class MeetingResponse(BaseModel):
     id: int
-    date: str
-    time: str
+    start_at: datetime
     meet_link: str
     updated_at: datetime
     

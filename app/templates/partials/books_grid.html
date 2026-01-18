@@ -1,0 +1,89 @@
+<div class="grid sm:grid-cols-2 gap-6 mb-8">
+  {% for book in books %}
+  <article
+    class="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 flex"
+  >
+    <!-- Cover -->
+    <div
+      class="w-28 h-full bg-gray-50 flex items-center justify-center shrink-0"
+    >
+      {% if book.cover_image_url %}
+      <img
+        src="{{ book.cover_image_url }}"
+        alt="{{ book.title }}"
+        class="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform"
+      />
+      {% else %}
+      <div class="text-3xl">📘</div>
+      {% endif %}
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 p-5 flex flex-col justify-between">
+      <div>
+        <h3 class="font-semibold text-gray-900 leading-snug line-clamp-2 mb-1">
+          {{ book.title }}
+        </h3>
+
+        {% if book.author %}
+        <p class="text-sm text-gray-500 mb-3">{{ book.author }}</p>
+        {% endif %}
+
+        <!-- Status line (1–2 max) -->
+        <div class="flex flex-wrap gap-2 text-xs">
+          {% if book.status == "completed" and book.completed_date %}
+          <span
+            class="px-2 py-1 rounded-full bg-gray-100 text-gray-700 font-medium"
+          >
+            <i
+              data-lucide="book-open-check"
+              class="icon icon-lg icon-muted"
+            ></i>
+
+            Completed {{ book.completed_date.strftime('%b %Y') }}
+          </span>
+          {% elif book.status == "current" and book.current_chapters %}
+          <span
+            class="px-2 py-1 rounded-full bg-teal-100 text-teal-800 font-medium"
+          >
+            {{ book.current_chapters }}
+          </span>
+          {% else %}
+          <span
+            class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-medium"
+          >
+            In queue
+          </span>
+          {% endif %} {% if book.total_chapters %}
+          <span
+            class="px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-medium"
+          >
+            {{ book.total_chapters }} chapters
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action -->
+      <div class="pt-4">
+        {% if book.pdf_url %}
+        <a
+          href="{{ book.pdf_url }}"
+          target="_blank"
+          class="btn-primary inline-flex items-center justify-center w-full h-10 rounded-xl text-sm text-white"
+        >
+          {% if book.status == "completed" %} Revisit PDF {% elif book.status ==
+          "current" %} Read now {% else %} Preview PDF {% endif %}
+        </a>
+        {% else %}
+        <div
+          class="text-center text-sm text-gray-400 h-10 flex items-center justify-center"
+        >
+          PDF unavailable
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>

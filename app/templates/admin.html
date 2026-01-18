@@ -9,7 +9,8 @@ Club{% endblock %} {% block content %}
     </div>
     <a
       href="/dashboard"
-      class="text-purple-600 hover:text-purple-800 font-medium"
+      class="font-semibold transition-colors"
+      style="color: var(--primary)"
     >
       ← Back to Member View
     </a>
@@ -25,9 +26,13 @@ Club{% endblock %} {% block content %}
             {{ total_members }}
           </p>
         </div>
-        <div class="bg-purple-100 p-3 rounded-lg">
+        <div
+          class="p-3 rounded-lg"
+          style="background: rgba(255, 107, 107, 0.15)"
+        >
           <svg
-            class="w-6 h-6 text-purple-600"
+            class="w-6 h-6"
+            style="color: var(--primary)"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -45,9 +50,13 @@ Club{% endblock %} {% block content %}
           <p class="text-sm text-gray-600">New This Month</p>
           <p class="text-3xl font-bold text-gray-900 mt-1">{{ new_members }}</p>
         </div>
-        <div class="bg-green-100 p-3 rounded-lg">
+        <div
+          class="p-3 rounded-lg"
+          style="background: rgba(78, 205, 196, 0.15)"
+        >
           <svg
-            class="w-6 h-6 text-green-600"
+            class="w-6 h-6"
+            style="color: var(--secondary)"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -68,9 +77,13 @@ Club{% endblock %} {% block content %}
             {{ pending_count }}
           </p>
         </div>
-        <div class="bg-yellow-100 p-3 rounded-lg">
+        <div
+          class="p-3 rounded-lg"
+          style="background: rgba(255, 230, 109, 0.3)"
+        >
           <svg
-            class="w-6 h-6 text-yellow-600"
+            class="w-6 h-6"
+            style="color: var(--accent-dark)"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -92,9 +105,13 @@ Club{% endblock %} {% block content %}
             {{ engagement.tracking }}
           </p>
         </div>
-        <div class="bg-blue-100 p-3 rounded-lg">
+        <div
+          class="p-3 rounded-lg"
+          style="background: rgba(78, 205, 196, 0.15)"
+        >
           <svg
-            class="w-6 h-6 text-blue-600"
+            class="w-6 h-6"
+            style="color: var(--secondary)"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -119,7 +136,10 @@ Club{% endblock %} {% block content %}
     >
       <div>
         <p class="text-sm text-gray-600">Current Access Code</p>
-        <p class="text-2xl font-bold text-purple-600 font-mono mt-1">
+        <p
+          class="text-2xl font-bold font-mono mt-1"
+          style="color: var(--primary)"
+        >
           {{ access_code.code if access_code else 'Not Set' }}
         </p>
         {% if access_code %}
@@ -130,7 +150,7 @@ Club{% endblock %} {% block content %}
       </div>
       <button
         onclick="document.getElementById('code-modal').classList.remove('hidden')"
-        class="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700"
+        class="btn-primary text-white px-6 py-3 rounded-xl font-semibold"
       >
         Change Code
       </button>
@@ -151,13 +171,19 @@ Club{% endblock %} {% block content %}
     </h2>
 
     {% if current_book %}
-    <div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-4">
+    <div
+      class="rounded-xl p-6 mb-4 border-2"
+      style="
+        background: rgba(255, 107, 107, 0.05);
+        border-color: var(--primary);
+      "
+    >
       <div class="flex items-start justify-between">
         <div class="flex-1">
           <h3 class="text-xl font-bold text-gray-900 mb-2">
             {{ current_book.title }}
           </h3>
-          <p class="text-purple-600 mb-4">
+          <p class="mb-4 font-medium" style="color: var(--secondary)">
             {{ current_book.current_chapters }}
           </p>
           <a
@@ -170,13 +196,14 @@ Club{% endblock %} {% block content %}
         </div>
         <button
           onclick="document.getElementById('edit-book-modal').classList.remove('hidden')"
-          class="bg-white text-purple-600 border border-purple-600 px-4 py-2 rounded-lg font-medium hover:bg-purple-50 mr-2"
+          class="bg-white border-2 px-4 py-2 rounded-xl font-semibold mr-2 transition-colors"
+          style="color: var(--primary); border-color: var(--primary)"
         >
           Edit Details
         </button>
         <button
           onclick="document.getElementById('complete-modal').classList.remove('hidden')"
-          class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
+          class="btn-secondary text-white px-4 py-2 rounded-xl font-semibold"
         >
           Mark Completed
         </button>
@@ -198,17 +225,23 @@ Club{% endblock %} {% block content %}
   <div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
     <h2 class="text-xl font-bold text-gray-900 mb-4">📅 Meeting Management</h2>
 
-    {% if meeting %}
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+    {% if meeting %} {% set uk_time = meeting.start_at.astimezone(uk_tz) %}
+    <div
+      class="rounded-xl p-4 mb-4 border-2"
+      style="
+        background: rgba(78, 205, 196, 0.1);
+        border-color: var(--secondary);
+      "
+    >
       <div class="flex items-center justify-between">
         <div>
           <p class="font-semibold text-gray-900">
-            {{ meeting.date }} at {{ meeting.time }}
+            {{ uk_time.strftime('%d %B %Y at %H:%M') }} UK time
           </p>
           <a
             href="{{ meeting.meet_link }}"
             target="_blank"
-            class="text-sm text-blue-600 hover:text-blue-800"
+            class="text-sm text-blue-600 hover:text-blue-800 break-all"
           >
             {{ meeting.meet_link }}
           </a>
@@ -224,7 +257,7 @@ Club{% endblock %} {% block content %}
     {% else %}
     <button
       onclick="document.getElementById('meeting-modal').classList.remove('hidden')"
-      class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700"
+      class="w-full btn-secondary text-white px-6 py-3 rounded-xl font-semibold"
     >
       Set Meeting Details
     </button>
@@ -238,49 +271,87 @@ Club{% endblock %} {% block content %}
     </h2>
 
     {% if pending_suggestions %}
+    <!-- In your pending suggestions section -->
     <div class="space-y-4">
-      {% for suggestion in pending_suggestions %}
-      <div class="border border-gray-200 rounded-lg p-4">
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <h4 class="font-semibold text-gray-900 mb-1">
-              {{ suggestion.title }}
-            </h4>
-            <p class="text-sm text-gray-600 mb-2">
-              Suggested by: <strong>{{ suggestion.user_name }}</strong> ({{
-              suggestion.user_email }})
-            </p>
-            <a
-              href="{{ suggestion.pdf_url }}"
-              target="_blank"
-              class="text-sm text-blue-600 hover:text-blue-800"
-            >
-              📄 View PDF →
-            </a>
-          </div>
-          <div class="flex space-x-2">
-            <button
-              hx-put="/api/admin/suggestions/{{ suggestion.id }}/approve"
-              hx-confirm="Approve '{{ suggestion.title }}'?"
-              hx-target="closest div.border"
-              hx-swap="outerHTML"
-              class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
-            >
-              ✓ Approve
-            </button>
-            <button
-              hx-put="/api/admin/suggestions/{{ suggestion.id }}/reject"
-              hx-confirm="Reject '{{ suggestion.title }}'?"
-              hx-target="closest div.border"
-              hx-swap="outerHTML"
-              class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700"
-            >
-              ✗ Reject
-            </button>
-          </div>
+        {% for suggestion in pending_suggestions %}
+        <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-start gap-4">
+                <!-- Cover Image Preview -->
+                {% if suggestion.cover_image_url %}
+                <div class="flex-shrink-0 w-20 h-28 rounded-lg overflow-hidden shadow-sm bg-gray-50">
+                    <img
+                        src="{{ suggestion.cover_image_url }}"
+                        alt="{{ suggestion.title }}"
+                        class="w-full h-full object-contain"
+                        onerror="this.parentElement.innerHTML='<div class=\"w-full h-full bg-gray-200 flex items-center justify-center text-2xl\">📚</div>'"
+                    />
+                </div>
+                {% else %}
+                <div class="flex-shrink-0 w-20 h-28 rounded-lg bg-gray-100 flex items-center justify-center text-3xl">
+                    📚
+                </div>
+                {% endif %}
+
+                <!-- Book Info -->
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-gray-900 mb-1">
+                        {{ suggestion.title }}
+                    </h4>
+                    <p class="text-sm text-gray-600 mb-2">
+                        Suggested by: <strong>{{ suggestion.user_name }}</strong> ({{ suggestion.user_email }})
+                    </p>
+                    <div class="flex gap-2 text-sm flex-wrap">
+                        <a
+                            href="{{ suggestion.pdf_url }}"
+                            target="_blank"
+                            class="text-blue-600 hover:text-blue-800"
+                        >
+                            📄 View PDF
+                        </a>
+                        {% if suggestion.cover_image_url %}
+                        <span class="text-gray-400">•</span>
+                        <a
+                            href="{{ suggestion.cover_image_url }}"
+                            target="_blank"
+                            class="text-blue-600 hover:text-blue-800"
+                        >
+                            🖼️ View Cover
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col gap-2">
+                    <button
+                        type="button"
+                        class="btn-secondary text-white px-4 py-2 rounded-xl font-semibold whitespace-nowrap approve-btn"
+                        data-id="{{ suggestion.id }}"
+                        data-title="{{ suggestion.title }}"
+                        data-user-name="{{ suggestion.user_name }}"
+                        data-user-email="{{ suggestion.user_email }}"
+                        data-pdf-url="{{ suggestion.pdf_url }}"
+                        data-cover-url="{{ suggestion.cover_image_url or '' }}"
+                    >
+                        ✓ Approve
+                    </button>
+                    <button
+                        type="button"
+                        class="text-white px-4 py-2 rounded-xl font-semibold whitespace-nowrap reject-btn"
+                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
+                        data-id="{{ suggestion.id }}"
+                        data-title="{{ suggestion.title }}"
+                        data-user-name="{{ suggestion.user_name }}"
+                        data-user-email="{{ suggestion.user_email }}"
+                        data-pdf-url="{{ suggestion.pdf_url }}"
+                        data-cover-url="{{ suggestion.cover_image_url or '' }}"
+                    >
+                        ✗ Reject
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-      {% endfor %}
+        {% endfor %}
     </div>
     {% else %}
     <div
@@ -298,32 +369,72 @@ Club{% endblock %} {% block content %}
     </h2>
 
     {% if approved_queue %}
-    <div class="space-y-3">
-      {% for book in approved_queue %}
-      <div
-        class="flex items-center justify-between border border-gray-200 rounded-lg p-4"
-      >
-        <div class="flex-1">
-          <h4 class="font-semibold text-gray-900">{{ book.title }}</h4>
-          <a
-            href="{{ book.pdf_url }}"
-            target="_blank"
-            class="text-sm text-blue-600 hover:text-blue-800"
-          >
-            View PDF →
-          </a>
-        </div>
-        {% if not current_book %}
-        <button
-          type="button"
-          onclick="openSetCurrentModal({{ book.id }}, `{{ book.title }}`)"
-          class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
+    <div class="max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+      <div class="space-y-3 p-3">
+        {% for book in approved_queue %}
+        <div
+          class="flex items-start gap-3 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
         >
-          Set as Current
-        </button>
-        {% endif %}
+          <!-- Cover Image -->
+          {% if book.cover_image_url %}
+          <div
+            class="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden shadow-sm bg-gray-50"
+          >
+            <img
+              src="{{ book.cover_image_url }}"
+              alt="{{ book.title }}"
+              class="w-full h-full object-contain"
+              onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gray-100 flex items-center justify-center text-2xl\'>📚</div>'"
+            />
+          </div>
+          {% else %}
+          <div
+            class="flex-shrink-0 w-16 h-24 rounded-lg bg-gray-100 flex items-center justify-center text-2xl"
+          >
+            📚
+          </div>
+          {% endif %}
+
+          <!-- Book Info -->
+          <div class="flex-1 min-w-0">
+            <h4 class="font-semibold text-gray-900 mb-1">{{ book.title }}</h4>
+            <div class="flex gap-2 text-sm mb-2">
+              <a
+                href="{{ book.pdf_url }}"
+                target="_blank"
+                class="text-blue-600 hover:text-blue-800"
+              >
+                📄 View PDF
+              </a>
+              {% if book.cover_image_url %}
+              <span class="text-gray-400">•</span>
+              <a
+                href="{{ book.cover_image_url }}"
+                target="_blank"
+                class="text-blue-600 hover:text-blue-800"
+              >
+                🖼️ View Cover
+              </a>
+              {% endif %}
+            </div>
+            <p class="text-xs text-gray-500">
+              Added {{ book.created_at.strftime('%b %d, %Y') }}
+            </p>
+          </div>
+
+          <!-- Set as Current Button -->
+          {% if not current_book %}
+          <button
+            type="button"
+            onclick="openSetCurrentModal({{ book.id }}, `{{ book.title }}`, `{{ book.cover_image_url or '' }}`)"
+            class="btn-primary text-white px-4 py-2 rounded-xl font-semibold whitespace-nowrap"
+          >
+            Set as Current
+          </button>
+          {% endif %}
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
     </div>
     {% else %}
     <div
@@ -333,6 +444,7 @@ Club{% endblock %} {% block content %}
     </div>
     {% endif %}
   </div>
+
   <!-- Admin Activity Logs -->
   <div class="bg-white rounded-xl shadow-sm border p-6 mt-8">
     <h2 class="text-xl font-bold text-gray-900 mb-4">
@@ -341,118 +453,115 @@ Club{% endblock %} {% block content %}
 
     {% if admin_logs %}
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Admin
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Action
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Details
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Time
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          {% for log in admin_logs %}
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <div
-                  class="flex-shrink-0 h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center"
-                >
-                  <span class="text-purple-600 font-semibold text-sm">
-                    {{ log.admin_name[0].upper() }}
-                  </span>
-                </div>
-                <div class="ml-3">
-                  <div class="text-sm font-medium text-gray-900">
-                    {{ log.admin_name }}
+      <div class="max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 sticky top-0">
+            <tr>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Admin
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Action
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Details
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Time
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for log in admin_logs %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div
+                    class="flex-shrink-0 h-8 w-8 bg-teal-400 rounded-full flex items-center justify-center"
+                  >
+                    <span class="text-white font-semibold text-sm">
+                      {{ log.admin_name[0].upper() }}
+                    </span>
+                  </div>
+                  <div class="ml-3">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ log.admin_name }}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <div class="text-sm text-gray-900">
-                {% if log.action == "approve_suggestion" %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900">
+                  {% if log.action == "approve_suggestion" %}
+                  <span class="badge badge-secondary text-white text-xs">
+                    ✓ Approved Suggestion
+                  </span>
+                  {% elif log.action == "reject_suggestion" %}
+                  <span
+                    class="badge text-white text-xs"
+                    style="
+                      background: linear-gradient(
+                        135deg,
+                        #ef4444 0%,
+                        #dc2626 100%
+                      );
+                    "
+                  >
+                    ✗ Rejected Suggestion
+                  </span>
+                  {% elif log.action == "update_access_code" %}
+                  <span class="badge badge-primary text-white text-xs">
+                    🔑 Updated Access Code
+                  </span>
+                  {% elif log.action == "set_current_book" %}
+                  <span class="badge badge-secondary text-white text-xs">
+                    📖 Set Current Book
+                  </span>
+                  {% elif log.action == "update_current_book" %}
+                  <span class="badge badge-accent text-xs">
+                    ✏️ Updated Book
+                  </span>
+                  {% elif log.action == "complete_book" %}
+                  <span class="badge badge-secondary text-white text-xs">
+                    ✔️ Completed Book
+                  </span>
+                  {% elif log.action == "update_meeting" %}
+                  <span class="badge badge-accent text-xs">
+                    📅 Updated Meeting
+                  </span>
+                  {% else %}
+                  <span
+                    class="badge text-xs font-medium bg-gray-100 text-gray-800"
+                  >
+                    {{ log.action }}
+                  </span>
+                  {% endif %}
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div
+                  class="text-sm text-gray-500 max-w-xs truncate"
+                  title="{{ log.target }}"
                 >
-                  ✓ Approved Suggestion
-                </span>
-                {% elif log.action == "reject_suggestion" %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                >
-                  ✗ Rejected Suggestion
-                </span>
-                {% elif log.action == "update_access_code" %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                >
-                  🔑 Updated Access Code
-                </span>
-                {% elif log.action == "set_current_book" %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                >
-                  📖 Set Current Book
-                </span>
-                {% elif log.action == "update_current_book" %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                >
-                  ✏️ Updated Book
-                </span>
-                {% elif log.action == "complete_book" %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                >
-                  ✔️ Completed Book
-                </span>
-                {% elif log.action == "update_meeting" %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
-                >
-                  📅 Updated Meeting
-                </span>
-                {% else %}
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                >
-                  {{ log.action }}
-                </span>
-                {% endif %}
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <div
-                class="text-sm text-gray-500 max-w-xs truncate"
-                title="{{ log.target }}"
-              >
-                {{ log.target or 'N/A' }}
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ log.timestamp.strftime('%b %d, %Y at %I:%M %p') }}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                  {{ log.target or 'N/A' }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ log.timestamp.strftime('%b %d, %Y at %I:%M %p') }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
     {% else %}
     <div
@@ -462,6 +571,7 @@ Club{% endblock %} {% block content %}
     </div>
     {% endif %}
   </div>
+
   <!-- User Management -->
   <div class="bg-white rounded-xl shadow-sm border p-6 mt-8">
     <div class="flex items-center justify-between mb-4">
@@ -472,112 +582,119 @@ Club{% endblock %} {% block content %}
     </div>
 
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              User
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Role
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Joined
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          {% for user in all_users %}
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <div
-                  class="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center {% if user.is_admin %}bg-purple-100{% else %}bg-blue-100{% endif %}"
-                >
-                  <span
-                    class="font-medium text-sm {% if user.is_admin %}text-purple-600{% else %}text-blue-600{% endif %}"
+      <div class="max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 sticky top-0">
+            <tr>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                User
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Role
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Joined
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for user in all_users %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div
+                    class="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
+                    style="background: {% if user.is_admin %}rgba(255, 107, 107, 0.15){% else %}rgba(78, 205, 196, 0.15){% endif %};"
                   >
-                    {{ user.name[0].upper() }}
-                  </span>
-                </div>
-                <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900">
-                    {{ user.name }} {% if user.id == admin.id %}
-                    <span class="text-purple-600">(You)</span>
-                    {% endif %}
+                    <span
+                      class="font-medium text-sm"
+                      style="color: {% if user.is_admin %}var(--primary){% else %}var(--secondary){% endif %};"
+                    >
+                      {{ user.name[0].upper() }}
+                    </span>
                   </div>
-                  <div class="text-sm text-gray-500">{{ user.email }}</div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ user.name }} {% if user.id == admin.id %}
+                      <span class="text-teal-400">(You)</span>
+                      {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-500">{{ user.email }}</div>
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {% if user.is_admin %}
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-              >
-                ⭐ Admin
-              </span>
-              {% else %}
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-              >
-                👤 Member
-              </span>
-              {% endif %}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ user.created_at.strftime('%b %d, %Y') }}
-            </td>
-            <!-- Find this section in your admin.html -->
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              {% if user.id != admin.id %} {% if user.is_admin %}
-              <!-- Demote button -->
-              <button
-                onclick="demoteUser({{ user.id }}, '{{ user.name }}')"
-                class="text-orange-600 hover:text-orange-800 font-medium"
-                {%
-                if
-                admin_count|int
-                <=1
-                %}disabled
-                title="Cannot demote last admin"
-                {%
-                endif
-                %}
-              >
-                ↓ Demote
-              </button>
-              {% else %}
-              <!-- Promote button -->
-              <button
-                onclick="promoteUser({{ user.id }}, '{{ user.name }}')"
-                class="text-green-600 hover:text-green-800 font-medium"
-              >
-                ↑ Promote
-              </button>
-              {% endif %} {% else %}
-              <span class="text-gray-400">—</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {% if user.is_admin %}
+                <span class="badge badge-primary text-white text-xs">
+                  ⭐ Admin
+                </span>
+                {% else %}
+                <span class="badge badge-secondary text-white text-xs">
+                  👤 Member
+                </span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ user.created_at.strftime('%b %d, %Y') }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                {% if user.id != admin.id %} {% if user.is_admin %}
+                <!-- Demote button -->
+                <button
+                  onclick="demoteUser({{ user.id }}, '{{ user.name }}')"
+                  class="font-semibold transition-colors"
+                  style="color: var(--accent-dark)"
+                  {%
+                  if
+                  admin_count|int
+                  <="1"
+                  %}disabled
+                  title="Cannot demote last admin"
+                  {%
+                  endif
+                  %}
+                >
+                  ↓ Demote
+                </button>
+                {% else %}
+                <!-- Promote button -->
+                <button
+                  onclick="promoteUser({{ user.id }}, '{{ user.name }}')"
+                  class="font-semibold transition-colors"
+                  style="color: var(--secondary)"
+                >
+                  > ↑ Promote
+                </button>
+                {% endif %} {% else %}
+                <span class="text-gray-400">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <p class="text-sm text-blue-800">
+    <div
+      class="mt-4 rounded-xl p-4 border-2"
+      style="
+        background: rgba(78, 205, 196, 0.1);
+        border-color: var(--secondary);
+      "
+    >
+      <p class="text-sm font-medium" style="color: var(--secondary-dark)">
         <strong>ℹ️ Admin Management Guidelines:</strong>
       </p>
       <ul class="text-sm text-blue-700 mt-2 ml-4 list-disc space-y-1">
@@ -591,33 +708,50 @@ Club{% endblock %} {% block content %}
 </div>
 
 <!-- Modals -->
-<!-- Change Code Modal -->
 <div
   id="code-modal"
   class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
 >
   <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-    <h3 class="text-xl font-bold mb-4">Change Access Code</h3>
+    <h3 class="text-xl font-bold mb-2">Change Access Code</h3>
+    <p class="text-sm text-gray-600 mb-4">
+      Generate a secure random code or enter your own.
+    </p>
+
     <form hx-put="/api/admin/code" hx-target="#code-result">
-      <input
-        type="text"
-        name="new_code"
-        placeholder="Enter new code"
-        class="w-full px-4 py-2 border rounded-lg mb-4"
-        required
-      />
+      <div class="mb-3">
+        <label class="block text-sm font-medium mb-1">Access Code</label>
+        <input
+          type="text"
+          id="new-code-input"
+          name="new_code"
+          placeholder="Enter new code or click Generate"
+          class="w-full px-4 py-2 border rounded-lg"
+          required
+        />
+      </div>
+
+      <button
+        type="button"
+        onclick="generateCode()"
+        class="mb-4 px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200"
+      >
+        Generate Secure Code
+      </button>
+
       <div id="code-result" class="mb-4"></div>
+
       <div class="flex space-x-2">
         <button
           type="submit"
-          class="flex-1 bg-purple-600 text-white py-2 rounded-lg"
+          class="flex-1 btn-primary text-white py-3 rounded-xl font-semibold"
         >
           Update
         </button>
         <button
           type="button"
           onclick="document.getElementById('code-modal').classList.add('hidden')"
-          class="flex-1 bg-gray-300 py-2 rounded-lg"
+          class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
         >
           Cancel
         </button>
@@ -650,14 +784,16 @@ Club{% endblock %} {% block content %}
         />
       </div>
       <div>
-        <label class="block text-sm font-medium mb-2">Cover Image URL</label>
+        <label class="block text-sm font-medium mb-1">
+          Cover Image URL <span class="text-red-500">*</span>
+        </label>
         <input
           type="url"
           name="cover_image_url"
-          value="{{ current_book.cover_image_url if current_book else '' }}"
           placeholder="https://example.com/cover.jpg"
           class="w-full px-4 py-2 border rounded-lg"
         />
+
         <p class="text-xs text-gray-500 mt-1">
           Optional: Direct link to book cover image
         </p>
@@ -694,14 +830,14 @@ Club{% endblock %} {% block content %}
       <div class="flex space-x-2">
         <button
           type="submit"
-          class="flex-1 bg-purple-600 text-white py-2 rounded-lg"
+          class="flex-1 btn-primary text-white py-3 rounded-xl font-semibold"
         >
           Save Changes
         </button>
         <button
           type="button"
           onclick="document.getElementById('edit-book-modal').classList.add('hidden')"
-          class="flex-1 bg-gray-300 py-2 rounded-lg"
+          class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
         >
           Cancel
         </button>
@@ -717,33 +853,30 @@ Club{% endblock %} {% block content %}
 >
   <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
     <h3 class="text-xl font-bold mb-4">Meeting Details</h3>
+
     <form
       hx-put="/api/admin/meeting"
       hx-target="#meeting-result"
       class="space-y-4"
     >
       <div>
-        <label class="block text-sm font-medium mb-2">Date</label>
+        <label class="block text-sm font-medium mb-2">Date & Time (UK)</label>
         <input
-          type="text"
-          name="date"
-          value="{{ meeting.date if meeting else '' }}"
-          placeholder="December 15, 2024"
+          type="datetime-local"
+          name="start_at_local"
+          value="{% if meeting and meeting.start_at %}
+                    {{ meeting.start_at.astimezone(uk_tz).strftime('%Y-%m-%dT%H:%M') }}
+                 {% else %}{% endif %}"
           class="w-full px-4 py-2 border rounded-lg"
           required
         />
+        <p class="text-xs text-gray-500 mt-1">
+          Times are in UK time (Europe/London).
+        </p>
       </div>
-      <div>
-        <label class="block text-sm font-medium mb-2">Time</label>
-        <input
-          type="text"
-          name="time"
-          value="{{ meeting.time if meeting else '' }}"
-          placeholder="7:00 PM EAT"
-          class="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-      </div>
+
+      <input type="hidden" name="timezone" value="Europe/London" />
+
       <div>
         <label class="block text-sm font-medium mb-2">Google Meet Link</label>
         <input
@@ -755,18 +888,20 @@ Club{% endblock %} {% block content %}
           required
         />
       </div>
+
       <div id="meeting-result"></div>
+
       <div class="flex space-x-2">
         <button
           type="submit"
-          class="flex-1 bg-blue-600 text-white py-2 rounded-lg"
+          class="flex-1 btn-secondary text-white py-3 rounded-xl font-semibold"
         >
           Save
         </button>
         <button
           type="button"
           onclick="document.getElementById('meeting-modal').classList.add('hidden')"
-          class="flex-1 bg-gray-300 py-2 rounded-lg"
+          class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
         >
           Cancel
         </button>
@@ -788,15 +923,14 @@ Club{% endblock %} {% block content %}
     </p>
     <div class="flex space-x-2">
       <button
-        hx-post="/api/admin/books/complete"
-        hx-target="#complete-result"
-        class="flex-1 bg-green-600 text-white py-2 rounded-lg"
+        onclick="completeCurrentBook()"
+        class="flex-1 btn-secondary text-white py-3 rounded-xl font-semibold"
       >
         Yes, Complete
       </button>
       <button
         onclick="document.getElementById('complete-modal').classList.add('hidden')"
-        class="flex-1 bg-gray-300 py-2 rounded-lg"
+        class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
       >
         Cancel
       </button>
@@ -804,68 +938,256 @@ Club{% endblock %} {% block content %}
     <div id="complete-result" class="mt-4"></div>
   </div>
 </div>
+
+<!-- Approve / Reject Suggestion Modal -->
+<div
+  id="suggestion-modal"
+  class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"
+  onclick="if(event.target === this) closeSuggestionModal()"
+>
+  <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-modal">
+    <!-- Header with gradient -->
+    <div class="gradient-bg p-6 relative">
+      <div class="relative z-10">
+        <h3 id="suggestion-modal-title" class="text-2xl font-bold text-white mb-1">
+          Review Book Suggestion
+        </h3>
+        <p id="suggestion-user" class="text-white/90 text-sm"></p>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6">
+      <!-- Book Preview Card -->
+      <div class="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl p-4 mb-6 card-hover">
+        <div class="flex gap-4">
+          <!-- Cover Preview -->
+          <div id="modal-cover-preview" class="flex-shrink-0 w-24 h-32 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center shadow-lg">
+            <span class="text-4xl">📚</span>
+          </div>
+          
+          <!-- Book Info -->
+          <div class="flex-1 min-w-0">
+            <h4 id="suggestion-title" class="font-bold text-gray-900 text-lg mb-2 line-clamp-2"></h4>
+            <a
+              id="suggestion-pdf"
+              href="#"
+              target="_blank"
+              class="inline-flex items-center gap-1 text-sm font-medium hover:underline mb-3"
+              style="color: var(--secondary);"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              View PDF
+            </a>
+            <div id="cover-status" class="text-xs text-gray-500"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="suggestion-form" class="space-y-4">
+        <input type="hidden" id="suggestion-id" />
+        <input type="hidden" id="action-type" />
+
+        <!-- Cover Image Input -->
+        <div id="cover-input-section">
+          <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" style="color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Cover Image URL
+            <span id="cover-required" class="text-red-500 text-xs font-normal">(Required for approval)</span>
+          </label>
+          <input
+            id="cover-url-input"
+            type="url"
+            class="w-full border-2 rounded-xl px-4 py-3 focus:ring-4 transition-all"
+            placeholder="https://example.com/cover.jpg"
+            oninput="previewCover(this.value)"
+          />
+          <p id="no-cover-warning" class="text-xs mt-2 px-3 py-2 bg-red-50 border-2 border-red-200 rounded-lg hidden" style="color: var(--primary);">
+            <strong>⚠️ Required:</strong> Add a cover image URL to approve this book
+          </p>
+        </div>
+
+        <!-- Result Messages -->
+        <div id="suggestion-result"></div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 pt-2">
+          <button
+            type="button"
+            onclick="closeSuggestionModal()"
+            class="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="confirm-action-btn"
+            type="submit"
+            class="flex-1 py-3 rounded-xl font-semibold text-white transition-all transform hover:scale-105 hover:shadow-xl"
+          >
+            <span id="btn-text">Confirm</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Set Current Book Modal -->
 <div
   id="set-current-modal"
   class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    onclick="if(event.target === this) closeSetCurrentModal()"
 >
-  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-    <h3 class="text-xl font-bold mb-4">Set Book as Current</h3>
-    <p class="text-sm text-gray-600 mb-4" id="set-current-title">
-      Set this book as the current read.
-    </p>
-
-    <form
-      id="set-current-form"
-      onsubmit="return onSetCurrentSubmit(event)"
-      class="space-y-4"
-    >
-      <div>
-        <label class="block text-sm font-medium mb-2"> Current Chapters </label>
-        <input
-          type="text"
-          name="current_chapters"
-          placeholder="e.g., Chapters 3–4"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-          required
-        />
-        <p class="text-xs text-gray-500 mt-1">
-          This will be shown on the member dashboard.
+  
+  <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-modal">
+    <!-- Header with gradient -->
+    <div class="gradient-bg p-6 relative">
+      <div class="relative z-10">
+        <h3 class="text-2xl font-bold text-white mb-1">
+          📖 Set as Current Book
+        </h3>
+        <p id="set-current-subtitle" class="text-white/90 text-sm">
+          Configure this book as the club's current read
         </p>
       </div>
+    </div>
 
-      <div>
-        <label class="block text-sm font-medium mb-2">
-          Cover Image URL (optional)
-        </label>
-        <input
-          type="url"
-          name="cover_image_url"
-          placeholder="https://example.com/cover.jpg"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-        />
+    <!-- Content -->
+    <div class="p-6">
+      <!-- Book Preview Card -->
+      <div class="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl p-4 mb-6 card-hover">
+        <div class="flex gap-4">
+          <!-- Cover Preview -->
+          <div id="current-cover-preview" class="flex-shrink-0 w-24 h-32 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center shadow-lg">
+            <span class="text-4xl">📚</span>
+          </div>
+          
+          <!-- Book Info -->
+          <div class="flex-1 min-w-0">
+            <h4 id="current-book-title" class="font-bold text-gray-900 text-lg mb-2 line-clamp-2"></h4>
+            <a
+              id="current-book-pdf"
+              href="#"
+              target="_blank"
+              class="inline-flex items-center gap-1 text-sm font-medium hover:underline mb-3"
+              style="color: var(--secondary);"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              View PDF
+            </a>
+            <div id="current-cover-status" class="text-xs text-gray-500"></div>
+          </div>
+        </div>
       </div>
 
-      <div id="set-current-result" class="text-sm text-gray-600"></div>
+      <!-- Form -->
+      <form id="set-current-form" onsubmit="return onSetCurrentSubmit(event)" class="space-y-4">
+        <!-- Current Chapters -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" style="color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            Current Chapters
+            <span class="text-red-500 text-xs font-normal">(Required)</span>
+          </label>
+          <input
+            type="text"
+            name="current_chapters"
+            placeholder="e.g., Chapters 1-3 or Introduction"
+            class="w-full border-2 rounded-xl px-4 py-3 focus:ring-4 transition-all"
+            required
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            This will be displayed on the member dashboard
+          </p>
+        </div>
 
-      <div class="flex space-x-2">
-        <button
-          type="submit"
-          class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700"
-        >
-          Set as Current
-        </button>
-        <button
-          type="button"
-          onclick="closeSetCurrentModal()"
-          class="flex-1 bg-gray-300 py-2 rounded-lg font-medium hover:bg-gray-400"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+        <!-- Cover Image URL -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" style="color: var(--secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Cover Image URL
+            <span class="text-xs text-gray-500 font-normal">(Optional - update if needed)</span>
+          </label>
+          <input
+            type="url"
+            name="cover_image_url"
+            id="current-cover-url-input"
+            placeholder="https://example.com/cover.jpg"
+            class="w-full border-2 rounded-xl px-4 py-3 focus:ring-4 transition-all"
+            oninput="previewCurrentCover(this.value)"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            💡 Leave blank to keep existing cover, or add a new URL to update it
+          </p>
+        </div>
+
+        <!-- Result Messages -->
+        <div id="set-current-result"></div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 pt-2">
+          <button
+            type="button"
+            onclick="closeSetCurrentModal()"
+            class="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="set-current-btn"
+            type="submit"
+            class="flex-1 btn-primary text-white py-3 rounded-xl font-semibold transition-all transform hover:scale-105 hover:shadow-xl"
+          >
+            <span id="set-current-btn-text">✓ Set as Current Book</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
+
+<style>
+/* Current Book Cover Preview Styles */
+#current-cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#current-cover-preview.loading {
+  position: relative;
+}
+
+#current-cover-preview.loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Focus states matching suggestion modal */
+#current-cover-url-input:focus,
+#set-current-form input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+}
+</style>
 
 <script>
   function approveSuggestion(suggestionId, title) {
@@ -891,88 +1213,231 @@ Club{% endblock %} {% block content %}
       });
   }
 
-  // Fix for setCurrentBook function that uses fetch
   // Set Current Book Modal helpers
   let currentBookIdForModal = null;
+  let currentBookData = {};
 
-  function openSetCurrentModal(bookId, title) {
-    currentBookIdForModal = bookId;
 
-    const modal = document.getElementById("set-current-modal");
-    const titleEl = document.getElementById("set-current-title");
-    const form = document.getElementById("set-current-form");
-
-    if (titleEl) {
-      titleEl.textContent = `Set "${title}" as the current book.`;
+ // Preview cover image as user types
+function previewCurrentCover(url) {
+  const preview = document.getElementById("current-cover-preview");
+  const status = document.getElementById("current-cover-status");
+  
+  if (!url || url.trim() === "") {
+    // Show original cover if available
+    if (currentBookData.originalCover) {
+      preview.innerHTML = `<img src="${currentBookData.originalCover}" alt="Book cover" />`;
+      status.innerHTML = '<span style="color: var(--secondary);">✓ Using original cover</span>';
+    } else {
+      preview.innerHTML = '<span class="text-4xl">📚</span>';
+      status.textContent = "";
     }
+    return;
+  }
+  
+  preview.classList.add("loading");
+  status.textContent = "Loading preview...";
+  
+  const img = new Image();
+  img.onload = function() {
+    preview.innerHTML = `<img src="${url}" alt="Book cover" />`;
+    preview.classList.remove("loading");
+    status.innerHTML = '<span style="color: var(--secondary);">✓ New cover loaded successfully</span>';
+  };
+  img.onerror = function() {
+    if (currentBookData.originalCover) {
+      preview.innerHTML = `<img src="${currentBookData.originalCover}" alt="Book cover" />`;
+      status.innerHTML = '<span style="color: var(--primary);">⚠ Could not load new image - showing original</span>';
+    } else {
+      preview.innerHTML = '<span class="text-4xl">📚</span>';
+      status.innerHTML = '<span style="color: var(--primary);">⚠ Could not load image</span>';
+    }
+    preview.classList.remove("loading");
+  };
+  img.src = url;
+}
 
-    // Reset form
-    form.reset();
+// Open modal with book data
+function openSetCurrentModal(bookId, title, coverUrl = "", pdfUrl = "") {
+  currentBookIdForModal = bookId;
+  currentBookData = {
+    id: bookId,
+    title: title,
+    originalCover: coverUrl,
+    pdfUrl: pdfUrl
+  };
 
-    modal.classList.remove("hidden");
+  const modal = document.getElementById("set-current-modal");
+  const form = document.getElementById("set-current-form");
+  const subtitle = document.getElementById("set-current-subtitle");
+  const bookTitle = document.getElementById("current-book-title");
+  const bookPdf = document.getElementById("current-book-pdf");
+  const coverInput = document.getElementById("current-cover-url-input");
+  const preview = document.getElementById("current-cover-preview");
+  const status = document.getElementById("current-cover-status");
+
+  // Update content
+  subtitle.textContent = `Configure "${title}" as the club's current read`;
+  bookTitle.textContent = title;
+  
+  if (pdfUrl) {
+    bookPdf.href = pdfUrl;
+    bookPdf.classList.remove("hidden");
+  } else {
+    bookPdf.classList.add("hidden");
   }
 
-  function closeSetCurrentModal() {
-    const modal = document.getElementById("set-current-modal");
-    modal.classList.add("hidden");
+  // Reset form
+  form.reset();
+  
+  // Set cover URL (autopopulate if exists)
+  coverInput.value = coverUrl || "";
+  
+  // Show cover preview
+  if (coverUrl) {
+    preview.innerHTML = `<img src="${coverUrl}" alt="${title}" />`;
+    status.innerHTML = '<span style="color: var(--secondary);">✓ Current cover loaded</span>';
+  } else {
+    preview.innerHTML = '<span class="text-4xl">📚</span>';
+    status.textContent = "";
   }
 
-  function onSetCurrentSubmit(event) {
-    event.preventDefault(); // Prevent form submission
+  // Clear result
+  document.getElementById("set-current-result").innerHTML = "";
 
-    const form = document.getElementById("set-current-form");
-    const currentChapters = form.querySelector(
-      '[name="current_chapters"]'
-    ).value;
-    const coverImageUrl = form.querySelector('[name="cover_image_url"]').value;
+  // Show modal
+  modal.classList.remove("hidden");
+}
 
-    if (!currentChapters) {
-      showToast("Current chapters are required", "error");
-      return false;
-    }
+// Close modal
+function closeSetCurrentModal() {
+  const modal = document.getElementById("set-current-modal");
+  modal.classList.add("hidden");
+  currentBookIdForModal = null;
+  currentBookData = {};
+}
 
-    // Use fetch() like the original code
-    fetch(`/api/admin/books/${currentBookIdForModal}/set-current`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        current_chapters: currentChapters,
-        cover_image_url: coverImageUrl || null,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        showToast(data.message, data.success ? "success" : "error");
-        if (data.success) {
-          setTimeout(() => {
-            closeSetCurrentModal();
-            window.location.reload();
-          }, 1000);
-        }
-      })
-      .catch((error) => {
-        showToast("Error: " + error.message, "error");
-      });
+// Handle form submission
+function onSetCurrentSubmit(event) {
+  event.preventDefault();
 
+  const form = document.getElementById("set-current-form");
+  const currentChapters = form.querySelector('[name="current_chapters"]').value;
+  const coverImageUrl = form.querySelector('[name="cover_image_url"]').value;
+  const resultDiv = document.getElementById("set-current-result");
+  const submitBtn = document.getElementById("set-current-btn");
+  const btnText = document.getElementById("set-current-btn-text");
+
+  if (!currentChapters || !currentChapters.trim()) {
+    resultDiv.innerHTML = `
+      <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+        <strong>⚠️ Required:</strong> Please specify the current chapters
+      </div>`;
     return false;
   }
 
-  // Keep the other HTMX listeners for other modals
-  // Handle HTMX responses
-  document.addEventListener("htmx:afterSwap", function (event) {
-    const targetId = event.detail.target.id;
-    if (
-      [
-        "code-result",
-        "edit-result",
-        "meeting-result",
-        "complete-result",
-      ].includes(targetId)
-    ) {
-      showToast("Changes saved successfully!", "success");
-      setTimeout(() => location.reload(), 1500);
-    }
-  });
+  // Show loading state
+  submitBtn.disabled = true;
+  btnText.innerHTML = '<span class="loading-spinner">Setting</span>';
+  resultDiv.innerHTML = '<div class="text-sm text-gray-500 text-center">Setting book as current...</div>';
+
+  // Use fetch() to send JSON
+  fetch(`/api/admin/books/${currentBookIdForModal}/set-current`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      current_chapters: currentChapters.trim(),
+      cover_image_url: coverImageUrl.trim() || null,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+            <strong>✓ Success:</strong> ${data.message}
+          </div>`;
+        showToast(data.message, "success");
+        setTimeout(() => {
+          closeSetCurrentModal();
+          window.location.reload();
+        }, 1000);
+      } else {
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+            <strong>✗ Error:</strong> ${data.message || "Something went wrong"}
+          </div>`;
+        submitBtn.disabled = false;
+        btnText.textContent = "✓ Set as Current Book";
+      }
+    })
+    .catch((error) => {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+          <strong>✗ Error:</strong> ${error.message}
+        </div>`;
+      submitBtn.disabled = false;
+      btnText.textContent = "✓ Set as Current Book";
+    });
+
+  return false;
+}
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && !document.getElementById('set-current-modal').classList.contains('hidden')) {
+    closeSetCurrentModal();
+  }
+});
+
+  function generateCode() {
+    fetch("/api/admin/code/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to generate code");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const input = document.getElementById("new-code-input");
+        if (input && data.code) {
+          input.value = data.code;
+          showToast("New code generated", "success");
+        } else {
+          showToast("Could not read generated code", "error");
+        }
+      })
+      .catch((error) => {
+        showToast("Error generating code: " + error.message, "error");
+      });
+  }
+
+  function completeCurrentBook() {
+    fetch('/api/admin/books/complete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showToast(data.message, 'success');
+        document.getElementById('complete-modal').classList.add('hidden');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        showToast(data.message, 'error');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
+  }
 
   function promoteUser(userId, userName) {
     if (
@@ -1019,5 +1484,253 @@ Club{% endblock %} {% block content %}
         });
     }
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+        // Approve buttons
+        document.querySelectorAll('.approve-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const data = this.dataset;
+                openSuggestionModal(
+                    data.id,
+                    data.title,
+                    data.userName,
+                    data.userEmail,
+                    data.pdfUrl,
+                    data.coverUrl,
+                    'approve'
+                );
+            });
+        });
+
+        // Reject buttons
+        document.querySelectorAll('.reject-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const data = this.dataset;
+                openSuggestionModal(
+                    data.id,
+                    data.title,
+                    data.userName,
+                    data.userEmail,
+                    data.pdfUrl,
+                    data.coverUrl,
+                    'reject'
+                );
+            });
+        });
+    });
+  window.currentSuggestionId = null;
+  window.currentAction = null;
+
+  
+// Preview cover image as user types
+function previewCover(url) {
+  const preview = document.getElementById("modal-cover-preview");
+  const warning = document.getElementById("no-cover-warning");
+  const status = document.getElementById("cover-status");
+  
+  if (!url || url.trim() === "") {
+    preview.innerHTML = '<span class="text-4xl">📚</span>';
+    status.textContent = "";
+    if (window.currentAction === "approve") {
+      warning.classList.remove("hidden");
+    }
+    return;
+  }
+  
+  warning.classList.add("hidden");
+  preview.classList.add("loading");
+  status.textContent = "Loading preview...";
+  
+  const img = new Image();
+  img.onload = function() {
+    preview.innerHTML = `<img src="${url}" alt="Book cover" />`;
+    preview.classList.remove("loading");
+    status.innerHTML = '<span style="color: var(--secondary);">✓ Cover loaded successfully</span>';
+  };
+  img.onerror = function() {
+    preview.innerHTML = '<span class="text-4xl">📚</span>';
+    preview.classList.remove("loading");
+    status.innerHTML = '<span style="color: var(--primary);">⚠ Could not load image</span>';
+  };
+  img.src = url;
+}
+
+// Open modal with data
+window.openSuggestionModal = function(id, title, userName, userEmail, pdfUrl, coverUrl, action) {
+  window.currentSuggestionId = id;
+  window.currentAction = action;
+
+  // Update hidden fields
+  document.getElementById("suggestion-id").value = id;
+  document.getElementById("action-type").value = action;
+  
+  // Update content
+  document.getElementById("suggestion-title").textContent = title;
+  document.getElementById("suggestion-user").textContent = `Suggested by ${userName} (${userEmail})`;
+  document.getElementById("suggestion-pdf").href = pdfUrl;
+
+  const modalTitle = document.getElementById("suggestion-modal-title");
+  const confirmBtn = document.getElementById("confirm-action-btn");
+  const btnText = document.getElementById("btn-text");
+  const coverInput = document.getElementById("cover-url-input");
+  const coverSection = document.getElementById("cover-input-section");
+  const warning = document.getElementById("no-cover-warning");
+  const coverRequired = document.getElementById("cover-required");
+  const coverStatus = document.getElementById("cover-status");
+
+  if (action === "approve") {
+    modalTitle.textContent = `✅ Approve "${title}"`;
+    btnText.textContent = "✓ Approve & Add to Queue";
+    confirmBtn.className = "flex-1 btn-secondary py-3 rounded-xl font-semibold text-white transition-all transform hover:scale-105 hover:shadow-xl";
+    coverSection.classList.remove("hidden");
+    coverRequired.classList.remove("hidden");
+    warning.classList.toggle("hidden", !!coverUrl);
+  } else {
+    modalTitle.textContent = `❌ Reject "${title}"`;
+    btnText.textContent = "✗ Reject Suggestion";
+    confirmBtn.style.background = "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)";
+    confirmBtn.className = "flex-1 py-3 rounded-xl font-semibold text-white transition-all transform hover:scale-105 hover:shadow-xl";
+    coverSection.classList.add("hidden");
+    warning.classList.add("hidden");
+  }
+
+  // Set cover URL and preview
+  coverInput.value = coverUrl || "";
+  coverStatus.textContent = "";
+  if (coverUrl) {
+    previewCover(coverUrl);
+  } else {
+    document.getElementById("modal-cover-preview").innerHTML = '<span class="text-4xl">📚</span>';
+  }
+  
+  document.getElementById("suggestion-result").innerHTML = "";
+
+  // Show modal
+  document.getElementById("suggestion-modal").classList.remove("hidden");
+};
+
+// Close modal
+window.closeSuggestionModal = function() {
+  document.getElementById("suggestion-modal").classList.add("hidden");
+  window.currentSuggestionId = null;
+  window.currentAction = null;
+};
+
+// Handle form submission
+async function handleSuggestionAction(e) {
+  e.preventDefault();
+
+  const coverUrl = document.getElementById("cover-url-input").value.trim();
+  const resultDiv = document.getElementById("suggestion-result");
+  const suggestionId = document.getElementById("suggestion-id").value;
+  const action = document.getElementById("action-type").value;
+  const confirmBtn = document.getElementById("confirm-action-btn");
+  const btnText = document.getElementById("btn-text");
+
+  if (action === "approve" && !coverUrl) {
+    resultDiv.innerHTML = `
+      <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+        <strong>⚠️ Missing Cover:</strong> Please add a cover image URL to approve this book
+      </div>`;
+    return;
+  }
+
+  // Show loading state
+  confirmBtn.disabled = true;
+  btnText.innerHTML = '<span class="loading-spinner">Processing</span>';
+  resultDiv.innerHTML = '<div class="text-sm text-gray-500 text-center">Processing your request...</div>';
+
+  try {
+    // Create FormData
+    const formData = new FormData();
+    if (action === "approve") {
+      formData.append("cover_image_url", coverUrl);
+    }
+
+    const response = await fetch(
+      `/api/admin/suggestions/${suggestionId}/${action}`,
+      {
+        method: "PUT",
+        body: formData
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+          <strong>✓ Success:</strong> ${data.message}
+        </div>`;
+      showToast(data.message, "success");
+      setTimeout(() => {
+        closeSuggestionModal();
+        location.reload();
+      }, 800);
+    } else {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+          <strong>✗ Error:</strong> ${data.message || "Something went wrong"}
+        </div>`;
+      confirmBtn.disabled = false;
+      btnText.textContent = action === "approve" ? "✓ Approve & Add to Queue" : "✗ Reject Suggestion";
+    }
+  } catch (err) {
+    resultDiv.innerHTML = `
+      <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+        <strong>✗ Error:</strong> ${err.message}
+      </div>`;
+    confirmBtn.disabled = false;
+    btnText.textContent = action === "approve" ? "✓ Approve & Add to Queue" : "✗ Reject Suggestion";
+  }
+}
+
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Approve buttons
+  document.querySelectorAll('.approve-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const data = this.dataset;
+      openSuggestionModal(
+        data.id,
+        data.title,
+        data.userName,
+        data.userEmail,
+        data.pdfUrl,
+        data.coverUrl,
+        'approve'
+      );
+    });
+  });
+
+  // Reject buttons
+  document.querySelectorAll('.reject-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const data = this.dataset;
+      openSuggestionModal(
+        data.id,
+        data.title,
+        data.userName,
+        data.userEmail,
+        data.pdfUrl,
+        data.coverUrl,
+        'reject'
+      );
+    });
+  });
+
+  // Attach form handler
+  const suggestionForm = document.getElementById("suggestion-form");
+  if (suggestionForm) {
+    suggestionForm.addEventListener("submit", handleSuggestionAction);
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeSuggestionModal();
+    }
+  });
+});
 </script>
 {% endblock %}

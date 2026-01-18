@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.params import Form
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List
+from typing import List, Optional
 
 from app.database import get_db
 from app.models import Book, Meeting, BookSuggestion, ReadingProgress, User
@@ -78,6 +78,7 @@ async def get_past_books(
 async def create_suggestion(
     title: str = Form(...),
     pdf_url: str = Form(...),
+    cover_image_url: Optional[str] = Form(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -87,11 +88,12 @@ async def create_suggestion(
     Suggestions go to pending status and require admin approval
     """
       # Validate using schema
-    suggestion_data = SuggestionCreate(title=title, pdf_url=pdf_url)
+    suggestion_data = SuggestionCreate(title=title, pdf_url=pdf_url, cover_image_url=cover_image_url)
     
     new_suggestion = BookSuggestion(
         title=suggestion_data.title.strip(),
         pdf_url=suggestion_data.pdf_url,
+        cover_image_url=suggestion_data.cover_image_url,
         user_id=current_user.id,
         status="pending"
     )

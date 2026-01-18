@@ -5,7 +5,11 @@ from fastapi import APIRouter, Depends, Form, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from typing import List
+import secrets
+import string
+
 
 from app.database import get_db
 from app.models import User, Book, BookSuggestion, Meeting, AccessCode, ReadingProgress, AdminAction
@@ -15,6 +19,13 @@ from app.schemas import (
 from app.dependencies import require_admin
 
 router = APIRouter()
+
+CODE_CHARS = string.ascii_uppercase + string.digits  # e.g. ABC123
+DEFAULT_CODE_LENGTH = 8 
+
+def generate_access_code(length: int = DEFAULT_CODE_LENGTH) -> str:
+    return ''.join(secrets.choice(CODE_CHARS) for _ in range(length))
+
 
 # ===== Access Code Management =====
 @router.get("/code", response_model=CodeResponse)
@@ -66,6 +77,34 @@ async def update_access_code(
         "message": f"Access code updated to: {code.code}. Remember to post it in the WhatsApp group!",
         "success": True
     }
+@router.post("/code/generate", response_model=CodeResponse)
+async def generate_access_code_endpoint(
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Generate a new random access code and save it.
+    """
+    new_code = generate_access_code()
+
+    code = db.query(AccessCode).first()
+    if not code:
+        code = AccessCode(code=new_code)
+        db.add(code)
+    else:
+        code.code = new_code
+
+    admin_action = AdminAction(
+        admin_id=admin.id,
+        action="update_access_code",
+        target=f"new_code={new_code}",
+    )
+    db.add(admin_action)
+    db.commit()
+    db.refresh(code)
+
+    return code
+
 
 # ===== Current Book Management =====
 @router.put("/books/current", response_model=MessageResponse)
@@ -176,7 +215,8 @@ async def complete_current_book(
     """
     Mark current book as completed
     
-    Moves book to past books archive
+    AUTO-COMPLETES all in-progress readings (chapter > 0 but not -1)
+    to prevent orphaned "reading" states in past books
     """
     current_book = db.query(Book).filter(Book.status == "current").first()
     
@@ -186,23 +226,40 @@ async def complete_current_book(
             detail="No current book to complete"
         )
     
-    # Update status
+    # AUTO-FIX: Mark all incomplete progress as completed (-1)
+    # Only affects users who started but didn't mark as complete
+    incomplete_progress = db.query(ReadingProgress).filter(
+        ReadingProgress.book_id == current_book.id,
+        ReadingProgress.chapter > 0,  # Started reading
+        ReadingProgress.chapter != -1  # But not completed
+    ).all()
+    
+    auto_completed_count = 0
+    for progress in incomplete_progress:
+        progress.chapter = -1  # Mark as completed
+        auto_completed_count += 1
+    
+    # Update book status
     current_book.status = "completed"
     current_book.completed_date = datetime.utcnow()
     current_book.current_chapters = None
     
-    # Log the admin action  ← ADD THIS
+    # Log the admin action
     admin_action = AdminAction(
         admin_id=admin.id,
         action="complete_book",
-        target=f"book_id={current_book.id}, title={current_book.title}"
+        target=f"book_id={current_book.id}, title={current_book.title}, auto_completed={auto_completed_count}"
     )
     db.add(admin_action)
-
+    
     db.commit()
     
+    message = f"'{current_book.title}' marked as completed."
+    if auto_completed_count > 0:
+        message += f" {auto_completed_count} in-progress readings auto-completed."
+    
     return {
-        "message": f"'{current_book.title}' marked as completed. You can now set a new current book.",
+        "message": message,
         "success": True
     }
 
@@ -218,41 +275,53 @@ async def get_meeting(
 
 @router.put("/meeting", response_model=MessageResponse)
 async def update_meeting(
-    date: str = Form(...),
-    time: str = Form(...),
+    start_at_local: str = Form(...),   # "2025-01-10T18:30"
+    timezone: str = Form(...),         # "Europe/London"
     meet_link: str = Form(...),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    """Update meeting details"""
+   # Parse naive local datetime from input
+    try:
+        naive = datetime.strptime(start_at_local, "%Y-%m-%dT%H:%M")
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid datetime format. Use the datetime picker input.",
+        )
+
+    # Attach timezone and convert to UTC
+    try:
+        local_tz = ZoneInfo(timezone)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid timezone identifier.",
+        )
+
+    local_dt = naive.replace(tzinfo=local_tz)
+    start_at_utc = local_dt.astimezone(ZoneInfo("UTC"))
+
     meeting = db.query(Meeting).first()
-    
     if not meeting:
         meeting = Meeting(
-            date=date,
-            time=time,
-            meet_link=meet_link
+            start_at=start_at_utc,
+            meet_link=meet_link,
         )
         db.add(meeting)
     else:
-        meeting.date = date
-        meeting.time = time
+        meeting.start_at = start_at_utc
         meeting.meet_link = meet_link
-    
-    # Log the admin action  ← ADD THIS
-    admin_action = AdminAction(
+
+    adminaction = AdminAction(
         admin_id=admin.id,
-        action="update_meeting",
-        target=f"date={date}, time={time}"
+        action="updatemeeting",
+        target=f"start_at={local_dt.isoformat()}, tz={timezone}",
     )
-    db.add(admin_action)
-    
+    db.add(adminaction)
     db.commit()
-    
-    return {
-        "message": "Meeting updated successfully",
-        "success": True
-    }
+
+    return {"message": "Meeting updated successfully", "success": True}
 
 # ===== Book Suggestions Management =====
 @router.get("/suggestions/pending")
@@ -283,7 +352,7 @@ async def get_pending_suggestions(
 @router.put("/suggestions/{suggestion_id}/approve", response_model=MessageResponse)
 async def approve_suggestion(
     suggestion_id: int,
-    cover_image_url: str = Body(None, embed=True),
+    cover_image_url: str = Form(...),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -308,16 +377,24 @@ async def approve_suggestion(
             detail=f"Suggestion is already {suggestion.status}"
         )
     
+    if not cover_image_url.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Cover image is required to approve a book"
+        )
+    
     # Update status
     suggestion.status = "approved"
     
     # Create book in queue
+
     new_book = Book(
         title=suggestion.title,
         pdf_url=suggestion.pdf_url,
-        cover_image_url=cover_image_url,
+        cover_image_url=cover_image_url.strip(),
         status="queued"
     )
+
     db.add(new_book)
 
     # Log the admin action
@@ -329,11 +406,15 @@ async def approve_suggestion(
     db.add(admin_action)
     
     db.commit()
+
+    # After approval, get updated lists
+
     
     return {
         "message": f"'{suggestion.title}' approved and added to queue",
         "success": True
     }
+
 
 @router.put("/suggestions/{suggestion_id}/reject", response_model=MessageResponse)
 async def reject_suggestion(

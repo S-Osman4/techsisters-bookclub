@@ -1,26 +1,12 @@
 """
 SQLAlchemy Database Models
+
 """
 from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey, UniqueConstraint, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from passlib.context import CryptContext
+import bcrypt  # ✅ SECURE: Direct bcrypt import (no passlib dependency)
 from app.database import Base
-from werkzeug.security import generate_password_hash, check_password_hash
-
-# Password hashing context
-try:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-except Exception:
-    # Fallback for bcrypt issues    
-    class BcryptFallback:
-        def verify(self, plain_password, hashed_password):
-            return check_password_hash(hashed_password, plain_password)
-        
-        def hash(self, password):
-            return generate_password_hash(password)
-    
-    pwd_context = BcryptFallback()
 
 class AccessCode(Base):
     """Single active access code for guest access"""
@@ -58,13 +44,47 @@ class User(Base):
     )
     
     def verify_password(self, password: str) -> bool:
-        """Verify password against hash"""
-        return pwd_context.verify(password, self.password_hash)
+        """
+        Verify password against stored bcrypt hash
+        
+        Args:
+            password: Plain text password to verify
+            
+        Returns:
+            bool: True if password matches, False otherwise
+        """
+        try:
+            # bcrypt.checkpw expects bytes, not strings
+            return bcrypt.checkpw(
+                password.encode('utf-8'),  # Convert input to bytes
+                self.password_hash.encode('utf-8')  # Convert stored hash to bytes
+            )
+        except (ValueError, AttributeError, UnicodeDecodeError):
+            # Handle cases where:
+            # 1. Hash is malformed or not a valid bcrypt hash
+            # 2. Password is None or empty
+            # 3. Encoding fails
+            return False
     
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash a password"""
-        return pwd_context.hash(password)
+        """
+        Hash a password using bcrypt with automatic salt generation
+        
+        Args:
+            password: Plain text password to hash
+            
+        Returns:
+            str: Bcrypt hash as string (for database storage)
+        """
+        # bcrypt.hashpw expects bytes
+        password_bytes = password.encode('utf-8')
+        
+        # Generate hash with salt (bcrypt.gensalt() creates optimal salt)
+        hashed_bytes = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+        
+        # Return as string for database storage
+        return hashed_bytes.decode('utf-8')
     
     def __repr__(self):
         return f"<User(name='{self.name}', email='{self.email}')>"
@@ -103,6 +123,7 @@ class BookSuggestion(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     pdf_url = Column(String(500), nullable=False)
+    cover_image_url = Column(String(500), nullable=True)
     status = Column(String(20), default="pending", nullable=False, index=True)  # 'pending', 'approved', 'rejected'
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -119,13 +140,12 @@ class Meeting(Base):
     __tablename__ = "meetings"
     
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(String(50), nullable=False)  # e.g., "December 15, 2024"
-    time = Column(String(50), nullable=False)  # e.g., "7:00 PM EAT"
+    start_at = Column(DateTime(timezone=True), nullable=False)
     meet_link = Column(String(500), nullable=False)  # Google Meet URL
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     def __repr__(self):
-        return f"<Meeting(date='{self.date}', time='{self.time}')>"
+        return f"<Meeting(start_at='{self.start_at.isoformat()}', meet_link='{self.meet_link}')>"
 
 
 class ReadingProgress(Base):
@@ -145,6 +165,7 @@ class ReadingProgress(Base):
     
     def __repr__(self):
         return f"<ReadingProgress(user_id={self.user_id}, book_id={self.book_id}, chapter={self.chapter})>"
+
 
 class AdminAction(Base):
     """Audit log for admin actions"""

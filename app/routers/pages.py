@@ -1,10 +1,13 @@
 """
 HTML Pages Router - Serves templates for the web interface
 """
+from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from fastapi import Query
 
 from app.database import get_db
 from app.models import Book, Meeting, User, BookSuggestion, ReadingProgress
@@ -80,10 +83,11 @@ async def dashboard(
     # Fetch data
     current_book = db.query(Book).filter(Book.status == "current").first()
     meeting = db.query(Meeting).first()
+    uk_tz = ZoneInfo("Europe/London")
     upcoming_books = db.query(Book).filter(Book.status == "queued").order_by(Book.created_at).all()
     past_books = db.query(Book).filter(Book.status == "completed").order_by(Book.completed_date.desc()).all()
     
-    # Community progress
+    # Community progress - FIXED INDENTATION
     community_stats = []
     if current_book:
         all_progress = db.query(ReadingProgress).filter(
@@ -93,30 +97,46 @@ async def dashboard(
         total_members = len(all_progress)
         if total_members > 0:
             stats = {}
+            sort_order = {}
+            
+            # THIS LOOP MUST CONTAIN THE IF/ELIF/ELSE BLOCK
             for progress in all_progress:
                 chapter = progress.chapter
+                
+                # THIS BLOCK MUST BE INSIDE THE LOOP
                 if chapter == -1:
                     key = "Completed"
+                    order = 999  # Last
                 elif chapter == 0:
                     key = "Not Started"
+                    order = 0  # First
                 elif chapter <= 2:
                     key = "Chapters 1-2"
+                    order = 1
                 elif chapter <= 4:
                     key = "Chapters 3-4"
+                    order = 2
                 elif chapter <= 6:
                     key = "Chapters 5-6"
+                    order = 3
                 else:
                     key = f"Chapter {chapter}+"
+                    order = 4
+                
                 stats[key] = stats.get(key, 0) + 1
-            
-            for range_name, count in stats.items():
+                sort_order[key] = order
+
+            # Sort by order, then build the list
+            sorted_ranges = sorted(stats.items(), key=lambda x: sort_order[x[0]])
+
+            for range_name, count in sorted_ranges:
                 percentage = (count / total_members * 100)
                 community_stats.append({
                     "range": range_name,
                     "count": count,
                     "percentage": round(percentage, 1)
                 })
-    
+
     # If logged in, get user-specific data
     user_progress = None
     user_suggestions = []
@@ -131,6 +151,7 @@ async def dashboard(
         user_suggestions = db.query(BookSuggestion).filter(
             BookSuggestion.user_id == current_user.id
         ).order_by(BookSuggestion.created_at.desc()).all()
+   
     
     return templates.TemplateResponse(
         "dashboard.html",
@@ -139,6 +160,7 @@ async def dashboard(
             "current_user": current_user,
             "current_book": current_book,
             "meeting": meeting,
+            "uk_tz": uk_tz,
             "upcoming_books": upcoming_books,
             "past_books": past_books,
             "user_progress": user_progress,
@@ -163,6 +185,7 @@ async def admin_page(
     access_code = db.query(AccessCode).first()
     current_book = db.query(Book).filter(Book.status == "current").first()
     meeting = db.query(Meeting).first()
+    uk_tz = ZoneInfo("Europe/London")
     
     # Pending suggestions with user names
     pending_suggestions_query = db.query(BookSuggestion, User).join(User).filter(
@@ -175,6 +198,7 @@ async def admin_page(
             "id": suggestion.id,
             "title": suggestion.title,
             "pdf_url": suggestion.pdf_url,
+            "cover_image_url": suggestion.cover_image_url,
             "user_name": user.name,
             "user_email": user.email,
             "created_at": suggestion.created_at
@@ -237,9 +261,6 @@ async def admin_page(
             "timestamp": log.created_at
         })
         
-    # Debug logging
-    print(f"🔍 DEBUG: admin_count = {admin_count}, type = {type(admin_count)}")
-    print(f"🔍 DEBUG: total_members = {total_members}, type = {type(total_members)}")
     return templates.TemplateResponse(
         "admin.html",
         {
@@ -248,6 +269,7 @@ async def admin_page(
             "access_code": access_code,
             "current_book": current_book,
             "meeting": meeting,
+            "uk_tz": uk_tz,
             "pending_suggestions": pending_suggestions,
             "approved_queue": approved_queue,
             "total_members": total_members,
@@ -316,3 +338,97 @@ async def profile_page(
             "is_only_admin": is_only_admin
         }
     )
+# GET /past-books
+@router.get("/past-books")
+async def past_books_page(
+    request: Request,
+    search: str = Query(None),
+    page: int = Query(1, ge=1),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_optional)
+):
+    # Query past books (completed books), most recent first
+    query = db.query(Book).filter(Book.status == "completed").order_by(Book.completed_date.desc())
+    
+    if search:
+        query = query.filter(
+            Book.title.ilike(f"%{search}%")
+        )
+    
+    # Pagination (10 per page)
+    total = query.count()
+    books = query.offset((page-1)*10).limit(10).all()
+    
+    # Check if this is an HTMX request (from search or pagination)
+    is_htmx = request.headers.get("hx-request") == "true"
+    
+    if is_htmx:
+        # Return only the books grid for HTMX requests
+        return templates.TemplateResponse("partials/books_grid.html", {
+            "request": request,
+            "books": books,
+            "search": search,
+            "page": page,
+            "total_pages": (total + 9) // 10,
+            "current_user": current_user,
+            "total_count": total
+        })
+    else:
+        # Return full page for initial page load
+        return templates.TemplateResponse("past_books.html", {
+            "request": request,
+            "books": books,
+            "search": search,
+            "page": page,
+            "total_pages": (total + 9) // 10,
+            "current_user": current_user,
+            "total_count": total
+        })
+
+# GET /upcoming-books
+@router.get("/upcoming-books")  
+async def upcoming_books_page(
+    request: Request,
+    search: str = Query(None),
+    page: int = Query(1, ge=1), 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_optional)
+):
+    # Query books that are in queue (not current or completed)
+    query = db.query(Book).filter(
+        Book.status == "queued"
+    ).order_by(Book.created_at.asc())
+    
+    if search:
+        query = query.filter(
+            Book.title.ilike(f"%{search}%")
+        )
+    
+    total = query.count()
+    books = query.offset((page-1)*10).limit(10).all()
+    
+    # Check if this is an HTMX request (from search or pagination)
+    is_htmx = request.headers.get("hx-request") == "true"
+    
+    if is_htmx:
+        # Return only the books grid for HTMX requests
+        return templates.TemplateResponse("partials/books_grid.html", {
+            "request": request,
+            "books": books,
+            "search": search,
+            "page": page,
+            "total_pages": (total + 9) // 10,
+            "current_user": current_user,
+            "total_count": total
+        })
+    else:
+        # Return full page for initial page load
+        return templates.TemplateResponse("upcoming_books.html", {
+            "request": request,
+            "books": books,
+            "search": search,
+            "page": page,
+            "total_pages": (total + 9) // 10,
+            "current_user": current_user,
+            "total_count": total
+        })

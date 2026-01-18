@@ -1,23 +1,38 @@
 {% extends "base.html" %} {% block title %}TechSisters Book Club - Home{%
 endblock %} {% block content %}
-<!-- Hero Section -->
-<div class="gradient-bg text-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+<!-- Hero Section with Background Image -->
+<div class="hero-section relative text-white">
+  <!-- Background Image -->
+  <div class="absolute inset-0 z-0">
+    <img
+      src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2000"
+      alt="Books background"
+      class="w-full h-full object-cover"
+    />
+    <!-- Coral Overlay -->
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-red-400/90 via-pink-500/85 to-orange-400/90"
+    ></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
     <div class="text-center">
-      <h1 class="text-5xl font-bold mb-6">
+      <h1 class="text-5xl font-bold mb-6 drop-shadow-lg">
         Welcome to TechSisters Book Club 📚
       </h1>
-      <p class="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+      <p class="text-xl mb-8 opacity-95 max-w-2xl mx-auto drop-shadow-md">
         A community of tech women reading together, growing together, and
         learning together.
       </p>
       <button
         onclick="document.getElementById('code-modal').classList.remove('hidden')"
-        class="bg-white text-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:shadow-xl transition-all transform hover:scale-105"
+        class="bg-white px-8 py-4 rounded-xl text-lg font-bold hover:shadow-2xl transition-all transform hover:scale-105"
+        style="color: var(--primary)"
       >
         🔓 Enter Access Code
       </button>
-      <p class="mt-4 text-sm opacity-75">
+      <p class="mt-4 text-sm opacity-90 drop-shadow">
         This platform is for TechSisters members only. Get the code from the
         TechSisters Book Club WhatsApp group.
       </p>
@@ -62,12 +77,12 @@ endblock %} {% block content %}
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
     <div class="grid md:grid-cols-4 gap-6">
-      <!-- Step 1 -->
       <div class="text-center">
         <div
-          class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          style="background-color: var(--primary)"
         >
-          <span class="text-2xl font-bold text-purple-600">1</span>
+          <span class="text-2xl font-bold text-white">1</span>
         </div>
         <h3 class="font-semibold mb-2">Join TechSisters</h3>
         <p class="text-sm text-gray-600">
@@ -76,12 +91,12 @@ endblock %} {% block content %}
         </p>
       </div>
 
-      <!-- Step 2 -->
       <div class="text-center">
         <div
-          class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          style="background-color: var(--primary)"
         >
-          <span class="text-2xl font-bold text-purple-600">2</span>
+          <span class="text-2xl font-bold text-white">2</span>
         </div>
         <h3 class="font-semibold mb-2">Enter the Book Club</h3>
         <p class="text-sm text-gray-600">
@@ -90,12 +105,12 @@ endblock %} {% block content %}
         </p>
       </div>
 
-      <!-- Step 3 -->
       <div class="text-center">
         <div
-          class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          style="background-color: var(--primary)"
         >
-          <span class="text-2xl font-bold text-purple-600">3</span>
+          <span class="text-2xl font-bold text-white">3</span>
         </div>
         <h3 class="font-semibold mb-2">Use the Code Here</h3>
         <p class="text-sm text-gray-600">
@@ -104,12 +119,12 @@ endblock %} {% block content %}
         </p>
       </div>
 
-      <!-- Step 4 -->
       <div class="text-center">
         <div
-          class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          style="background-color: var(--primary)"
         >
-          <span class="text-2xl font-bold text-purple-600">4</span>
+          <span class="text-2xl font-bold text-white">4</span>
         </div>
         <h3 class="font-semibold mb-2">Read & Discuss</h3>
         <p class="text-sm text-gray-600">
@@ -128,11 +143,11 @@ endblock %} {% block content %}
     Join TechSisters to access our book club and other amazing resources!
   </p>
   <a
-    href="https://chat.whatsapp.com/YOUR_GROUP_LINK"
+    href="https://YOUR ORG LINK"
     target="_blank"
-    class="inline-block bg-green-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-600 transition-all"
+    class="inline-block btn-secondary text-white px-8 py-4 rounded-xl font-bold hover:shadow-xl transition-all"
   >
-    💚 Join TechSisters WhatsApp
+    🤍 Join TechSisters
   </a>
 </div>
 
@@ -168,7 +183,7 @@ endblock %} {% block content %}
           name="code"
           id="code-input"
           placeholder="Enter code from WhatsApp"
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
           required
           autocomplete="off"
           autocapitalize="characters"
@@ -178,10 +193,10 @@ endblock %} {% block content %}
         </p>
       </div>
 
-      <!-- Empty div for HTMX to target, but we'll handle everything via toasts -->
-      <div id="code-result" class="min-h-6"></div>
+      <!-- Hidden result div - no minimum height -->
+      <div id="code-result" class="hidden"></div>
 
-      <div class="space-y-2">
+      <div class="space-y-2 mt-4">
         <button
           type="submit"
           class="w-full btn-primary text-white py-3 rounded-lg font-semibold transition-all hover:shadow-lg"
@@ -193,10 +208,11 @@ endblock %} {% block content %}
         <button
           type="button"
           onclick="document.getElementById('code-modal').classList.add('hidden')"
-          class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all"
+          class="btn-secondary w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all"
         >
           Cancel
         </button>
+
       </div>
     </form>
 
@@ -206,7 +222,8 @@ endblock %} {% block content %}
         <a
           href="https://chat.whatsapp.com/YOURGROUPLINK"
           target="_blank"
-          class="text-purple-600 hover:text-purple-800 font-medium"
+          class="font-semibold hover:underline"
+          style="color: var(--primary)"
         >
           Join the TechSisters WhatsApp community
         </a>
@@ -216,8 +233,38 @@ endblock %} {% block content %}
   </div>
 </div>
 
+<style>
+  .hero-section {
+    min-height: 500px;
+    overflow: hidden;
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: translateX(-5px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: translateX(5px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+</style>
+
 <script>
-  // Handle code verification form submission
   document.addEventListener("htmx:afterSwap", function (event) {
     if (event.detail.target.id === "code-result") {
       const response = event.detail.xhr.response;
@@ -229,13 +276,8 @@ endblock %} {% block content %}
             window.location.href = "/dashboard";
           }, 1000);
         } else {
-          // Clear the result div (we don't need it)
           event.detail.target.innerHTML = "";
-
-          // Show error toast
           showToast(`❌ ${data.detail || "Invalid code"}`, "error");
-
-          // Shake animation for error
           const codeInput = document.getElementById("code-input");
           if (codeInput) {
             codeInput.classList.add("animate-shake");
@@ -245,29 +287,21 @@ endblock %} {% block content %}
           }
         }
       } catch (e) {
-        // Clear the result div
         event.detail.target.innerHTML = "";
         showToast("🚨 An error occurred. Please try again.", "error");
       }
     }
   });
 
-  // Handle HTTP errors for the verify-code form
   document.addEventListener("htmx:responseError", function (event) {
     if (event.detail.requestConfig.path === "/auth/verify-code") {
       try {
         const response = JSON.parse(event.detail.xhr.response);
-
-        // Clear any content in result div
         const errorDiv = document.getElementById("code-result");
         if (errorDiv) {
           errorDiv.innerHTML = "";
         }
-
-        // Show error toast
         showToast(`❌ ${response.detail || "Invalid code"}`, "error");
-
-        // Shake animation for error
         const codeInput = document.getElementById("code-input");
         if (codeInput) {
           codeInput.classList.add("animate-shake");
@@ -281,21 +315,6 @@ endblock %} {% block content %}
     }
   });
 
-  // Add shake animation CSS
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-        20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-    .animate-shake {
-        animation: shake 0.5s ease-in-out;
-    }
-`;
-  document.head.appendChild(style);
-
-  // Add loading state to verify button
   document.addEventListener("htmx:beforeRequest", function (event) {
     if (event.detail.requestConfig.path === "/auth/verify-code") {
       const verifyBtn = document.getElementById("verify-btn");
@@ -306,7 +325,6 @@ endblock %} {% block content %}
     }
   });
 
-  // Restore button after request
   document.addEventListener("htmx:afterRequest", function (event) {
     if (event.detail.requestConfig.path === "/auth/verify-code") {
       const verifyBtn = document.getElementById("verify-btn");

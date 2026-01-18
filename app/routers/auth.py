@@ -74,16 +74,17 @@ async def verify_code(
     }
 
 # ===== Registration =====
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 async def register(
     request: Request,
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
+    from_param: str = Form(None, alias="from"),
     db: Session = Depends(get_db)
 ):
     """
-    Register a new user account
+    Register a new user account with auto-login
     
     Requirements:
     - Access code must be verified first
@@ -157,12 +158,25 @@ async def register(
         db.commit()
         db.refresh(new_user)
         
-        # Auto-login by setting session
+        # Auto-login the new user
         request.session["user_id"] = new_user.id
         request.session["user_name"] = new_user.name
         request.session["is_admin"] = new_user.is_admin
         
-        return new_user
+        # Determine redirect URL based on from parameter
+        if from_param == "dashboard":
+            redirect_url = "/dashboard"
+        elif from_param == "suggest":
+            redirect_url = "/dashboard#suggest-book"
+        else:
+            redirect_url = "/dashboard"
+        
+        # Return redirect response with HX-Redirect header for htmx
+        return {
+        "success": True,
+        "redirect": redirect_url
+    }
+            
     except Exception as e:
         db.rollback()
         raise HTTPException(
@@ -171,11 +185,12 @@ async def register(
         )
 
 # ===== Login =====
-@router.post("/login", response_model=MessageResponse)
+@router.post("/login")
 async def login(
     request: Request,
     email: str = Form(...),
     password: str = Form(...),
+    from_param: str = Form(None, alias="from"),
     db: Session = Depends(get_db)
 ):
     """
@@ -183,7 +198,6 @@ async def login(
     
     Creates a session that persists across requests
     """
-
     # Clean inputs
     email = email.strip().lower()
     
@@ -222,17 +236,29 @@ async def login(
     request.session["user_name"] = user.name
     request.session["is_admin"] = user.is_admin
     
+    # Determine redirect URL based on from parameter
+    if from_param == "dashboard":
+        redirect_url = "/dashboard"
+    elif from_param == "suggest":
+        redirect_url = "/dashboard#suggest-book"
+    elif from_param == "suggestions":
+        redirect_url = "/dashboard#your-suggestions"
+    else:
+        redirect_url = "/dashboard"
+    
+    # Return redirect response with HX-Redirect header for htmx
     return {
-        "message": f"Welcome back, {user.name}!",
-        "success": True
-    }
+    "success": True,
+    "redirect": redirect_url
+}
 
 # ===== Logout =====
-@router.post("/logout", response_model=MessageResponse)
+@router.post("/logout")
 async def logout(request: Request):
     """
-    Logout user and clear session
+    Logout user and clear all session data
     """
+    # Clear all session data (user session and code verification)
     request.session.clear()
     return RedirectResponse(url="/", status_code=303)
 

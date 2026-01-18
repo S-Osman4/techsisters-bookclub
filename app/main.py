@@ -10,7 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
 
-from app.database import create_tables, test_connection
+from app.database import DATABASE_URL, create_tables, test_connection, disconnect
 from app.routers import auth, books, admin, pages, profile
 
 # Load environment variables
@@ -172,3 +172,5 @@ async def shutdown_event():
     """Run on application shutdown"""
     print("🔴 Shutting down gracefully...")
     # Add any cleanup code here (close database connections, etc.)
+    disconnect()
+    print("✅ Shutdown complete.")

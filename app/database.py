@@ -63,3 +63,10 @@ def test_connection():
     except Exception as e:
         print(f"❌ Database connection failed: {e}")
         return False
+    
+    # Function to close database connection
+def disconnect():
+    """Close database connection pool"""
+    if engine:
+        engine.dispose()
+        print("✅ Database connections closed")

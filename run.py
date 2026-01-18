@@ -23,7 +23,7 @@ if __name__ == "__main__":
             port=8000,
             workers=4,  # Multiple workers for better performance
             log_level="info",
-            timeout_keep_alive=30,  # Close idle connections after 30 seconds
+            timeout_keep_alive=2,  # Close idle connections after 30 seconds
             limit_concurrency=100,  # Limit to 100 concurrent connections
             limit_max_requests=5000
         )
