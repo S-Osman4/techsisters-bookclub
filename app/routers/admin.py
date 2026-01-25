@@ -158,6 +158,7 @@ async def set_current_book(
     book_id: int,
     current_chapters: str = Body(..., embed=True),
     cover_image_url: str = Body(None, embed=True),
+    total_chapters: int = Body(None, embed=True),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -190,9 +191,11 @@ async def set_current_book(
     book.status = "current"
     book.current_chapters = current_chapters
     if cover_image_url:
-        book.cover_image_url = cover_image_url
-    
-    # Log the admin action  ← ADD THIS
+        book.cover_image_url = cover_image_url    
+    if total_chapters: 
+        book.total_chapters = total_chapters
+
+    # Log the admin action
     admin_action = AdminAction(
         admin_id=admin.id,
         action="set_current_book",

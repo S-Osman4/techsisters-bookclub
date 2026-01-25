@@ -434,7 +434,7 @@ endblock %} {% block content %}
   {% endif %}
 
   <!-- Books Tab Section -->
-  <div class="bg-gray-50  p-8 mb-8">
+  <div class="bg-gray-50 p-8 mb-8">
     <h3
       class="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2"
     >
@@ -480,42 +480,60 @@ endblock %} {% block content %}
         <div
           class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8"
         >
-          {% for book in upcoming_books[:4] %}
-<div class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-  <!-- Top accent bar for status -->
-  <div class="absolute top-0 left-0 w-full h-1 rounded-t-xl bg-[var(--secondary)]"></div>
+          {% for book in upcoming_books[:12] %}
+          <div
+            class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+          >
+            <!-- Top accent bar for status -->
+            <div
+              class="absolute top-0 left-0 w-full h-1 rounded-t-xl bg-[var(--secondary)]"
+            ></div>
 
-  <!-- Cover -->
-  <div class="w-full h-28 rounded-lg overflow-hidden mb-3 flex items-center justify-center bg-gray-50">
-    {% if book.cover_image_url %}
-    <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200"/>
-    {% else %}
-    <div class="text-2xl">📚</div>
-    {% endif %}
-  </div>
+            <!-- Cover -->
+            <div
+              class="w-full h-28 rounded-lg overflow-hidden mb-3 flex items-center justify-center bg-gray-50"
+            >
+              {% if book.cover_image_url %}
+              <img
+                src="{{ book.cover_image_url }}"
+                alt="{{ book.title }}"
+                class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200"
+              />
+              {% else %}
+              <div class="text-2xl">📚</div>
+              {% endif %}
+            </div>
 
-  <!-- Title -->
-  <h4 class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-3 leading-tight min-h-[2.5rem] mb-2">{{ book.title }}</h4>
+            <!-- Title -->
+            <h4
+              class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-3 leading-tight min-h-[2.5rem] mb-2"
+            >
+              {{ book.title }}
+            </h4>
 
-  <!-- Status badge -->
-  <span class="badge badge-secondary">In queue</span>
+            <!-- Status badge -->
+            <span class="badge badge-secondary">In queue</span>
 
-  <!-- PDF link -->
-  {% if book.pdf_url %}
-  <a href="{{ book.pdf_url }}" target="_blank" class="mt-3 inline-flex items-center text-xs font-medium text-gray-600 hover:text-[var(--secondary)] transition-colors">📄 Preview</a>
-  {% endif %}
-</div>
-{% endfor %}
-
-
+            <!-- PDF link -->
+            {% if book.pdf_url %}
+            <a
+              href="{{ book.pdf_url }}"
+              target="_blank"
+              class="mt-3 inline-flex items-center text-xs font-medium text-gray-600 hover:text-[var(--secondary)] transition-colors"
+              >📄 Preview</a
+            >
+            {% endif %}
+          </div>
+          {% endfor %}
         </div>
         {% if upcoming_books|length > 4 %}
         <div class="pt-8 border-t border-gray-100 flex justify-center">
-          <a href="/upcoming-books" class="btn-secondary inline-flex items-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group">
-  View All Upcoming ({{ upcoming_books|length }})
-  →
-</a>
-
+          <a
+            href="/upcoming-books"
+            class="btn-secondary inline-flex items-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            View All Upcoming ({{ upcoming_books|length }}) →
+          </a>
         </div>
         {% endif %} {% else %}
         <div class="text-center py-12">
@@ -540,42 +558,62 @@ endblock %} {% block content %}
         <div
           class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8"
         >
-          {% for book in past_books[:4] %}
-<div class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-  <!-- Top accent bar for status -->
-  <div class="absolute top-0 left-0 w-full h-1 rounded-t-xl bg-[var(--primary)]"></div>
+          {% for book in past_books[:12] %}
+          <div
+            class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+          >
+            <!-- Top accent bar for status -->
+            <div
+              class="absolute top-0 left-0 w-full h-1 rounded-t-xl bg-[var(--primary)]"
+            ></div>
 
-  <!-- Cover -->
-  <div class="w-full h-28 rounded-lg overflow-hidden mb-3 flex items-center justify-center bg-gray-50">
-    {% if book.cover_image_url %}
-    <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200"/>
-    {% else %}
-    <div class="text-2xl">📚</div>
-    {% endif %}
-  </div>
+            <!-- Cover -->
+            <div
+              class="w-full h-28 rounded-lg overflow-hidden mb-3 flex items-center justify-center bg-gray-50"
+            >
+              {% if book.cover_image_url %}
+              <img
+                src="{{ book.cover_image_url }}"
+                alt="{{ book.title }}"
+                class="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200"
+              />
+              {% else %}
+              <div class="text-2xl">📚</div>
+              {% endif %}
+            </div>
 
-  <!-- Title -->
-  <h4 class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-3 leading-tight min-h-[2.5rem] mb-2">{{ book.title }}</h4>
+            <!-- Title -->
+            <h4
+              class="font-semibold text-gray-900 text-xs lg:text-sm line-clamp-3 leading-tight min-h-[2.5rem] mb-2"
+            >
+              {{ book.title }}
+            </h4>
 
-  <!-- Status badge -->
-  <span class="badge badge-primary">Completed {{ book.completed_date.strftime('%b %Y') }}</span>
+            <!-- Status badge -->
+            <span class="badge badge-primary"
+              >Completed {{ book.completed_date.strftime('%b %Y') }}</span
+            >
 
-  <!-- PDF link -->
-  {% if book.pdf_url %}
-  <a href="{{ book.pdf_url }}" target="_blank" class="mt-3 inline-flex items-center text-xs font-medium text-gray-600 hover:text-[var(--primary)] transition-colors">📄 Read PDF</a>
-  {% endif %}
-</div>
-{% endfor %}
-
-
+            <!-- PDF link -->
+            {% if book.pdf_url %}
+            <a
+              href="{{ book.pdf_url }}"
+              target="_blank"
+              class="mt-3 inline-flex items-center text-xs font-medium text-gray-600 hover:text-[var(--primary)] transition-colors"
+              >📄 Read PDF</a
+            >
+            {% endif %}
+          </div>
+          {% endfor %}
         </div>
         {% if past_books|length > 4 %}
         <div class="pt-8 border-t border-gray-100 flex justify-center">
-          <a href="/past-books" class="btn-primary inline-flex items-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group">
-  View All Past ({{ past_books|length }})
-  →
-</a>
-
+          <a
+            href="/past-books"
+            class="btn-primary inline-flex items-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            View All Past ({{ past_books|length }}) →
+          </a>
         </div>
         {% endif %} {% else %}
         <div class="text-center py-12">

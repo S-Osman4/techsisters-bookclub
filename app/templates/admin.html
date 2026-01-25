@@ -710,227 +710,259 @@ Club{% endblock %} {% block content %}
 <!-- Modals -->
 <div
   id="code-modal"
-  class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  class="modal-overlay hidden"
 >
-  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-    <h3 class="text-xl font-bold mb-2">Change Access Code</h3>
-    <p class="text-sm text-gray-600 mb-4">
-      Generate a secure random code or enter your own.
-    </p>
+  <div class="modal-container">
+    <div class="modal-content">
+      <!-- Header -->
+      <h3 class="text-xl font-bold mb-1">Change Access Code</h3>
+      <p class="text-sm text-gray-600 mb-4">
+        Generate a secure random code or enter your own.
+      </p>
 
-    <form hx-put="/api/admin/code" hx-target="#code-result">
-      <div class="mb-3">
-        <label class="block text-sm font-medium mb-1">Access Code</label>
-        <input
-          type="text"
-          id="new-code-input"
-          name="new_code"
-          placeholder="Enter new code or click Generate"
-          class="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-      </div>
+      <!-- Form -->
+      <form onsubmit="return updateAccessCode();">
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-1">Access Code</label>
+    <input
+      type="text"
+      id="new-code-input"
+      name="new_code"
+      placeholder="Enter new code or click Generate"
+      class="w-full px-4 py-2 border rounded-lg"
+      required
+    />
+  </div>
 
-      <button
-        type="button"
-        onclick="generateCode()"
-        class="mb-4 px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200"
-      >
-        Generate Secure Code
-      </button>
+  <button
+    type="button"
+    onclick="generateCode()"
+    id="generate-code-btn"
+    class="mb-4 px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200"
+  >
+    <span class="btn-text">Generate Secure Code</span>
+  </button>
 
-      <div id="code-result" class="mb-4"></div>
+  <div id="code-result"></div>
 
-      <div class="flex space-x-2">
-        <button
-          type="submit"
-          class="flex-1 btn-primary text-white py-3 rounded-xl font-semibold"
-        >
-          Update
-        </button>
-        <button
-          type="button"
-          onclick="document.getElementById('code-modal').classList.add('hidden')"
-          class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+  <div class="modal-actions">
+    <button
+      type="submit"
+      id="update-code-btn"
+      class="flex-1 btn-primary py-3 rounded-xl font-semibold text-white"
+    >
+      <span class="btn-text">Update</span>
+    </button>
+
+    <button
+      type="button"
+      onclick="document.getElementById('code-modal').classList.add('hidden')"
+      class="flex-1 btn-ghost py-3 rounded-xl"
+    >
+      Cancel
+    </button>
+  </div>
+</form>
+
+    </div>
   </div>
 </div>
+
 
 <!-- Edit Book Modal -->
 <div
   id="edit-book-modal"
-  class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  class="modal-overlay hidden"
 >
-  <div
-    class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto"
-  >
-    <h3 class="text-xl font-bold mb-4">Edit Current Book</h3>
-    <form
-      hx-put="/api/admin/books/current"
-      hx-target="#edit-result"
-      class="space-y-4"
-    >
-      <div>
-        <label class="block text-sm font-medium mb-2">Title</label>
-        <input
-          type="text"
-          name="title"
-          value="{{ current_book.title if current_book else '' }}"
-          class="w-full px-4 py-2 border rounded-lg"
-        />
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">
-          Cover Image URL <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="url"
-          name="cover_image_url"
-          placeholder="https://example.com/cover.jpg"
-          class="w-full px-4 py-2 border rounded-lg"
-        />
+  <div class="modal-container modal-container-lg">
+    <div class="modal-content">
+      <!-- Header -->
+      <h3 class="text-xl font-bold mb-4">Edit Current Book</h3>
 
-        <p class="text-xs text-gray-500 mt-1">
-          Optional: Direct link to book cover image
-        </p>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-2">PDF URL</label>
-        <input
-          type="url"
-          name="pdf_url"
-          value="{{ current_book.pdf_url if current_book else '' }}"
-          class="w-full px-4 py-2 border rounded-lg"
-        />
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-2">Current Chapters</label>
-        <input
-          type="text"
-          name="current_chapters"
-          value="{{ current_book.current_chapters if current_book else '' }}"
-          placeholder="e.g., Chapters 3-4"
-          class="w-full px-4 py-2 border rounded-lg"
-        />
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-2">Total Chapters</label>
-        <input
-          type="number"
-          name="total_chapters"
-          value="{{ current_book.total_chapters if current_book else '' }}"
-          class="w-full px-4 py-2 border rounded-lg"
-        />
-      </div>
-      <div id="edit-result"></div>
-      <div class="flex space-x-2">
-        <button
-          type="submit"
-          class="flex-1 btn-primary text-white py-3 rounded-xl font-semibold"
+      <!-- Form -->
+      <form
+          id="edit-book-form"
+          onsubmit="return updateCurrentBook();"
+          class="space-y-4"
         >
-          Save Changes
-        </button>
-        <button
-          type="button"
-          onclick="document.getElementById('edit-book-modal').classList.add('hidden')"
-          class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+        <div>
+          <label class="block text-sm font-medium mb-2">Title</label>
+          <input
+            type="text"
+            name="title"
+            value="{{ current_book.title if current_book else '' }}"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">
+            Cover Image URL <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="url"
+            name="cover_image_url"
+            placeholder="https://example.com/cover.jpg"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            Optional: Direct link to book cover image
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">PDF URL</label>
+          <input
+            type="url"
+            name="pdf_url"
+            value="{{ current_book.pdf_url if current_book else '' }}"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">
+            Current Chapters
+          </label>
+          <input
+            type="text"
+            name="current_chapters"
+            value="{{ current_book.current_chapters if current_book else '' }}"
+            placeholder="e.g., Chapters 3-4"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">
+            Total Chapters
+          </label>
+          <input
+            type="number"
+            name="total_chapters"
+            value="{{ current_book.total_chapters if current_book else '' }}"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
+
+        <div id="edit-result"></div>
+
+        <!-- Actions -->
+        <div class="modal-actions">
+          <button
+      type="submit"
+      id="edit-book-submit"
+      class="flex-1 btn-primary py-3 rounded-xl font-semibold text-white"
+    >
+      <span class="btn-text">Save Changes</span>
+    </button>
+
+          <button
+      type="button"
+      onclick="document.getElementById('edit-book-modal').classList.add('hidden')"
+      class="flex-1 btn-ghost py-3 rounded-xl"
+    >
+      Cancel
+    </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
+
 
 <!-- Meeting Modal -->
-<div
-  id="meeting-modal"
-  class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+<div id="meeting-modal" class="hidden modal-overlay">
+  <div class="modal-container max-w-md">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">Meeting Details</h3>
+
+      <form
+  id="meeting-form"
+  onsubmit="return updateMeeting();"
+  class="space-y-4"
 >
-  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-    <h3 class="text-xl font-bold mb-4">Meeting Details</h3>
+  <div>
+    <label class="block text-sm font-medium mb-2">
+      Date & Time (UK)
+    </label>
+    <input
+      type="datetime-local"
+      name="start_at_local"
+      value="{% if meeting and meeting.start_at %}
+        {{ meeting.start_at.astimezone(uk_tz).strftime('%Y-%m-%dT%H:%M') }}
+      {% endif %}"
+      class="w-full px-4 py-2 border rounded-lg"
+      required
+    />
+    <p class="text-xs text-gray-500 mt-1">
+      Times are in UK time (Europe/London).
+    </p>
+  </div>
 
-    <form
-      hx-put="/api/admin/meeting"
-      hx-target="#meeting-result"
-      class="space-y-4"
+  <input type="hidden" name="timezone" value="Europe/London" />
+
+  <div>
+    <label class="block text-sm font-medium mb-2">
+      Google Meet Link
+    </label>
+    <input
+      type="url"
+      name="meet_link"
+      value="{{ meeting.meet_link if meeting else '' }}"
+      placeholder="https://meet.google.com/..."
+      class="w-full px-4 py-2 border rounded-lg"
+      required
+    />
+  </div>
+
+  <div id="meeting-result"></div>
+
+  <div class="modal-actions">
+    <button
+      type="submit"
+      id="meeting-submit-btn"
+      class="flex-1 btn-secondary text-white py-3 rounded-xl font-semibold"
     >
-      <div>
-        <label class="block text-sm font-medium mb-2">Date & Time (UK)</label>
-        <input
-          type="datetime-local"
-          name="start_at_local"
-          value="{% if meeting and meeting.start_at %}
-                    {{ meeting.start_at.astimezone(uk_tz).strftime('%Y-%m-%dT%H:%M') }}
-                 {% else %}{% endif %}"
-          class="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-        <p class="text-xs text-gray-500 mt-1">
-          Times are in UK time (Europe/London).
-        </p>
-      </div>
+      <span class="btn-text">Save</span>
+    </button>
 
-      <input type="hidden" name="timezone" value="Europe/London" />
+    <button
+      type="button"
+      onclick="document.getElementById('meeting-modal').classList.add('hidden')"
+      class="flex-1 btn-ghost py-3 rounded-xl"
+    >
+      Cancel
+    </button>
+  </div>
+</form>
 
-      <div>
-        <label class="block text-sm font-medium mb-2">Google Meet Link</label>
-        <input
-          type="url"
-          name="meet_link"
-          value="{{ meeting.meet_link if meeting else '' }}"
-          placeholder="https://meet.google.com/..."
-          class="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-      </div>
-
-      <div id="meeting-result"></div>
-
-      <div class="flex space-x-2">
-        <button
-          type="submit"
-          class="flex-1 btn-secondary text-white py-3 rounded-xl font-semibold"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          onclick="document.getElementById('meeting-modal').classList.add('hidden')"
-          class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
 
+
 <!-- Complete Book Modal -->
-<div
-  id="complete-modal"
-  class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
->
-  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-    <h3 class="text-xl font-bold mb-4">Mark Book as Completed?</h3>
-    <p class="text-gray-600 mb-6">
-      This will move "{{ current_book.title if current_book else '' }}" to past
-      books.
-    </p>
-    <div class="flex space-x-2">
+<div id="complete-modal" class="hidden modal-overlay">
+  <div class="modal-container max-w-md">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">Mark Book as Completed?</h3>
+      <p class="text-gray-600 mb-6">
+        This will move "{{ current_book.title if current_book else '' }}" to past books.
+      </p>
+
+    <div class="modal-actions">
       <button
+        id="complete-book-btn"
         onclick="completeCurrentBook()"
         class="flex-1 btn-secondary text-white py-3 rounded-xl font-semibold"
       >
-        Yes, Complete
+        <span class="btn-text">Yes, Complete</span>
       </button>
+
       <button
         onclick="document.getElementById('complete-modal').classList.add('hidden')"
-        class="flex-1 bg-gray-300 py-3 rounded-xl font-semibold hover:bg-gray-400"
+        class="flex-1 btn-ghost py-3 rounded-xl"
       >
         Cancel
       </button>
@@ -938,6 +970,10 @@ Club{% endblock %} {% block content %}
     <div id="complete-result" class="mt-4"></div>
   </div>
 </div>
+</div>
+
+
+
 
 <!-- Approve / Reject Suggestion Modal -->
 <div
@@ -1132,6 +1168,26 @@ Club{% endblock %} {% block content %}
             💡 Leave blank to keep existing cover, or add a new URL to update it
           </p>
         </div>
+        <!-- Total Chapters -->
+<div>
+  <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+    <svg class="w-4 h-4" style="color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+    </svg>
+    Total Chapters
+    <span class="text-xs text-gray-500 font-normal">(Optional - for progress tracking)</span>
+  </label>
+  <input
+    type="number"
+    name="total_chapters"
+    min="1"
+    placeholder="e.g., 12"
+    class="w-full border-2 rounded-xl px-4 py-3 focus:ring-4 transition-all"
+  />
+  <p class="text-xs text-gray-500 mt-1">
+    💡 Helps members track progress accurately in their dashboard
+  </p>
+</div>
 
         <!-- Result Messages -->
         <div id="set-current-result"></div>
@@ -1390,54 +1446,274 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-  function generateCode() {
-    fetch("/api/admin/code/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to generate code");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const input = document.getElementById("new-code-input");
-        if (input && data.code) {
-          input.value = data.code;
-          showToast("New code generated", "success");
-        } else {
-          showToast("Could not read generated code", "error");
-        }
-      })
-      .catch((error) => {
-        showToast("Error generating code: " + error.message, "error");
-      });
-  }
 
-  function completeCurrentBook() {
-    fetch('/api/admin/books/complete', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
+  function generateCode() {
+  const btn = document.getElementById("generate-code-btn");
+  const text = btn.querySelector(".btn-text");
+
+  // 🔄 turn spinner ON
+  btn.classList.add("loading-spinner");
+  btn.disabled = true;
+  text.textContent = "Generating";
+
+  fetch("/api/admin/code/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to generate code");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const input = document.getElementById("new-code-input");
+      if (input && data.code) {
+        input.value = data.code;
+        showToast("New code generated", "success");
+      } else {
+        showToast("Could not read generated code", "error");
       }
     })
-    .then(response => response.json())
-    .then(data => {
+    .catch((error) => {
+      showToast("Error generating code: " + error.message, "error");
+    })
+    .finally(() => {
+      // ✅ turn spinner OFF
+      btn.classList.remove("loading-spinner");
+      btn.disabled = false;
+      text.textContent = "Generate Secure Code";
+    });
+}
+
+  async function updateAccessCode() {
+  const form = document.querySelector('#code-modal form');
+  const resultDiv = document.getElementById('code-result');
+  const submitBtn = document.getElementById('update-code-btn');
+  const btnTextSpan = submitBtn.querySelector('.btn-text');
+  const formData = new FormData(form);
+
+  // Loading state: disable button, show spinner + message
+  submitBtn.disabled = true;
+  btnTextSpan.innerHTML = '<span class="loading-spinner">Processing</span>';
+  resultDiv.innerHTML = `
+    <div class="text-sm text-gray-500 text-center">
+      Updating access code...
+    </div>
+  `;
+
+  try {
+    const resp = await fetch('/api/admin/code', {
+      method: 'PUT',
+      body: formData,
+    });
+    const data = await resp.json();
+
+    if (data.success) {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+          <strong>Success</strong> ${data.message}
+        </div>
+      `;
+      showToast(data.message, 'success');
+
+      setTimeout(() => {
+        document.getElementById('code-modal').classList.add('hidden');
+        window.location.reload();
+      }, 1000);
+    } else {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary)">
+          <strong>Error</strong> ${data.message || 'Something went wrong'}
+        </div>
+      `;
+      submitBtn.disabled = false;
+      btnTextSpan.textContent = 'Update';
+    }
+  } catch (err) {
+    resultDiv.innerHTML = `
+      <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary)">
+        <strong>Error</strong> ${err.message}
+      </div>
+    `;
+    showToast('Error updating access code', 'error');
+    submitBtn.disabled = false;
+    btnTextSpan.textContent = 'Update';
+  }
+
+  return false; 
+}
+
+
+  async function updateCurrentBook() {
+    const form = document.getElementById('edit-book-form');
+    const resultDiv = document.getElementById('edit-result');
+    const submitBtn = document.getElementById('edit-book-submit');
+    const btnTextSpan = submitBtn.querySelector('.btn-text');
+    const formData = new FormData(form);
+
+    // Loading state
+    submitBtn.disabled = true;
+    btnTextSpan.innerHTML = '<span class="loading-spinner">Saving</span>';
+    resultDiv.innerHTML = `
+      <div class="text-sm text-gray-500 text-center">
+        Updating current book...
+      </div>
+    `;
+
+    try {
+      const resp = await fetch('/api/admin/books/current', {
+        method: 'PUT',
+        body: formData,
+      });
+      const data = await resp.json();
+
       if (data.success) {
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+            <strong>Success</strong> ${data.message}
+          </div>
+        `;
         showToast(data.message, 'success');
-        document.getElementById('complete-modal').classList.add('hidden');
+
         setTimeout(() => {
+          document
+            .getElementById('edit-book-modal')
+            .classList.add('hidden');
           window.location.reload();
         }, 1000);
       } else {
-        showToast(data.message, 'error');
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary)">
+            <strong>Error</strong> ${data.message || 'Something went wrong'}
+          </div>
+        `;
+        submitBtn.disabled = false;
+        btnTextSpan.textContent = 'Save Changes';
+      }
+    } catch (err) {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary)">
+          <strong>Error</strong> ${err.message}
+        </div>
+      `;
+      showToast('Error updating current book', 'error');
+      submitBtn.disabled = false;
+      btnTextSpan.textContent = 'Save Changes';
+    }
+
+    return false; // prevent default submit
+  }
+
+  async function updateMeeting() {
+  const form = document.getElementById('meeting-form');
+  const resultDiv = document.getElementById('meeting-result');
+  const submitBtn = document.getElementById('meeting-submit-btn');
+  const btnTextSpan = submitBtn.querySelector('.btn-text');
+  const formData = new FormData(form);
+
+  // Loading state
+  submitBtn.disabled = true;
+  btnTextSpan.innerHTML = '<span class="loading-spinner">Saving</span>';
+  resultDiv.innerHTML = `
+    <div class="text-sm text-gray-500 text-center">
+      Updating meeting details...
+    </div>
+  `;
+
+  try {
+    const resp = await fetch('/api/admin/meeting', {
+      method: 'PUT',
+      body: formData,
+    });
+    const data = await resp.json();
+
+    if (data.success) {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+          <strong>Success</strong> ${data.message}
+        </div>
+      `;
+      showToast(data.message, 'success');
+
+      setTimeout(() => {
+        document
+          .getElementById('meeting-modal')
+          .classList.add('hidden');
+        window.location.reload();
+      }, 1000);
+    } else {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary)">
+          <strong>Error</strong> ${data.message || 'Something went wrong'}
+        </div>
+      `;
+      submitBtn.disabled = false;
+      btnTextSpan.textContent = 'Save';
+    }
+  } catch (err) {
+    resultDiv.innerHTML = `
+      <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary)">
+        <strong>Error</strong> ${err.message}
+      </div>
+    `;
+    showToast('Error updating meeting', 'error');
+    submitBtn.disabled = false;
+    btnTextSpan.textContent = 'Save';
+  }
+
+  return false; // prevent default submit
+}
+
+
+
+
+  function completeCurrentBook() {
+  const btn = document.querySelector("#complete-modal .btn-secondary");
+  const btnText = btn.innerHTML; // store original text
+  const resultDiv = document.getElementById("complete-result");
+
+  // 🔄 Show spinner & disable button
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner">Processing</span>';
+  resultDiv.innerHTML = '<div class="text-sm text-gray-500 text-center">Completing book...</div>';
+
+  fetch('/api/admin/books/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+            <strong>✓ Success:</strong> ${data.message}
+          </div>`;
+        showToast(data.message, 'success');
+        setTimeout(() => {
+          document.getElementById('complete-modal').classList.add('hidden');
+          window.location.reload();
+        }, 1000);
+      } else {
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+            <strong>✗ Error:</strong> ${data.message || 'Something went wrong'}
+          </div>`;
+        btn.disabled = false;
+        btn.innerHTML = btnText; // revert text
       }
     })
     .catch(error => {
+      resultDiv.innerHTML = `
+        <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+          <strong>✗ Error:</strong> ${error.message}
+        </div>`;
+      btn.disabled = false;
+      btn.innerHTML = btnText; // revert text
       showToast('Error: ' + error.message, 'error');
     });
-  }
+}
+
 
   function promoteUser(userId, userName) {
     if (
