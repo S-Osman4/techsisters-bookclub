@@ -345,90 +345,72 @@ async def past_books_page(
     search: str = Query(None),
     page: int = Query(1, ge=1),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_optional)
+    current_user: User = Depends(get_current_user_optional),
 ):
-    # Query past books (completed books), most recent first
-    query = db.query(Book).filter(Book.status == "completed").order_by(Book.completed_date.desc())
-    
+    query = (
+        db.query(Book)
+        .filter(Book.status == "completed")
+        .order_by(Book.completed_date.desc())
+    )
+
     if search:
-        query = query.filter(
-            Book.title.ilike(f"%{search}%")
-        )
-    
-    # Pagination (10 per page)
+        query = query.filter(Book.title.ilike(f"%{search}%"))
+
     total = query.count()
-    books = query.offset((page-1)*10).limit(10).all()
-    
-    # Check if this is an HTMX request (from search or pagination)
-    is_htmx = request.headers.get("hx-request") == "true"
-    
+    books = query.offset((page - 1) * 10).limit(10).all()
+
+    is_htmx = request.headers.get("HX-Request") is not None
+
+    context = {
+        "request": request,
+        "books": books,
+        "search": search,
+        "page": page,
+        "total_pages": (total + 9) // 10,
+        "current_user": current_user,
+        "total_count": total,
+    }
+
     if is_htmx:
-        # Return only the books grid for HTMX requests
-        return templates.TemplateResponse("partials/books_grid.html", {
-            "request": request,
-            "books": books,
-            "search": search,
-            "page": page,
-            "total_pages": (total + 9) // 10,
-            "current_user": current_user,
-            "total_count": total
-        })
+        return templates.TemplateResponse("partials/books_grid.html", context)
     else:
-        # Return full page for initial page load
-        return templates.TemplateResponse("past_books.html", {
-            "request": request,
-            "books": books,
-            "search": search,
-            "page": page,
-            "total_pages": (total + 9) // 10,
-            "current_user": current_user,
-            "total_count": total
-        })
+        return templates.TemplateResponse("past_books.html", context)
+
 
 # GET /upcoming-books
-@router.get("/upcoming-books")  
+@router.get("/upcoming-books")
 async def upcoming_books_page(
     request: Request,
     search: str = Query(None),
-    page: int = Query(1, ge=1), 
+    page: int = Query(1, ge=1),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_optional)
+    current_user: User = Depends(get_current_user_optional),
 ):
-    # Query books that are in queue (not current or completed)
-    query = db.query(Book).filter(
-        Book.status == "queued"
-    ).order_by(Book.created_at.asc())
-    
+    query = (
+        db.query(Book)
+        .filter(Book.status == "queued")
+        .order_by(Book.created_at.asc())
+    )
+
     if search:
-        query = query.filter(
-            Book.title.ilike(f"%{search}%")
-        )
-    
+        query = query.filter(Book.title.ilike(f"%{search}%"))
+
     total = query.count()
-    books = query.offset((page-1)*10).limit(10).all()
-    
-    # Check if this is an HTMX request (from search or pagination)
-    is_htmx = request.headers.get("hx-request") == "true"
-    
+    books = query.offset((page - 1) * 10).limit(10).all()
+
+    is_htmx = request.headers.get("HX-Request") is not None
+
+    context = {
+        "request": request,
+        "books": books,
+        "search": search,
+        "page": page,
+        "total_pages": (total + 9) // 10,
+        "current_user": current_user,
+        "total_count": total,
+    }
+
     if is_htmx:
-        # Return only the books grid for HTMX requests
-        return templates.TemplateResponse("partials/books_grid.html", {
-            "request": request,
-            "books": books,
-            "search": search,
-            "page": page,
-            "total_pages": (total + 9) // 10,
-            "current_user": current_user,
-            "total_count": total
-        })
+        return templates.TemplateResponse("partials/books_grid.html", context)
     else:
-        # Return full page for initial page load
-        return templates.TemplateResponse("upcoming_books.html", {
-            "request": request,
-            "books": books,
-            "search": search,
-            "page": page,
-            "total_pages": (total + 9) // 10,
-            "current_user": current_user,
-            "total_count": total
-        })
+        return templates.TemplateResponse("upcoming_books.html", context)

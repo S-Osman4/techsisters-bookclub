@@ -202,6 +202,24 @@ h3 {
   box-shadow: 0 15px 30px -5px rgba(78, 205, 196, 0.4);
 }
 
+/* Spinner hidden by default, visible while the form has htmx-request */
+.htmx-indicator {
+  opacity: 0;
+  display: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Show the indicator when the request is in progress */
+/* Alternative explicit approach */
+.htmx-indicator {
+  display: none !important;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  display: flex !important;
+}
+
 .toast {
   position: fixed;
   top: 20px;

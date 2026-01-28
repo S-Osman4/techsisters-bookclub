@@ -1,89 +1,145 @@
 <div class="grid sm:grid-cols-2 gap-6 mb-8">
   {% for book in books %}
   <article
-    class="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 flex"
+    class="group bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:shadow-xl hover:border-[var(--primary)] transition-all duration-300"
   >
-    <!-- Cover -->
+    <!-- Cover Image Header -->
     <div
-      class="w-28 h-full bg-gray-50 flex items-center justify-center shrink-0"
+      class="relative bg-gradient-to-br from-gray-50 to-gray-100 h-48 flex items-center justify-center"
     >
       {% if book.cover_image_url %}
       <img
         src="{{ book.cover_image_url }}"
         alt="{{ book.title }}"
-        class="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform"
+        class="h-full w-auto object-contain p-4 group-hover:scale-105 transition-transform duration-300"
       />
       {% else %}
-      <div class="text-3xl">📘</div>
+      <div class="text-6xl opacity-40">📚</div>
+      {% endif %}
+
+      <!-- Status Badge (Top Right) -->
+      {% if book.status == "completed" %}
+      <div
+        class="absolute top-3 right-3 px-3 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-semibold flex items-center gap-1"
+      >
+        <i data-lucide="check-circle" class="icon icon-sm"></i>
+        Completed
+      </div>
+      {% elif book.status == "current" %}
+      <div
+        class="absolute top-3 right-3 px-3 py-1 rounded-full bg-[var(--secondary)] text-white text-xs font-semibold flex items-center gap-1"
+      >
+        <i data-lucide="book-open" class="icon icon-sm"></i>
+        Reading Now
+      </div>
+      {% else %}
+      <div
+        class="absolute top-3 right-3 px-3 py-1 rounded-full bg-[var(--accent)] text-gray-800 text-xs font-semibold flex items-center gap-1"
+      >
+        <i data-lucide="clock" class="icon icon-sm"></i>
+        Queued
+      </div>
       {% endif %}
     </div>
 
-    <!-- Content -->
-    <div class="flex-1 p-5 flex flex-col justify-between">
-      <div>
-        <h3 class="font-semibold text-gray-900 leading-snug line-clamp-2 mb-1">
+    <!-- Content Section -->
+    <div class="p-5">
+      <!-- Title & Author -->
+      <div class="mb-4">
+        <h3
+          class="font-bold text-lg text-gray-900 leading-snug line-clamp-2 mb-2"
+        >
           {{ book.title }}
         </h3>
 
         {% if book.author %}
-        <p class="text-sm text-gray-500 mb-3">{{ book.author }}</p>
+        <p class="text-sm text-gray-500 flex items-center gap-1">
+          <i data-lucide="user" class="icon icon-sm"></i>
+          {{ book.author }}
+        </p>
         {% endif %}
+      </div>
 
-        <!-- Status line (1–2 max) -->
-        <div class="flex flex-wrap gap-2 text-xs">
-          {% if book.status == "completed" and book.completed_date %}
-          <span
-            class="px-2 py-1 rounded-full bg-gray-100 text-gray-700 font-medium"
-          >
+      <!-- Book Details Grid -->
+      <div class="space-y-2 mb-4 pb-4 border-b border-gray-100">
+        {% if book.total_chapters %}
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-500 flex items-center gap-1">
             <i
-              data-lucide="book-open-check"
-              class="icon icon-lg icon-muted"
+              data-lucide="book-text"
+              class="icon icon-sm text-[var(--secondary)]"
             ></i>
-
-            Completed {{ book.completed_date.strftime('%b %Y') }}
+            Total Chapters
           </span>
-          {% elif book.status == "current" and book.current_chapters %}
-          <span
-            class="px-2 py-1 rounded-full bg-teal-100 text-teal-800 font-medium"
-          >
+          <span class="font-semibold text-gray-900">
+            {{ book.total_chapters }}
+          </span>
+        </div>
+        {% endif %} {% if book.status == "current" and book.current_chapters %}
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-500 flex items-center gap-1">
+            <i
+              data-lucide="bookmark"
+              class="icon icon-sm text-[var(--secondary)]"
+            ></i>
+            Current Progress
+          </span>
+          <span class="font-semibold text-[var(--secondary)]">
             {{ book.current_chapters }}
           </span>
-          {% else %}
-          <span
-            class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-medium"
-          >
-            In queue
-          </span>
-          {% endif %} {% if book.total_chapters %}
-          <span
-            class="px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-medium"
-          >
-            {{ book.total_chapters }} chapters
-          </span>
-          {% endif %}
         </div>
-      </div>
-
-      <!-- Action -->
-      <div class="pt-4">
-        {% if book.pdf_url %}
-        <a
-          href="{{ book.pdf_url }}"
-          target="_blank"
-          class="btn-primary inline-flex items-center justify-center w-full h-10 rounded-xl text-sm text-white"
-        >
-          {% if book.status == "completed" %} Revisit PDF {% elif book.status ==
-          "current" %} Read now {% else %} Preview PDF {% endif %}
-        </a>
-        {% else %}
-        <div
-          class="text-center text-sm text-gray-400 h-10 flex items-center justify-center"
-        >
-          PDF unavailable
+        {% endif %} {% if book.status == "completed" and book.completed_date %}
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-500 flex items-center gap-1">
+            <i
+              data-lucide="calendar-check"
+              class="icon icon-sm text-[var(--primary)]"
+            ></i>
+            Completed On
+          </span>
+          <span class="font-semibold text-gray-900">
+            {{ book.completed_date.strftime('%b %d, %Y') }}
+          </span>
         </div>
         {% endif %}
       </div>
+
+      <!-- Action Button -->
+      {% if book.pdf_url %}
+      <a
+        href="{{ book.pdf_url }}"
+        target="_blank"
+        class="btn-primary inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold text-white hover:scale-[1.02] transition-transform"
+      >
+        <i data-lucide="book-open" class="icon icon-sm"></i>
+        {% if book.status == "completed" %} Revisit Book {% elif book.status ==
+        "current" %} Continue Reading {% else %} Preview Book {% endif %}
+      </a>
+      {% else %}
+      <div
+        class="text-center py-3 text-sm text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200"
+      >
+        <i data-lucide="file-x" class="icon icon-sm inline mr-1"></i>
+        PDF Unavailable
+      </div>
+      {% endif %}
     </div>
   </article>
   {% endfor %}
 </div>
+
+{% if total_pages > 1 %}
+<div class="flex justify-center items-center mt-12 gap-2 flex-wrap">
+  {% for p in range(1, total_pages + 1) %}
+  <a
+    href="{{ request.url.path }}?page={{ p }}{% if search %}&search={{ search }}{% endif %}"
+    hx-get="{{ request.url.path }}?page={{ p }}{% if search %}&search={{ search }}{% endif %}"
+    hx-target="#books-list"
+    hx-push-url="true"
+    class="px-4 py-2 rounded-lg font-medium transition-all {% if p == page %} btn-primary text-white shadow-lg {% else %} bg-white border-2 border-gray-200 text-gray-700 hover:border-[var(--primary)] hover:text-[var(--primary)] {% endif %}"
+  >
+    {{ p }}
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
