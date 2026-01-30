@@ -1,4 +1,5 @@
-<div class="grid sm:grid-cols-2 gap-6 mb-8">
+{% if books %}
+<div class="grid sm:grid-cols-2 gap-6 mb-8 mt-6">
   {% for book in books %}
   <article
     class="group bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:shadow-xl hover:border-[var(--primary)] transition-all duration-300"
@@ -44,7 +45,7 @@
 
     <!-- Content Section -->
     <div class="p-5">
-      <!-- Title & Author -->
+      <!-- Title  -->
       <div class="mb-4">
         <h3
           class="font-bold text-lg text-gray-900 leading-snug line-clamp-2 mb-2"
@@ -52,12 +53,7 @@
           {{ book.title }}
         </h3>
 
-        {% if book.author %}
-        <p class="text-sm text-gray-500 flex items-center gap-1">
-          <i data-lucide="user" class="icon icon-sm"></i>
-          {{ book.author }}
-        </p>
-        {% endif %}
+        
       </div>
 
       <!-- Book Details Grid -->
@@ -106,8 +102,8 @@
 
       <!-- Action Button -->
       {% if book.pdf_url %}
-      <a
-        href="{{ book.pdf_url }}"
+      
+        <a href="{{ book.pdf_url }}"
         target="_blank"
         class="btn-primary inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold text-white hover:scale-[1.02] transition-transform"
       >
@@ -131,8 +127,8 @@
 {% if total_pages > 1 %}
 <div class="flex justify-center items-center mt-12 gap-2 flex-wrap">
   {% for p in range(1, total_pages + 1) %}
-  <a
-    href="{{ request.url.path }}?page={{ p }}{% if search %}&search={{ search }}{% endif %}"
+  
+    <a href="{{ request.url.path }}?page={{ p }}{% if search %}&search={{ search }}{% endif %}"
     hx-get="{{ request.url.path }}?page={{ p }}{% if search %}&search={{ search }}{% endif %}"
     hx-target="#books-list"
     hx-push-url="true"
@@ -141,5 +137,34 @@
     {{ p }}
   </a>
   {% endfor %}
+</div>
+{% endif %}
+
+{% else %}
+<!-- Empty State for No Search Results -->
+<div class="text-center py-16 mt-6">
+  <div
+    class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6"
+  >
+    <i data-lucide="search-x" class="icon icon-xl text-gray-400"></i>
+  </div>
+  
+  {% if search %}
+  <h3 class="text-2xl font-bold text-gray-900 mb-2">No books found</h3>
+  <p class="text-gray-600 mb-6">
+    We couldn't find any books matching "<span class="font-semibold">{{ search }}</span>"
+  </p>
+  <button
+    type="button"
+    onclick="window.location.href = '{{ request.url.path }}'"
+    class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-[1.02] transition-transform"
+  >
+    <i data-lucide="x-circle" class="icon icon-sm"></i>
+    Clear search
+  </button>
+  {% else %}
+  <h3 class="text-2xl font-bold text-gray-900 mb-2">No books yet</h3>
+  <p class="text-gray-600">Check back soon for new additions!</p>
+  {% endif %}
 </div>
 {% endif %}
