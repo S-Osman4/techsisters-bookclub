@@ -7,6 +7,9 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import os
 from dotenv import load_dotenv
 
@@ -24,6 +27,11 @@ app = FastAPI(
     docs_url="/docs",  # Swagger UI at /docs
     redoc_url="/redoc"  # ReDoc UI at /redoc
 )
+
+# Rate limiting setup
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add session middleware (for cookie-based sessions)
 SECRET_KEY = os.getenv("SECRET_KEY")

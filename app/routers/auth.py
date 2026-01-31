@@ -1,11 +1,16 @@
 """
 Authentication routes - login, register, code verification
 """
+import code
 import re
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 
 from app.database import get_db
 from app.models import User, AccessCode
@@ -13,6 +18,8 @@ from app.schemas import UserResponse, MessageResponse
 from app.dependencies import get_current_user
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
+
 
 # ===== Helper Functions =====
 def validate_email(email: str) -> bool:
@@ -20,9 +27,26 @@ def validate_email(email: str) -> bool:
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
+def validate_password(password: str) -> tuple[bool, str]:
+    """Validate password strength"""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters"
+    
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain uppercase letter"
+    
+    if not re.search(r'[a-z]', password):
+        return False, "Password must contain lowercase letter"
+    
+    if not re.search(r'\d', password):
+        return False, "Password must contain a number"
+    
+    return True, ""
+
 
 # ===== Code Verification =====
 @router.post("/verify-code", response_model=MessageResponse)
+@limiter.limit("10/minute")
 async def verify_code(
     request: Request,
     code: str = Form(...),
@@ -51,8 +75,8 @@ async def verify_code(
             detail="Access code not configured. Please contact admin."
         )
     
-    # Now compare codes
-    if code.lower() != stored_code.code.lower():
+    # Now compare codes using constant-time comparison
+    if not secrets.compare_digest(code.lower(), stored_code.code.lower()):
         # Give a hint if close
         if len(code) == len(stored_code.code):
             raise HTTPException(
@@ -75,6 +99,7 @@ async def verify_code(
 
 # ===== Registration =====
 @router.post("/register")
+@limiter.limit("5/hour")
 async def register(
     request: Request,
     name: str = Form(...),
@@ -124,10 +149,11 @@ async def register(
         )
     
     # Validate password
-    if len(password) < 8:
+    is_valid, error_msg = validate_password(password)
+    if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 8 characters long"
+            detail=error_msg
         )
     
     if len(password) > 100:
@@ -158,6 +184,13 @@ async def register(
         db.commit()
         db.refresh(new_user)
         
+        # Regenerate session to prevent session fixation attacks
+        old_session_data = dict(request.session)
+        request.session.clear()
+        # Only preserve code verification if it existed
+        if old_session_data.get("code_verified"):
+            request.session["code_verified"] = True
+    
         # Auto-login the new user
         request.session["user_id"] = new_user.id
         request.session["user_name"] = new_user.name
@@ -186,6 +219,7 @@ async def register(
 
 # ===== Login =====
 @router.post("/login")
+@limiter.limit("5/minute")
 async def login(
     request: Request,
     email: str = Form(...),
@@ -232,6 +266,14 @@ async def login(
         )
     
     # Set session
+   # Regenerate session to prevent session fixation attacks
+    old_session_data = dict(request.session)
+    request.session.clear()
+    # Only preserve code verification if it existed
+    if old_session_data.get("code_verified"):
+        request.session["code_verified"] = True
+    
+# Set new authenticated session data
     request.session["user_id"] = user.id
     request.session["user_name"] = user.name
     request.session["is_admin"] = user.is_admin

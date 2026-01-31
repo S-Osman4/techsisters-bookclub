@@ -12,6 +12,7 @@ alembic
 python-jose[cryptography]
 passlib[bcrypt]
 pydantic[email]
+slowapi
 
 # Templates & Static Files
 jinja2
