@@ -4,6 +4,7 @@ Authentication routes - login, register, code verification
 import code
 import re
 import secrets
+import bleach
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
@@ -43,6 +44,28 @@ def validate_password(password: str) -> tuple[bool, str]:
     
     return True, ""
 
+def sanitize_input(text: str, max_length: int = 200) -> str:
+    """
+    Sanitize user input to prevent XSS attacks
+    
+    - Removes all HTML tags
+    - Strips whitespace
+    - Limits length
+    """
+    if not text:
+        return ""
+    
+    # Remove all HTML tags
+    cleaned = bleach.clean(text, tags=[], strip=True)
+    
+    # Strip whitespace
+    cleaned = cleaned.strip()
+    
+    # Limit length
+    if len(cleaned) > max_length:
+        cleaned = cleaned[:max_length]
+    
+    return cleaned
 
 # ===== Code Verification =====
 @router.post("/verify-code", response_model=MessageResponse)
@@ -123,9 +146,9 @@ async def register(
             detail="Please verify access code first"
         )
     
-    # Clean inputs
-    name = name.strip()
-    email = email.strip().lower()
+    # Clean and sanitize inputs
+    name = sanitize_input(name, max_length=50)
+    email = sanitize_input(email, max_length=100).lower()
     
     # Validate input
     # Validate name

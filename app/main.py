@@ -12,6 +12,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import os
 from dotenv import load_dotenv
+from secure import Secure
 
 from app.database import DATABASE_URL, create_tables, test_connection, disconnect
 from app.routers import auth, books, admin, pages, profile
@@ -49,11 +50,25 @@ app.add_middleware(
 # CORS middleware (for frontend if needed)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your domain
+    allow_origins=[
+        "https://techsisters-bookclub.onrender.com/dashboard",  
+        "http://localhost:8000",                # Local development
+        "http://127.0.0.1:8000",               # Alternative local
+    ] if os.getenv("ENVIRONMENT") == "production" else ["*"],  # Allow all in dev only
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Be specific
     allow_headers=["*"],
 )
+
+# Security headers middleware
+secure_headers = Secure.with_default_headers()
+
+@app.middleware("http")
+async def set_security_headers(request: Request, call_next):
+    """Add security headers to all responses"""
+    response = await call_next(request)
+    secure_headers.framework.fastapi(response)
+    return response
 
 # Mount static files (for CSS, JS, images)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

@@ -13,6 +13,8 @@ python-jose[cryptography]
 passlib[bcrypt]
 pydantic[email]
 slowapi
+secure
+bleach
 
 # Templates & Static Files
 jinja2

@@ -6,6 +6,7 @@ from fastapi.params import Form
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
+import bleach
 
 from app.database import get_db
 from app.models import Book, Meeting, BookSuggestion, ReadingProgress, User
@@ -19,6 +20,30 @@ from app.dependencies import (
 )
 
 router = APIRouter()
+
+# ===== Helper Functions =====
+def sanitize_input(text: str, max_length: int = 200) -> str:
+    """
+    Sanitize user input to prevent XSS attacks
+    
+    - Removes all HTML tags
+    - Strips whitespace
+    - Limits length
+    """
+    if not text:
+        return ""
+    
+    # Remove all HTML tags
+    cleaned = bleach.clean(text, tags=[], strip=True)
+    
+    # Strip whitespace
+    cleaned = cleaned.strip()
+    
+    # Limit length
+    if len(cleaned) > max_length:
+        cleaned = cleaned[:max_length]
+    
+    return cleaned
 
 # ===== Current Book & Meeting =====
 @router.get("/current")
@@ -87,11 +112,30 @@ async def create_suggestion(
     
     Suggestions go to pending status and require admin approval
     """
+
+   # Sanitize inputs to prevent XSS
+    title = sanitize_input(title, max_length=200)
+    pdf_url = sanitize_input(pdf_url, max_length=500)
+    cover_image_url = sanitize_input(cover_image_url, max_length=500) if cover_image_url else None
+
+    # Validate URL formats
+    if not pdf_url.startswith(('http://', 'https://')):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="PDF URL must be a valid HTTP/HTTPS URL"
+        )
+
+    if cover_image_url and not cover_image_url.startswith(('http://', 'https://')):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cover image URL must be a valid HTTP/HTTPS URL"
+        )
+    
       # Validate using schema
     suggestion_data = SuggestionCreate(title=title, pdf_url=pdf_url, cover_image_url=cover_image_url)
-    
+
     new_suggestion = BookSuggestion(
-        title=suggestion_data.title.strip(),
+        title=suggestion_data.title,
         pdf_url=suggestion_data.pdf_url,
         cover_image_url=suggestion_data.cover_image_url,
         user_id=current_user.id,
