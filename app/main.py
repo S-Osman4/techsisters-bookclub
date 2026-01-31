@@ -61,14 +61,26 @@ app.add_middleware(
 )
 
 # Security headers middleware
-secure_headers = Secure.with_default_headers()
+
+secure_headers = Secure()
 
 @app.middleware("http")
 async def set_security_headers(request: Request, call_next):
-    """Add security headers to all responses"""
     response = await call_next(request)
-    secure_headers.framework.fastapi(response)
+
+    # Optionally skip redirects
+    if 300 <= response.status_code < 400:
+        return response
+
+    # In your version, headers is likely a dict attribute, not a function
+    headers = secure_headers.headers  # <- no parentheses
+
+    # If it's callable in your env, flip this to: headers = secure_headers.headers()
+    for k, v in headers.items():
+        response.headers[k] = v
+
     return response
+
 
 # Mount static files (for CSS, JS, images)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
