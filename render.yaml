@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: techsisters-bookclub
+    runtime: docker
+    plan: free # or starter
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Set manually in Render dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: WHATSAPP_GROUP_LINK
+        sync: false
+    healthCheckPath: /health

@@ -1,0 +1,70 @@
+# Docker Ignore Configuration
+
+**pycache**/
+_.py[cod]
+_$py.class
+\*.so
+.Python
+
+## Virtual environment
+
+venv/
+env/
+ENV/
+.venv
+
+## Environment files
+
+.env
+.env.\*
+!.env.example
+
+## Testing
+
+.pytest_cache/
+tests/
+htmlcov/
+.coverage
+\*.cover
+
+## Database files
+
+_.db
+_.sqlite3
+
+## IDE
+
+.vscode/
+.idea/
+_.swp
+_.swo
+.DS_Store
+
+## Git
+
+.git/
+.gitignore
+.gitattributes
+
+## Documentation
+
+README.md
+\*.md
+
+## Scripts (not needed in production)
+
+seed.py
+verify_updates.py
+migrate_add_book_covers.py
+
+## Logs
+
+\*.log
+logs/
+
+## Misc
+
+Dockerfile
+.dockerignore
+docker-compose.yml
+render.yaml

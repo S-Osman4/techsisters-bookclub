@@ -12,12 +12,10 @@ endblock %} {% block content %}
     <p class="text-xl text-gray-600 mb-8">{{ total_count }} books completed</p>
 
     <!-- Updated Search Form -->
-    <!-- Updated Search Form -->
     <form
       hx-get="/past-books"
       hx-target="#books-list"
       hx-swap="innerHTML"
-      hx-indicator="#books-list-indicator"
       class="max-w-md mx-auto"
     >
       <div class="flex gap-2">
@@ -36,9 +34,13 @@ endblock %} {% block content %}
         </div>
         <button
           type="submit"
-          class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:scale-[1.02] transition-transform"
+          class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:scale-[1.02] transition-transform htmx-indicator"
         >
-          <span>Search</span>
+          <span class="htmx-indicator:hidden">Search</span>
+          <div class="htmx-indicator hidden flex items-center gap-2">
+            <div class="loading-spinner"></div>
+            <span>Processing...</span>
+          </div>
         </button>
       </div>
 
@@ -55,18 +57,8 @@ endblock %} {% block content %}
       {% endif %}
     </form>
 
-    <!-- Global HTMX indicator (not inside #books-list) -->
-    <div
-      id="books-list-indicator"
-      class="htmx-indicator mt-3 text-sm text-gray-500 flex items-center justify-center gap-2"
-    >
-      <div class="loading-spinner">
-        <span>Processing...</span>
-      </div>
-    </div>
-
     <!-- Books Grid + Pagination (HTMX target) -->
     <div id="books-list">{% include "partials/books_grid.html" %}</div>
   </div>
-  {% endblock %}
 </div>
+{% endblock %}

@@ -210,7 +210,6 @@ h3 {
 }
 
 /* Show the indicator when the request is in progress */
-/* Alternative explicit approach */
 .htmx-indicator {
   display: none !important;
 }
