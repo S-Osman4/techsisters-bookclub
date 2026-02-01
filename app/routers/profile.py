@@ -43,10 +43,10 @@ async def get_user_stats(
     ).scalar()
     
     return {
-        "total_suggestions": total_suggestions or 0,
-        "approved_suggestions": approved_suggestions or 0,
-        "completed_books": completed_books or 0,
-        "currently_reading": currently_reading or 0,
+        "total_suggestions": int(total_suggestions or 0),
+        "approved_suggestions": int(approved_suggestions or 0),
+        "completed_books": int(completed_books or 0),
+        "currently_reading": int(currently_reading or 0),
         "member_since": current_user.created_at
     }
 
@@ -132,8 +132,12 @@ async def delete_account(
     # Check if user is an admin
     if current_user.is_admin:
         # Count total admins
-        admin_count = db.query(func.count(User.id)).filter(User.is_admin == True).scalar()
-        
+        admin_count = int(
+            db.query(func.count(User.id))
+            .filter(User.is_admin == True)
+            .scalar() or 0
+        )
+
         if admin_count <= 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
