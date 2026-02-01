@@ -655,7 +655,7 @@ Club{% endblock %} {% block content %}
                   onclick="openDemoteModal({{ user.id }}, '{{ user.name }}')"
                   class="font-semibold transition-colors"
                   style="color: var(--accent-dark)"
-                  {% if admin_count|int <= 1 %}
+                  {% if admin_count|default(0)|int <= 1 %}
                   disabled
                   title="Cannot demote last admin"
                   {% endif %}
