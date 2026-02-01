@@ -652,29 +652,24 @@ Club{% endblock %} {% block content %}
                 {% if user.id != admin.id %} {% if user.is_admin %}
                 <!-- Demote button -->
                 <button
-                  onclick="demoteUser({{ user.id }}, '{{ user.name }}')"
+                  onclick="openDemoteModal({{ user.id }}, '{{ user.name }}')"
                   class="font-semibold transition-colors"
                   style="color: var(--accent-dark)"
-                  {%
-                  if
-                  admin_count
-                  <=1
-                  %}disabled
+                  {% if admin_count <= 1 %}
+                  disabled
                   title="Cannot demote last admin"
-                  {%
-                  endif
-                  %}
+                  {% endif %}
                 >
                   ↓ Demote
                 </button>
                 {% else %}
                 <!-- Promote button -->
                 <button
-                  onclick="promoteUser({{ user.id }}, '{{ user.name }}')"
+                  onclick="openPromoteModal({{ user.id }}, '{{ user.name }}')"
                   class="font-semibold transition-colors"
                   style="color: var(--secondary)"
                 >
-                  > ↑ Promote
+                  ↑ Promote
                 </button>
                 {% endif %} {% else %}
                 <span class="text-gray-400">—</span>
@@ -970,6 +965,88 @@ Club{% endblock %} {% block content %}
     <div id="complete-result" class="mt-4"></div>
   </div>
 </div>
+</div>
+<!-- Promote User Modal -->
+<div id="promote-modal" class="modal-overlay hidden">
+  <div class="modal-container max-w-md">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-2">Promote to Admin</h3>
+      <p class="text-gray-600 mb-4">
+        Promote <strong id="promote-user-name"></strong> to admin?
+      </p>
+      
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+        <p class="text-sm text-blue-800 font-medium mb-2">They will be able to:</p>
+        <ul class="text-sm text-blue-700 ml-4 list-disc space-y-1">
+          <li>Manage books and meetings</li>
+          <li>Approve/reject suggestions</li>
+          <li>Access admin panel</li>
+        </ul>
+      </div>
+
+      <div id="promote-result" class="mb-4"></div>
+
+      <div class="modal-actions">
+        <button
+          id="promote-confirm-btn"
+          onclick="confirmPromote()"
+          class="flex-1 btn-secondary text-white py-3 rounded-xl font-semibold"
+        >
+          <span class="btn-text">✓ Yes, Promote</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="closePromoteModal()"
+          class="flex-1 btn-ghost py-3 rounded-xl"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Demote User Modal -->
+<div id="demote-modal" class="modal-overlay hidden">
+  <div class="modal-container max-w-md">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-2">Demote from Admin</h3>
+      <p class="text-gray-600 mb-4">
+        Demote <strong id="demote-user-name"></strong> from admin?
+      </p>
+      
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6">
+        <p class="text-sm text-yellow-800 font-medium mb-2">They will lose access to:</p>
+        <ul class="text-sm text-yellow-700 ml-4 list-disc space-y-1">
+          <li>Admin panel</li>
+          <li>Book/meeting management</li>
+          <li>Suggestion approval</li>
+        </ul>
+      </div>
+
+      <div id="demote-result" class="mb-4"></div>
+
+      <div class="modal-actions">
+        <button
+          id="demote-confirm-btn"
+          onclick="confirmDemote()"
+          class="flex-1 text-white py-3 rounded-xl font-semibold"
+          style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
+        >
+          <span class="btn-text">⚠️ Yes, Demote</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="closeDemoteModal()"
+          class="flex-1 btn-ghost py-3 rounded-xl"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -1715,50 +1792,130 @@ document.addEventListener('keydown', function(e) {
 }
 
 
-  function promoteUser(userId, userName) {
-    if (
-      confirm(
-        `Promote ${userName} to admin?\n\nThey will be able to:\n• Manage books and meetings\n• Approve/reject suggestions\n• Access admin panel`
-      )
-    ) {
-      fetch(`/api/admin/users/${userId}/promote`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          showToast(data.message, data.success ? "success" : "error");
-          if (data.success) {
-            setTimeout(() => location.reload(), 1500);
-          }
-        })
-        .catch((error) => {
-          showToast("Error: " + error.message, "error");
-        });
-    }
+  // Promote/Demote Modal State
+  let promoteUserId = null;
+  let demoteUserId = null;
+
+  // Open Promote Modal
+  function openPromoteModal(userId, userName) {
+    promoteUserId = userId;
+    document.getElementById('promote-user-name').textContent = userName;
+    document.getElementById('promote-result').innerHTML = '';
+    document.getElementById('promote-modal').classList.remove('hidden');
   }
 
-  function demoteUser(userId, userName) {
-    if (
-      confirm(
-        `Demote ${userName} from admin?\n\nThey will lose access to:\n• Admin panel\n• Book/meeting management\n• Suggestion approval`
-      )
-    ) {
-      fetch(`/api/admin/users/${userId}/demote`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+  // Close Promote Modal
+  function closePromoteModal() {
+    document.getElementById('promote-modal').classList.add('hidden');
+    promoteUserId = null;
+  }
+
+  // Confirm Promote
+  function confirmPromote() {
+    const btn = document.getElementById('promote-confirm-btn');
+    const btnText = btn.querySelector('.btn-text');
+    const resultDiv = document.getElementById('promote-result');
+
+    // Loading state
+    btn.disabled = true;
+    btnText.innerHTML = '<span class="loading-spinner">Processing</span>';
+    resultDiv.innerHTML = '<div class="text-sm text-gray-500 text-center">Promoting user...</div>';
+
+    fetch(`/api/admin/users/${promoteUserId}/promote`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+              <strong>✓ Success:</strong> ${data.message}
+            </div>`;
+          showToast(data.message, 'success');
+          setTimeout(() => {
+            closePromoteModal();
+            location.reload();
+          }, 1500);
+        } else {
+          resultDiv.innerHTML = `
+            <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+              <strong>✗ Error:</strong> ${data.message}
+            </div>`;
+          btn.disabled = false;
+          btnText.textContent = '✓ Yes, Promote';
+        }
       })
-        .then((response) => response.json())
-        .then((data) => {
-          showToast(data.message, data.success ? "success" : "error");
-          if (data.success) {
-            setTimeout(() => location.reload(), 1500);
-          }
-        })
-        .catch((error) => {
-          showToast("Error: " + error.message, "error");
-        });
-    }
+      .catch(error => {
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+            <strong>✗ Error:</strong> ${error.message}
+          </div>`;
+        showToast('Error: ' + error.message, 'error');
+        btn.disabled = false;
+        btnText.textContent = '✓ Yes, Promote';
+      });
+  }
+
+  // Open Demote Modal
+  function openDemoteModal(userId, userName) {
+    demoteUserId = userId;
+    document.getElementById('demote-user-name').textContent = userName;
+    document.getElementById('demote-result').innerHTML = '';
+    document.getElementById('demote-modal').classList.remove('hidden');
+  }
+
+  // Close Demote Modal
+  function closeDemoteModal() {
+    document.getElementById('demote-modal').classList.add('hidden');
+    demoteUserId = null;
+  }
+
+  // Confirm Demote
+  function confirmDemote() {
+    const btn = document.getElementById('demote-confirm-btn');
+    const btnText = btn.querySelector('.btn-text');
+    const resultDiv = document.getElementById('demote-result');
+
+    // Loading state
+    btn.disabled = true;
+    btnText.innerHTML = '<span class="loading-spinner">Processing</span>';
+    resultDiv.innerHTML = '<div class="text-sm text-gray-500 text-center">Demoting user...</div>';
+
+    fetch(`/api/admin/users/${demoteUserId}/demote`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class="text-sm px-4 py-3 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+              <strong>✓ Success:</strong> ${data.message}
+            </div>`;
+          showToast(data.message, 'success');
+          setTimeout(() => {
+            closeDemoteModal();
+            location.reload();
+          }, 1500);
+        } else {
+          resultDiv.innerHTML = `
+            <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+              <strong>✗ Error:</strong> ${data.message}
+            </div>`;
+          btn.disabled = false;
+          btnText.textContent = '⚠️ Yes, Demote';
+        }
+      })
+      .catch(error => {
+        resultDiv.innerHTML = `
+          <div class="text-sm px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg" style="color: var(--primary);">
+            <strong>✗ Error:</strong> ${error.message}
+          </div>`;
+        showToast('Error: ' + error.message, 'error');
+        btn.disabled = false;
+        btnText.textContent = '⚠️ Yes, Demote';
+      });
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -2004,7 +2161,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Close on Escape key
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-      closeSuggestionModal();
+      if (!document.getElementById('promote-modal').classList.contains('hidden')) {
+        closePromoteModal();
+      }
+    if (!document.getElementById('demote-modal').classList.contains('hidden')) {
+        closeDemoteModal();
+      }
+    closeSuggestionModal();
     }
   });
 });
