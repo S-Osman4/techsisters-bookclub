@@ -414,3 +414,17 @@ async def upcoming_books_page(
         return templates.TemplateResponse("partials/books_grid.html", context)
     else:
         return templates.TemplateResponse("upcoming_books.html", context)
+
+# FEEDBACK PAGE
+@router.get("/feedback", response_class=HTMLResponse)
+async def feedback_page(
+    request: Request,
+    current_user: User = Depends(get_current_user_optional),
+):
+    return templates.TemplateResponse(
+        "feedback.html",
+        {
+            "request": request,
+            "current_user": current_user,
+        },
+    )

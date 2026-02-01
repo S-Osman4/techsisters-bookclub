@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from secure import Secure
 
 from app.database import DATABASE_URL, create_tables, test_connection, disconnect
-from app.routers import auth, books, admin, pages, profile
+from app.routers import auth, books, admin, pages, profile, feedback
 
 # Load environment variables
 load_dotenv()
@@ -91,6 +91,7 @@ app.include_router(books.router, prefix="/api/books", tags=["Books"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(profile.router, prefix="/api/profile", tags=["Profile"])
 app.include_router(pages.router, tags=["Pages"])
+app.include_router(feedback.api_router, tags=["Feedback"])
 
 # ===== Custom Error Handlers =====
 @app.exception_handler(HTTPException)

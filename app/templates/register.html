@@ -98,7 +98,7 @@ endblock %} {% block content %}
 
         <button
           type="submit"
-          class="w-full btn-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
+          class="w-full btn-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
         >
           Create Account & Join
         </button>
@@ -159,14 +159,12 @@ endblock %} {% block content %}
         try {
           const error = JSON.parse(xhr.responseText);
           if (error.detail) {
-            document.getElementById(
-              event.detail.target.id
-            ).innerHTML = `<div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg p-4">${error.detail}</div>`;
+            document.getElementById(event.detail.target.id).innerHTML =
+              `<div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg p-4">${error.detail}</div>`;
           }
         } catch (e) {
-          document.getElementById(
-            event.detail.target.id
-          ).innerHTML = `<div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg p-4">Something went wrong. Please try again.</div>`;
+          document.getElementById(event.detail.target.id).innerHTML =
+            `<div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg p-4">Something went wrong. Please try again.</div>`;
         }
       }
     }

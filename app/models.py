@@ -181,3 +181,15 @@ class AdminAction(Base):
 
     def __repr__(self):
         return f"<AdminAction(admin_id={self.admin_id}, action='{self.action}')>"
+    
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String(50), nullable=False)
+    message = Column(Text, nullable=False)
+    email = Column(String(255), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", backref="feedback_items")
