@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from typing import List
 import secrets
 import string
+import bleach
 
 
 from app.database import get_db
@@ -25,6 +26,30 @@ DEFAULT_CODE_LENGTH = 8
 
 def generate_access_code(length: int = DEFAULT_CODE_LENGTH) -> str:
     return ''.join(secrets.choice(CODE_CHARS) for _ in range(length))
+
+# Add this helper function
+def sanitize_input(text: str, max_length: int = 200) -> str:
+    """
+    Sanitize user input to prevent XSS attacks
+    
+    - Removes all HTML tags
+    - Strips whitespace
+    - Limits length
+    """
+    if not text:
+        return ""
+    
+    # Remove all HTML tags
+    cleaned = bleach.clean(text, tags=[], strip=True)
+    
+    # Strip whitespace
+    cleaned = cleaned.strip()
+    
+    # Limit length
+    if len(cleaned) > max_length:
+        cleaned = cleaned[:max_length]
+    
+    return cleaned
 
 
 # ===== Access Code Management =====
@@ -53,6 +78,15 @@ async def update_access_code(
     
     IMPORTANT: Post the new code in WhatsApp group after updating!
     """
+    # Sanitize and validate code
+    new_code = sanitize_input(new_code, max_length=20).upper()
+    
+    if not new_code or len(new_code) < 4:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Access code must be at least 4 characters"
+        )
+    
     code = db.query(AccessCode).first()
     
     if not code:
@@ -126,17 +160,37 @@ async def update_current_book(
             detail="No current book set. Please set a book from the queue first."
         )
     
-    # Update fields if provided
+    # Sanitize and update fields if provided
     if title is not None:
-        current_book.title = title.strip()
+        title = sanitize_input(title, max_length=200)
+        if not title:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Title cannot be empty"
+            )
+        current_book.title = title
+
     if pdf_url is not None:
+        pdf_url = sanitize_input(pdf_url, max_length=500)
+        if not pdf_url.startswith(('http://', 'https://')):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="PDF URL must be a valid HTTP/HTTPS URL"
+            )
         current_book.pdf_url = pdf_url
+
     if cover_image_url is not None:
+        cover_image_url = sanitize_input(cover_image_url, max_length=500)
+        if cover_image_url and not cover_image_url.startswith(('http://', 'https://')):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cover image URL must be a valid HTTP/HTTPS URL"
+            )
         current_book.cover_image_url = cover_image_url
+
     if current_chapters is not None:
+        current_chapters = sanitize_input(current_chapters, max_length=100)
         current_book.current_chapters = current_chapters
-    if total_chapters is not None:
-        current_book.total_chapters = total_chapters
     
     # Log the admin action
     admin_action = AdminAction(
@@ -187,6 +241,22 @@ async def set_current_book(
             detail="Book not found in queue"
         )
     
+    # Sanitize inputs
+    current_chapters = sanitize_input(current_chapters, max_length=100)
+    if not current_chapters:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current chapters cannot be empty"
+        )
+
+    if cover_image_url:
+        cover_image_url = sanitize_input(cover_image_url, max_length=500)
+        if not cover_image_url.startswith(('http://', 'https://')):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cover image URL must be a valid HTTP/HTTPS URL"
+            )
+
     # Set as current
     book.status = "current"
     book.current_chapters = current_chapters
@@ -305,6 +375,14 @@ async def update_meeting(
     local_dt = naive.replace(tzinfo=local_tz)
     start_at_utc = local_dt.astimezone(ZoneInfo("UTC"))
 
+    # Sanitize meeting link
+    meet_link = sanitize_input(meet_link, max_length=500)
+    if not meet_link.startswith(('http://', 'https://')):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Meeting link must be a valid HTTP/HTTPS URL"
+        )
+
     meeting = db.query(Meeting).first()
     if not meeting:
         meeting = Meeting(
@@ -380,21 +458,28 @@ async def approve_suggestion(
             detail=f"Suggestion is already {suggestion.status}"
         )
     
-    if not cover_image_url.strip():
+    # Sanitize cover image URL
+    cover_image_url = sanitize_input(cover_image_url, max_length=500)
+    if not cover_image_url:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cover image is required to approve a book"
         )
-    
+
+    if not cover_image_url.startswith(('http://', 'https://')):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cover image URL must be a valid HTTP/HTTPS URL"
+        )
+
     # Update status
     suggestion.status = "approved"
-    
-    # Create book in queue
 
+    # Create book in queue
     new_book = Book(
         title=suggestion.title,
         pdf_url=suggestion.pdf_url,
-        cover_image_url=cover_image_url.strip(),
+        cover_image_url=cover_image_url,
         status="queued"
     )
 
