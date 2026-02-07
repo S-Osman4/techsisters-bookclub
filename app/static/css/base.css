@@ -202,21 +202,35 @@ h3 {
   box-shadow: 0 15px 30px -5px rgba(78, 205, 196, 0.4);
 }
 
-/* Spinner hidden by default, visible while the form has htmx-request */
-.htmx-indicator {
-  opacity: 0;
-  display: none;
-  transition: opacity 0.3s ease;
+.btn-text {
+  display: inline;
 }
 
-/* Show the indicator when the request is in progress */
-.htmx-indicator {
+.loading-spinner {
+  display: none; /* Hidden by default */
+  align-items: center;
+  gap: 8px;
+}
+
+/* Show spinner during HTMX request */
+.htmx-request .loading-spinner {
+  display: inline-flex !important;
+}
+
+/* Hide button text during HTMX request */
+.htmx-request .btn-text {
   display: none !important;
 }
 
-.htmx-request .htmx-indicator,
-.htmx-request.htmx-indicator {
-  display: flex !important;
+/* Spinner animation */
+.loading-spinner::after {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spinBounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
 
 .toast {
@@ -243,22 +257,6 @@ h3 {
   100% {
     transform: translateX(0) scale(1);
   }
-}
-
-.loading-spinner {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.loading-spinner::after {
-  content: "";
-  width: 18px;
-  height: 18px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top: 3px solid white;
-  border-radius: 50%;
-  animation: spinBounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
 
 @keyframes spinBounce {

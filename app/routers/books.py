@@ -99,7 +99,7 @@ async def get_past_books(
     return books
 
 # ===== Book Suggestions =====
-@router.post("/suggestions", response_model=SuggestionResponse)
+@router.post("/suggestions")
 async def create_suggestion(
     title: str = Form(...),
     pdf_url: str = Form(...),
@@ -113,7 +113,7 @@ async def create_suggestion(
     Suggestions go to pending status and require admin approval
     """
 
-   # Sanitize inputs to prevent XSS
+    # Sanitize inputs to prevent XSS
     title = sanitize_input(title, max_length=200)
     pdf_url = sanitize_input(pdf_url, max_length=500)
     cover_image_url = sanitize_input(cover_image_url, max_length=500) if cover_image_url else None
@@ -131,7 +131,7 @@ async def create_suggestion(
             detail="Cover image URL must be a valid HTTP/HTTPS URL"
         )
     
-      # Validate using schema
+    # Validate using schema
     suggestion_data = SuggestionCreate(title=title, pdf_url=pdf_url, cover_image_url=cover_image_url)
 
     new_suggestion = BookSuggestion(
@@ -146,7 +146,11 @@ async def create_suggestion(
     db.commit()
     db.refresh(new_suggestion)
     
-    return new_suggestion
+    # ✅ Return formatted response instead of raw object
+    return {
+        "message": "Book suggestion submitted! Admins will review it soon.",
+        "reload": True
+    }
 
 @router.get("/suggestions/my", response_model=List[SuggestionResponse])
 async def get_my_suggestions(
@@ -165,7 +169,7 @@ async def get_my_suggestions(
     return suggestions
 
 # ===== Reading Progress =====
-@router.put("/progress", response_model=ProgressResponse)
+@router.put("/progress")
 async def update_progress(
     book_id: int = Form(...),
     chapter: int = Form(...),
@@ -180,7 +184,7 @@ async def update_progress(
     - 1+ = current chapter
     - -1 = completed
     """
-      # Validate using schema
+    # Validate using schema
     progress_data = ProgressUpdate(book_id=book_id, chapter=chapter)
     
     # Verify book exists
@@ -191,7 +195,7 @@ async def update_progress(
             detail="Book not found"
         )
    
-       # Find existing progress
+    # Find existing progress
     existing = db.query(ReadingProgress).filter(
         ReadingProgress.user_id == current_user.id,
         ReadingProgress.book_id == progress_data.book_id
@@ -201,7 +205,6 @@ async def update_progress(
         existing.chapter = progress_data.chapter
         db.commit()
         db.refresh(existing)
-        return existing
     else:
         new_progress = ReadingProgress(
             user_id=current_user.id,
@@ -211,7 +214,12 @@ async def update_progress(
         db.add(new_progress)
         db.commit()
         db.refresh(new_progress)
-        return new_progress
+    
+    # ✅ Return formatted response instead of raw object
+    return {
+        "message": "Progress updated successfully!",
+        "reload": True
+    }
     
 
 @router.get("/progress/my")

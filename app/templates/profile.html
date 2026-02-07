@@ -30,7 +30,7 @@ endblock %} {% block content %}
   </div>
 
   <!-- Stats Cards -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
     <div class="bg-white rounded-lg shadow-sm border p-4 text-center">
       <div class="text-3xl font-bold" style="color: var(--primary)">
         {{ stats.completed_books }}
@@ -60,7 +60,6 @@ endblock %} {% block content %}
   <!-- Account Information Card -->
   <div class="bg-white rounded-2xl shadow-xl border p-8 mb-8">
     <h2 class="text-2xl font-bold text-gray-900 mb-6">Account Information</h2>
-
     <div class="space-y-6">
       <!-- Name Update Form -->
       <div>
@@ -70,22 +69,25 @@ endblock %} {% block content %}
         <form
           hx-put="/api/profile/name"
           hx-target="#name-result"
-          class="flex gap-2"
+          class="flex flex-col gap-3 sm:flex-row sm:items-center"
         >
           <input
             type="text"
             name="new_name"
             value="{{ current_user.name }}"
+            hx-validate
             required
             minlength="2"
             maxlength="50"
-            class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent"
+            class="w-full sm:flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent"
           />
+          <!-- Name Update Button -->
           <button
             type="submit"
-            class="btn-primary text-white px-6 py-3 rounded-xl font-semibold whitespace-nowrap"
+            class="w-full sm:w-auto btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center relative"
           >
-            Update Name
+            <span class="btn-text">Update Name</span>
+            <span class="loading-spinner htmx-indicator name-spinner">Updating...</span>
           </button>
         </form>
         <div id="name-result" class="mt-2"></div>
@@ -110,9 +112,9 @@ endblock %} {% block content %}
         <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
         <div class="flex items-center">
           {% if current_user.is_admin %}
-          <span class="badge badge-primary text-white"> ⭐ Administrator </span>
+          <span class="badge badge-primary text-white">⭐ Administrator</span>
           {% else %}
-          <span class="badge badge-secondary text-white"> 👤 Member </span>
+          <span class="badge badge-secondary text-white">👤 Member</span>
           {% endif %}
         </div>
       </div>
@@ -132,10 +134,9 @@ endblock %} {% block content %}
     </div>
   </div>
 
-  <!-- Password Update Card (Separate!) -->
+  <!-- Password Update Card -->
   <div class="bg-white rounded-2xl shadow-xl border p-8 mb-8">
     <h2 class="text-2xl font-bold text-gray-900 mb-6">🔒 Change Password</h2>
-
     <form
       hx-put="/api/profile/password"
       hx-target="#password-result"
@@ -153,7 +154,6 @@ endblock %} {% block content %}
             required
           />
         </div>
-
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2"
             >New Password</label
@@ -169,14 +169,16 @@ endblock %} {% block content %}
           <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
         </div>
       </div>
-
       <div id="password-result"></div>
-
+      <!-- Password Update Button -->
       <button
         type="submit"
-        class="w-full btn-primary text-white py-4 rounded-xl font-bold text-lg"
+        class="w-full btn-primary text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center relative"
       >
-        Update Password
+        <span class="btn-text">Update Password</span>
+        <span class="loading-spinner htmx-indicator password-spinner"
+          >Updating...</span
+        >
       </button>
     </form>
   </div>
@@ -184,7 +186,6 @@ endblock %} {% block content %}
   <!-- Danger Zone -->
   <div class="bg-white rounded-xl shadow-sm border border-red-200 p-6 mb-6">
     <h2 class="text-xl font-bold text-red-600 mb-4">⚠️ Danger Zone</h2>
-
     {% if is_only_admin %}
     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
       <p class="text-sm text-yellow-800 font-medium">
@@ -205,9 +206,10 @@ endblock %} {% block content %}
       <li>Reading progress</li>
       <li>Account information</li>
     </ul>
-
     <button
-      onclick="document.getElementById('delete-modal').classList.remove('hidden')"
+      onclick="
+        document.getElementById('delete-modal').classList.remove('hidden')
+      "
       class="text-white px-6 py-3 rounded-xl font-semibold transition-all"
       style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
     >
@@ -316,7 +318,9 @@ endblock %} {% block content %}
         </button>
         <button
           type="button"
-          onclick="document.getElementById('delete-modal').classList.add('hidden')"
+          onclick="
+            document.getElementById('delete-modal').classList.add('hidden')
+          "
           class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 font-medium"
         >
           Cancel
@@ -327,37 +331,44 @@ endblock %} {% block content %}
 </div>
 
 <script>
-  // Handle profile updates
+  // Name update validation and UI updates
   document.addEventListener("htmx:afterSwap", function (event) {
     const targetId = event.detail.target.id;
 
     if (targetId === "name-result") {
-      const response = JSON.parse(event.detail.xhr.responseText);
-      if (response.success) {
-        showToast("Name updated successfully!", "success");
-        // Update the hero section name dynamically
-        document.querySelector("h1.text-4xl").textContent =
-          response.message.split("'")[3] ||
-          document.querySelector('input[name="new_name"]').value;
-        // Update user name in the member badge
-        const memberSpan = document.querySelector(
-          ".bg-gray-50 span:first-child"
-        );
-        if (memberSpan) {
-          memberSpan.textContent = `👤 ${
-            document.querySelector('input[name="new_name"]').value
-          }`;
+      try {
+        const response = JSON.parse(event.detail.xhr.responseText);
+        if (response.success) {
+          showToast("Name updated successfully!", "success");
+          // Update hero section dynamically
+          const heroName = document.querySelector("h1.text-4xl");
+          const newNameInput = document.querySelector('input[name="new_name"]');
+          if (heroName && newNameInput) {
+            heroName.textContent = newNameInput.value;
+          }
+          // Clear result div
+          event.detail.target.innerHTML = "";
+        } else {
+          showToast(response.detail || "Update failed", "error");
         }
+      } catch (e) {
+        showToast("Update failed. Please try again.", "error");
       }
     }
 
     if (targetId === "password-result") {
-      const response = JSON.parse(event.detail.xhr.responseText);
-      if (response.success) {
-        showToast("Password changed! Please login again.", "success");
-        setTimeout(() => {
-          window.location.href = "/auth/logout";
-        }, 2000);
+      try {
+        const response = JSON.parse(event.detail.xhr.responseText);
+        if (response.success) {
+          showToast("Password changed successfully! Logging out...", "success");
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1500);
+        } else {
+          showToast(response.detail || "Password update failed", "error");
+        }
+      } catch (e) {
+        showToast("Password update failed. Please try again.", "error");
       }
     }
 
@@ -366,10 +377,47 @@ endblock %} {% block content %}
       if (response.success) {
         showToast("Account deleted. Goodbye! 👋", "success");
         setTimeout(() => {
-          window.location.href = "/auth/logout";
+          window.location.href = "/";
         }, 2000);
       }
     }
+  });
+
+  // Form validation before submit
+  document.querySelectorAll("form[hx-put]").forEach((form) => {
+    form.addEventListener("submit", function (e) {
+      if (form.querySelector('input[name="new_name"]')) {
+        const newName = form
+          .querySelector('input[name="new_name"]')
+          .value.trim();
+        const currentName =
+          form.querySelector("h1.text-4xl")?.textContent.trim() || "";
+
+        // Check if name has actually changed
+        if (newName === currentName) {
+          e.preventDefault();
+          showToast("Please enter a different name to update.", "error");
+          return false;
+        }
+      }
+
+      if (form.querySelector('input[name="new_password"]')) {
+        const currentPass = form.querySelector(
+          'input[name="current_password"]',
+        ).value;
+        const newPass = form.querySelector('input[name="new_password"]').value;
+
+        // Check if passwords are the same
+        if (currentPass === newPass) {
+          e.preventDefault();
+          showToast(
+            "New password cannot be the same as current password.",
+            "error",
+          );
+          return false;
+        }
+      }
+    });
   });
 
   // Close modal on escape key or backdrop click

@@ -24,7 +24,7 @@ endblock %} {% block content %}
             type="text"
             name="search"
             value="{{ search or '' }}"
-            placeholder="Search by title or author..."
+            placeholder="Search by title ..."
             class="w-full px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all"
           />
           <i
@@ -34,13 +34,10 @@ endblock %} {% block content %}
         </div>
         <button
           type="submit"
-          class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:scale-[1.02] transition-transform htmx-indicator"
+          class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:scale-[1.02] transition-transform"
         >
-          <span class="htmx-indicator:hidden">Search</span>
-          <div class="htmx-indicator hidden flex items-center gap-2">
-            <div class="loading-spinner"></div>
-            <span>Processing...</span>
-          </div>
+          <span class="btn-text">Search</span>
+        
         </button>
       </div>
 

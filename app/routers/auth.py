@@ -218,6 +218,7 @@ async def register(
         request.session["user_id"] = new_user.id
         request.session["user_name"] = new_user.name
         request.session["is_admin"] = new_user.is_admin
+        request.session["session_created_at"] = datetime.utcnow().isoformat()
         
         # Determine redirect URL based on from parameter
         if from_param == "dashboard":
@@ -300,6 +301,7 @@ async def login(
     request.session["user_id"] = user.id
     request.session["user_name"] = user.name
     request.session["is_admin"] = user.is_admin
+    request.session["session_created_at"] = datetime.utcnow().isoformat()
     
     # Determine redirect URL based on from parameter
     if from_param == "dashboard":

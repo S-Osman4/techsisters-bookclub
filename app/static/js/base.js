@@ -2,10 +2,10 @@
 function showToast(message, type = "success", duration = 5000) {
   const toast = document.createElement("div");
   const iconMap = {
-  success: "check-circle",
-  error: "x-circle",
-  warning: "alert-triangle",
-  info: "info",
+    success: "check-circle",
+    error: "x-circle",
+    warning: "alert-triangle",
+    info: "info",
   };
 
   const icon = iconMap[type] || "info";
@@ -14,10 +14,10 @@ function showToast(message, type = "success", duration = 5000) {
     type === "success"
       ? "bg-green-500"
       : type === "error"
-      ? "bg-red-500"
-      : type === "warning"
-      ? "bg-yellow-500"
-      : "bg-blue-500";
+        ? "bg-red-500"
+        : type === "warning"
+          ? "bg-yellow-500"
+          : "bg-blue-500";
 
   toast.className = `toast ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2`;
   toast.innerHTML = `
@@ -27,7 +27,6 @@ function showToast(message, type = "success", duration = 5000) {
       ×
     </button>
   `;
-
 
   const container = document.getElementById("toast-container");
   container.appendChild(toast);
@@ -155,7 +154,7 @@ document.addEventListener("htmx:responseError", function (event) {
         if (!url.includes("/auth/login")) {
           setTimeout(
             () => (window.location.href = "/login?error=auth_required"),
-            1500
+            1500,
           );
         }
         break;
@@ -184,83 +183,67 @@ document.addEventListener("htmx:responseError", function (event) {
 // Handle successful responses
 document.addEventListener("htmx:afterSwap", function (event) {
   const target = event.detail.target;
+  const xhr = event.detail.xhr;
 
-  // Clear any JSON content from result divs
+  // Only clear result divs if response was NOT JSON
+  // (Let page-specific handlers deal with JSON responses)
   if (target.id && target.id.includes("result")) {
+    const contentType = xhr.getResponseHeader("Content-Type");
+
+    // If it's JSON, let the page-specific handler process it first
+    if (contentType && contentType.includes("application/json")) {
+      return; // Don't clear - let profile.html or other pages handle it
+    }
+
+    // Only clear for HTML responses
     target.innerHTML = "";
   }
 });
 
 // Handle form submissions
-document.addEventListener("htmx:beforeRequest", function (event) {
-  const form = event.detail.elt;
 
-  if (form.tagName === "FORM") {
-    // Clear previous errors
-    form.querySelectorAll(".border-red-500").forEach((el) => {
-      el.classList.remove("border-red-500", "ring-2", "ring-red-200");
-    });
-
-    // Validate form
-    const { isValid, errors } = validateForm(form);
-
-    if (!isValid && errors.length > 0) {
-      event.preventDefault();
-      errors.forEach((error) => showToast(error, "warning"));
-      return false;
-    }
-
-    // Add loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.innerHTML = `
-        <span class="loading-spinner"></span>
-        <span class="ml-2">Processing</span>
-      `;
-
-      submitBtn.disabled = true;
-    }
-  }
-});
-
-// Restore button state after request
+// Global button state reset after ANY HTMX request
 document.addEventListener("htmx:afterRequest", function (event) {
   const xhr = event.detail.xhr;
   const target = event.detail.target;
 
-  // Don't process if it's an error (handled elsewhere)
+  // Find the triggering form/button
+  const trigger = event.detail.elt;
+  const button =
+    trigger.tagName === "FORM"
+      ? trigger.querySelector('button[type="submit"]')
+      : trigger.tagName === "BUTTON"
+        ? trigger
+        : null;
+
+  // Reset button state (works for all buttons globally)
+  if (button) {
+    // Small delay to ensure HTMX classes are removed
+    setTimeout(() => {
+      button.classList.remove("htmx-request");
+      const btnText = button.querySelector(".btn-text");
+      const spinner = button.querySelector(".loading-spinner");
+
+      if (btnText) btnText.style.display = "inline";
+      if (spinner) spinner.style.display = "none";
+    }, 100);
+  }
+
+  // Handle JSON responses (existing code)
   if (xhr.status >= 400) return;
 
-  // Check if response is JSON
   const contentType = xhr.getResponseHeader("Content-Type");
   if (contentType && contentType.includes("application/json")) {
     try {
       const data = JSON.parse(xhr.responseText);
-
-      // Show toast for successful operations
       if (data.message && xhr.status >= 200 && xhr.status < 300) {
         showToast(data.message, "success");
-
-        // Clear any target content
-        if (target) {
-          target.innerHTML = "";
-        }
-
-        // Handle specific redirects if needed
-        if (data.redirect) {
-          setTimeout(() => {
-            window.location.href = data.redirect;
-          }, 1500);
-        }
-
-        // Handle page reloads if needed
-        if (data.reload) {
-          setTimeout(() => location.reload(), 1500);
-        }
+        if (target) target.innerHTML = "";
+        if (data.redirect)
+          setTimeout(() => (window.location.href = data.redirect), 1500);
+        if (data.reload) setTimeout(() => location.reload(), 1500);
       }
-    } catch (e) {
-      // Not JSON, ignore
-    }
+    } catch (e) {}
   }
 });
 
@@ -286,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
       errorMessages[error],
       error === "access_required" || error === "verify_code_first"
         ? "warning"
-        : "error"
+        : "error",
     );
 
     // Clean URL (remove error parameter)
@@ -295,36 +278,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Store original button text
-  document.querySelectorAll('button[type="submit"]').forEach((btn) => {
-    btn.setAttribute("data-original-text", btn.innerHTML);
-  });
-});
-
-document.addEventListener("htmx:configRequest", (evt) => {
-  // Disable button + add spinner on ALL HTMX requests
-  const button =
-    evt.detail.elt.closest("button") ||
-    evt.detail.elt.querySelector('button[type="submit"]');
-  if (button) {
-    button.disabled = true;
-    button.classList.add("btn-loading");
-    button.innerHTML =
-      button.innerHTML.replace("::after", "") +
-      ' <span class="loading-spinner"></span>';
-  }
-});
-
-document.addEventListener("htmx:afterRequest", (evt) => {
-  // Re-enable buttons after ALL requests
-  document.querySelectorAll(".btn-loading").forEach((btn) => {
-    btn.disabled = false;
-    btn.classList.remove("btn-loading");
-    // Remove spinner, restore original text
-    btn.innerHTML = btn.innerHTML.replace(
-      /<span class="loading-spinner"><\/span>$/,
-      ""
-    );
-  });
 });
 
 function initIcons() {
@@ -338,4 +291,3 @@ document.addEventListener("DOMContentLoaded", initIcons);
 
 // Re-run after HTMX swaps
 document.addEventListener("htmx:afterSwap", initIcons);
-

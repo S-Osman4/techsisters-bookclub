@@ -4,6 +4,7 @@ Authentication and authorization dependencies
 from fastapi import Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import Optional
+from datetime import datetime, timedelta
 import os
 
 from app.database import get_db
@@ -28,6 +29,7 @@ async def get_current_user(
     """
     Get current authenticated user from session.
     Raises 401 if not authenticated.
+    Includes session timeout check (7 days absolute timeout).
     """
     user_id = request.session.get("user_id")
     
@@ -36,6 +38,22 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated. Please login."
         )
+    
+    # Check session age (absolute timeout: 7 days)
+    session_created = request.session.get("session_created_at")
+    if not session_created:
+        # Backwards compatibility: set timestamp for existing sessions
+        request.session["session_created_at"] = datetime.utcnow().isoformat()
+    else:
+        from datetime import datetime, timedelta
+        created = datetime.fromisoformat(session_created)
+        if datetime.utcnow() - created > timedelta(days=7):
+            # Session too old, force re-login
+            request.session.clear()
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Your session has expired. Please log in again."
+            )
     
     user = db.query(User).filter(User.id == user_id).first()
     if not user:

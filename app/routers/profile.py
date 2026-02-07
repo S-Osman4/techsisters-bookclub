@@ -58,19 +58,25 @@ async def update_name(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Update user's name"""
+    """Update user's name - only if it has changed"""
+    new_name = new_name.strip()
+    
+    # Validate: name must be different from current name
+    if new_name.lower() == current_user.name.strip().lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New name must be different from current name"
+        )
+    
     old_name = current_user.name
-    current_user.name = new_name.strip()
+    current_user.name = new_name
     db.commit()
     db.refresh(current_user)
     
-    # Update session
-    # Note: We'll handle session update in the frontend via reload
     request.session["user_name"] = current_user.name
 
-    # ← ADD: Verify database update
     db_user = db.query(User).filter(User.id == current_user.id).first()
-    if db_user.name != new_name.strip():
+    if db_user.name != new_name:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update name in database"
@@ -89,7 +95,7 @@ async def change_password(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Change user's password"""
+    """Change user's password - cannot set same password"""
     
     # Verify current password
     if not current_user.verify_password(current_password):
@@ -98,12 +104,18 @@ async def change_password(
             detail="Current password is incorrect"
         )
     
+    # Validate: new password cannot be same as current
+    if current_user.verify_password(new_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password cannot be the same as current password"
+        )
+    
     # Update password
     current_user.password_hash = User.hash_password(new_password)
     db.commit()
     db.refresh(current_user) 
     
-    # Verify database update
     db_user = db.query(User).filter(User.id == current_user.id).first()
     if not db_user.verify_password(new_password):
         raise HTTPException(
@@ -111,14 +123,12 @@ async def change_password(
             detail="Failed to update password in database"
         )
     
-    # Clear session (force re-login)
     request.session.clear()
     
     return {
         "message": "Password changed successfully. Logging out for security...",
         "success": True
     }
-
 
 @router.delete("/account", response_model=MessageResponse)
 async def delete_account(

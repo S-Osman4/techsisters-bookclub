@@ -215,7 +215,8 @@ endblock %} {% block content %}
             type="submit"
             class="w-full btn-primary text-white py-3 rounded-xl font-semibold"
           >
-            Update Progress
+            <span class="btn-text">Update Progress</span>
+            <span class="loading-spinner">Updating...</span>
           </button>
         </form>
         </div> 
@@ -353,7 +354,8 @@ endblock %} {% block content %}
         type="submit"
         class="btn-primary text-white px-6 py-3 rounded-xl font-semibold"
       >
-        Submit Suggestion
+        <span class="btn-text">Submit Suggestion</span>
+        <span class="loading-spinner">Submitting...</span>
       </button>
     </form>
     {% else %}
@@ -592,7 +594,7 @@ endblock %} {% block content %}
 
             <!-- Status badge -->
             <span class="badge badge-primary"
-              >Completed {{ book.completed_date.strftime('%b %Y') }}</span
+              >Completed </span
             >
 
             <!-- PDF link -->
@@ -634,24 +636,8 @@ endblock %} {% block content %}
 
 <script>
   // Handle progress update
-  // Handle progress update
-document.addEventListener("htmx:afterRequest", function (event) {
-  if (event.detail.target.id === "progress-result") {
-    const xhr = event.detail.xhr;
-    if (xhr.status === 200) {
-      showToast("Progress updated successfully!", "success");
-      setTimeout(() => location.reload(), 1000);
-    }
-  }
 
-  if (event.detail.target.id === "suggestion-result") {
-    const xhr = event.detail.xhr;
-    if (xhr.status === 200) {
-      showToast("Book suggestion submitted!", "success");
-      setTimeout(() => location.reload(), 2500);
-    }
-  }
-});
+
 
   // Enhanced tabs with smooth animations
   const tabButtons = document.querySelectorAll(".tab-button");

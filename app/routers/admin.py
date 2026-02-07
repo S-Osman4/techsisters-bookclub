@@ -715,4 +715,4 @@ async def demote_from_admin(
     return {
         "message": f"⚠️ {user.name} has been demoted to regular member",
         "success": True
-    }   
+    }
