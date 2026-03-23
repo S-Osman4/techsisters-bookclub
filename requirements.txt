@@ -13,7 +13,7 @@ python-jose[cryptography]
 passlib[bcrypt]
 pydantic[email]
 slowapi
-secure 1.0.1
+secure==1.0.1
 bleach
 
 # Templates & Static Files
