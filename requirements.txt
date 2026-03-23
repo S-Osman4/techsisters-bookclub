@@ -1,42 +1,41 @@
 # Core FastAPI
-fastapi
-uvicorn[standard]
-python-multipart
+fastapi==0.124.4
+uvicorn[standard]==0.38.0
+python-multipart==0.0.20
 
 # Database
-sqlalchemy
-psycopg2-binary
-alembic
+sqlalchemy==2.0.45
+psycopg2-binary==2.9.11
+alembic==1.17.2
 
 # Authentication
-python-jose[cryptography]
-passlib[bcrypt]
-pydantic[email]
-slowapi
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+pydantic[email]==2.12.5
+slowapi==0.1.9
 secure==1.0.1
-bleach
+bleach==6.3.0
 
 # Templates & Static Files
-jinja2
-aiofiles
+jinja2==3.1.6
+aiofiles==25.1.0
 
 # Sessions
-itsdangerous
+itsdangerous==2.2.0
 
 # Environment Variables
-python-dotenv
+python-dotenv==1.2.1
 
 # Production Server
 gunicorn
 
 # Development & Testing
-pytest
-httpx
-pytest-asyncio
+pytest==7.4.4
+httpx==0.26.0
+pytest-asyncio==0.23.3
+werkzeug==3.1.4
 
-#additional imports
-werkzeug
-pytest
-pytest-asyncio
-httpx
+httpx===0.26.0
+# Timezone support
+tzdata==2025.3
 
