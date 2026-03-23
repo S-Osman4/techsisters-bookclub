@@ -87,7 +87,9 @@ endblock %} {% block content %}
             class="w-full sm:w-auto btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center relative"
           >
             <span class="btn-text">Update Name</span>
-            <span class="loading-spinner htmx-indicator name-spinner">Updating...</span>
+            <span class="loading-spinner htmx-indicator name-spinner"
+              >Updating...</span
+            >
           </button>
         </form>
         <div id="name-result" class="mt-2"></div>
@@ -373,12 +375,18 @@ endblock %} {% block content %}
     }
 
     if (targetId === "delete-result") {
-      const response = JSON.parse(event.detail.xhr.responseText);
-      if (response.success) {
-        showToast("Account deleted. Goodbye! 👋", "success");
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 2000);
+      try {
+        const response = JSON.parse(event.detail.xhr.responseText);
+        if (response.success) {
+          showToast("Account deleted. Goodbye! 👋", "success");
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 2000);
+        } else {
+          showToast(response.detail || "Deletion failed", "error");
+        }
+      } catch (e) {
+        showToast("Something went wrong. Please try again.", "error");
       }
     }
   });

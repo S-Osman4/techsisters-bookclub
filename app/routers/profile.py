@@ -132,6 +132,7 @@ async def change_password(
 
 @router.delete("/account", response_model=MessageResponse)
 async def delete_account(
+    request: Request,
     password: str = Form(...),
     confirmation: str = Form(...),
     current_user: User = Depends(get_current_user),
@@ -171,6 +172,7 @@ async def delete_account(
     # Delete user (cascade will handle related records)
     db.delete(current_user)
     db.commit()
+    request.session.clear()
     
     return {
         "message": "Account deleted successfully. You will be redirected to the home page.",

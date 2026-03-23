@@ -38,4 +38,5 @@ werkzeug==3.1.4
 httpx===0.26.0
 # Timezone support
 tzdata==2025.3
+resend==2.0.0
 
