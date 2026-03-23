@@ -116,7 +116,6 @@ app.add_middleware(
 
 # Security headers (skip in test environment)
 if not IS_TEST_ENV:
-    secure_headers = Secure()
 
     @app.middleware("http")
     async def set_security_headers(request: Request, call_next):
@@ -125,9 +124,12 @@ if not IS_TEST_ENV:
         if 300 <= response.status_code < 400:
             return response
 
-        headers = secure_headers.headers
-        for k, v in headers.items():
-            response.headers[k] = v
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
         if os.getenv("ENVIRONMENT") == "production":
             if response.status_code == 401 and request.url.path.startswith(("/auth/", "/api/")):
