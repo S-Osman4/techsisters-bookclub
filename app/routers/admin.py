@@ -10,6 +10,7 @@ from typing import List
 import secrets
 import string
 import bleach
+import json
 
 
 from app.database import get_db
@@ -100,7 +101,9 @@ async def update_access_code(
     admin_action = AdminAction(
         admin_id=admin.id,
         action="update_access_code",
-        target=f"new_code={new_code}"
+        target=json.dumps({
+            "new_code": new_code
+        })
     )
 
     db.add(admin_action)
@@ -111,33 +114,22 @@ async def update_access_code(
         "message": f"Access code updated to: {code.code}. Remember to post it in the WhatsApp group!",
         "success": True
     }
-@router.post("/code/generate", response_model=CodeResponse)
+@router.post("/code/generate", response_model=dict)
 async def generate_access_code_endpoint(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
     """
-    Generate a new random access code and save it.
+    Generate a new random access code (does NOT save to database).
+    Returns the code for preview/confirmation.
     """
     new_code = generate_access_code()
-
-    code = db.query(AccessCode).first()
-    if not code:
-        code = AccessCode(code=new_code)
-        db.add(code)
-    else:
-        code.code = new_code
-
-    admin_action = AdminAction(
-        admin_id=admin.id,
-        action="update_access_code",
-        target=f"new_code={new_code}",
-    )
-    db.add(admin_action)
-    db.commit()
-    db.refresh(code)
-
-    return code
+    
+    # Return the code WITHOUT saving to database
+    return {
+        "generated_code": new_code,
+        "message": "Code generated for preview. Click 'Update' to save it."
+    }
 
 
 # ===== Current Book Management =====
@@ -147,7 +139,7 @@ async def update_current_book(
     pdf_url: str = Form(None),
     cover_image_url: str = Form(None),
     current_chapters: str = Form(None),
-    total_chapters: int = Form(None),
+    total_chapters: str = Form(None),  # Keep as string
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -160,43 +152,69 @@ async def update_current_book(
             detail="No current book set. Please set a book from the queue first."
         )
     
-    # Sanitize and update fields if provided
+    # Title is required
     if title is not None:
         title = sanitize_input(title, max_length=200)
-        if not title:
+        if not title or not title.strip():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Title cannot be empty"
             )
         current_book.title = title
 
+    # Handle PDF URL - can be empty
     if pdf_url is not None:
         pdf_url = sanitize_input(pdf_url, max_length=500)
-        if not pdf_url.startswith(('http://', 'https://')):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="PDF URL must be a valid HTTP/HTTPS URL"
-            )
-        current_book.pdf_url = pdf_url
+        if pdf_url and pdf_url.strip():  # Only validate if not empty
+            if not pdf_url.startswith(('http://', 'https://')):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="PDF URL must be a valid HTTP/HTTPS URL"
+                )
+            current_book.pdf_url = pdf_url
+        else:
+            current_book.pdf_url = None  # Set to None if empty
 
+    # Handle Cover Image URL - can be empty
     if cover_image_url is not None:
         cover_image_url = sanitize_input(cover_image_url, max_length=500)
-        if cover_image_url and not cover_image_url.startswith(('http://', 'https://')):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cover image URL must be a valid HTTP/HTTPS URL"
-            )
-        current_book.cover_image_url = cover_image_url
+        if cover_image_url and cover_image_url.strip():  # Only validate if not empty
+            if not cover_image_url.startswith(('http://', 'https://')):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cover image URL must be a valid HTTP/HTTPS URL"
+                )
+            current_book.cover_image_url = cover_image_url
+        else:
+            current_book.cover_image_url = None
 
+    # Handle Current Chapters - can be empty
     if current_chapters is not None:
         current_chapters = sanitize_input(current_chapters, max_length=100)
-        current_book.current_chapters = current_chapters
+        current_book.current_chapters = current_chapters if current_chapters else None
+    
+    # Handle Total Chapters - convert only if provided and valid
+    if total_chapters is not None:
+        total_chapters = total_chapters.strip()
+        if total_chapters:
+            try:
+                current_book.total_chapters = int(total_chapters)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Total chapters must be a valid number"
+                )
+        else:
+            current_book.total_chapters = None
     
     # Log the admin action
     admin_action = AdminAction(
         admin_id=admin.id,
         action="update_current_book",
-        target=f"book_id={current_book.id}"
+        target=json.dumps({
+            "book_id": current_book.id,
+            "book_title": current_book.title
+        })
     )
     db.add(admin_action)
 
@@ -269,7 +287,10 @@ async def set_current_book(
     admin_action = AdminAction(
         admin_id=admin.id,
         action="set_current_book",
-        target=f"book_id={book_id}, title={book.title}"
+        target=json.dumps({
+            "book_id": book_id,
+            "book_title": book.title
+        })
     )
     db.add(admin_action)
 
@@ -321,7 +342,11 @@ async def complete_current_book(
     admin_action = AdminAction(
         admin_id=admin.id,
         action="complete_book",
-        target=f"book_id={current_book.id}, title={current_book.title}, auto_completed={auto_completed_count}"
+        target=json.dumps({
+            "book_id": current_book.id,
+            "book_title": current_book.title,
+            "auto_completed": auto_completed_count
+        })
     )
     db.add(admin_action)
     
@@ -394,12 +419,16 @@ async def update_meeting(
         meeting.start_at = start_at_utc
         meeting.meet_link = meet_link
 
-    adminaction = AdminAction(
+    admin_action = AdminAction(
         admin_id=admin.id,
-        action="updatemeeting",
-        target=f"start_at={local_dt.isoformat()}, tz={timezone}",
+        action="update_meeting",
+        target=json.dumps({
+            "start_at": local_dt.isoformat(),
+            "timezone": timezone,
+            "meet_link": meet_link
+        })
     )
-    db.add(adminaction)
+    db.add(admin_action)
     db.commit()
 
     return {"message": "Meeting updated successfully", "success": True}
@@ -489,7 +518,11 @@ async def approve_suggestion(
     admin_action = AdminAction(
         admin_id=admin.id,
         action="approve_suggestion",
-        target=f"suggestion_id={suggestion.id}"
+        target=json.dumps({
+            "suggestion_id": suggestion.id,
+            "book_title": suggestion.title,
+            "user_name": suggestion.user.name if suggestion.user else "User"
+        })
     )
     db.add(admin_action)
     
@@ -532,7 +565,11 @@ async def reject_suggestion(
     admin_action = AdminAction(
         admin_id=admin.id,
         action="reject_suggestion",
-        target=f"suggestion_id={suggestion.id}"
+        target=json.dumps({
+            "suggestion_id": suggestion.id,
+            "book_title": suggestion.title,
+            "user_name": suggestion.user.name if suggestion.user else "User"
+        })
     )
     db.add(admin_action)
     db.commit()
@@ -648,7 +685,11 @@ async def promote_to_admin(
     admin_action = AdminAction(
         admin_id=admin.id,
         action="promote_admin",
-        target=f"user_id={user.id}, email={user.email}"
+        target=json.dumps({
+            "user_id": user.id,
+            "user_name": user.name,
+            "user_email": user.email
+        })
     )
     db.add(admin_action)
     
@@ -706,7 +747,11 @@ async def demote_from_admin(
     admin_action = AdminAction(
         admin_id=admin.id,
         action="demote_admin",
-        target=f"user_id={user.id}, email={user.email}"
+        target=json.dumps({
+            "user_id": user.id,
+            "user_name": user.name,
+            "user_email": user.email
+        })
     )
     db.add(admin_action)
     
@@ -716,3 +761,104 @@ async def demote_from_admin(
         "message": f"⚠️ {user.name} has been demoted to regular member",
         "success": True
     }
+
+def format_admin_log_message(log_action: str, log_target: str) -> str:
+    """
+    Convert admin log data into a human-readable sentence.
+    Handles both old string format and new JSON format.
+    """
+    if not log_target:
+        return "No details available"
+    
+    # Try to parse as JSON first (new format)
+    try:
+        data = json.loads(log_target)
+        use_json = True
+    except json.JSONDecodeError:
+        use_json = False
+    
+    if use_json:
+        # Handle JSON format
+        if log_action == "set_current_book":
+            return f"Set '{data.get('book_title', 'a book')}' as the current reading club book."
+        
+        elif log_action == "update_current_book":
+            return f"Updated details for '{data.get('book_title', 'the current book')}'."
+        
+        elif log_action == "approve_suggestion":
+            book_title = data.get('book_title', 'a book')
+            user_name = data.get('user_name', 'a user')
+            return f"Approved '{book_title}' suggested by {user_name}."
+        
+        elif log_action == "reject_suggestion":
+            book_title = data.get('book_title', 'a book')
+            user_name = data.get('user_name', 'a user')
+            return f"Rejected '{book_title}' suggested by {user_name}."
+        
+        elif log_action == "update_access_code":
+            return f"Updated access code to '{data.get('new_code', 'new code')}'."
+        
+        elif log_action == "generate_access_code":
+            return f"Generated new access code: '{data.get('new_code', 'new code')}'."
+        
+        elif log_action == "update_meeting":
+            if data.get('start_at'):
+                try:
+                    dt = datetime.fromisoformat(data['start_at'].replace('Z', '+00:00'))
+                    formatted_time = dt.strftime('%d %B at %H:%M')
+                    return f"Scheduled meeting for {formatted_time}"
+                except:
+                    return "Updated meeting details"
+            return "Updated meeting details"
+        
+        elif log_action == "complete_book":
+            book_title = data.get('book_title', 'a book')
+            auto_completed = data.get('auto_completed', 0)
+            msg = f"Completed '{book_title}'"
+            if auto_completed and int(auto_completed) > 0:
+                msg += f" (auto-completed {auto_completed} readings)"
+            return msg + "."
+        
+        elif log_action == "promote_admin":
+            user_name = data.get('user_name', 'A user')
+            return f"Promoted {user_name} to Administrator."
+        
+        elif log_action == "demote_admin":
+            user_name = data.get('user_name', 'A user')
+            return f"Demoted {user_name} from Administrator to Member."
+        
+        else:
+            return f"Performed action: {log_action.replace('_', ' ')}"
+    
+    else:
+        # Handle old string format (backward compatibility)
+        try:
+            # Try to parse old format
+            if log_action == "set_current_book":
+                # Format: "book_id=5, title=Project Hail Mary"
+                parts = {}
+                for item in log_target.split(','):
+                    if '=' in item:
+                        key, value = item.strip().split('=', 1)
+                        parts[key] = value
+                return f"Set '{parts.get('title', 'a book')}' as current book."
+            
+            elif log_action == "update_access_code":
+                # Format: "new_code=ABC123"
+                if '=' in log_target:
+                    return f"Updated access code to '{log_target.split('=', 1)[1]}'."
+                return "Updated access code"
+            
+            elif log_action == "approve_suggestion":
+                # Format: "suggestion_id=12"
+                return "Approved a book suggestion"
+            
+            elif log_action == "reject_suggestion":
+                return "Rejected a book suggestion"
+            
+            else:
+                # Generic fallback for other actions
+                return log_target or "Action performed"
+                
+        except Exception:
+            return log_target or "Details not available"

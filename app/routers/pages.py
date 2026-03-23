@@ -180,6 +180,8 @@ async def admin_page(
     from app.models import AccessCode, AdminAction
     from sqlalchemy import func
     from datetime import datetime
+    from app.routers.admin import format_admin_log_message
+
     
     # Fetch admin data
     access_code = db.query(AccessCode).first()
@@ -278,7 +280,8 @@ async def admin_page(
             "engagement": engagement,
             "admin_logs": admin_logs,
             "all_users": users_list,
-            "admin_count": admin_count
+            "admin_count": admin_count,
+            "format_admin_log_message": format_admin_log_message
         }
     )
 
