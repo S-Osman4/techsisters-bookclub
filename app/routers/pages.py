@@ -431,3 +431,30 @@ async def feedback_page(
             "current_user": current_user,
         },
     )
+
+def mask_email(email: str) -> str:
+    """Mask email: jane.doe@example.com → ja*******@example.com"""
+    if not email or '@' not in email:
+        return email
+    
+    local, domain = email.split('@', 1)
+    
+    # Show first 2 chars, mask the rest of local part
+    if len(local) <= 2:
+        masked_local = local[0] + '*'
+    else:
+        masked_local = local[:2] + '*' * (len(local) - 2)
+    
+    # Also partially mask domain: example.com → ex*****.com
+    dot_pos = domain.rfind('.')
+    if dot_pos > 2:
+        domain_name = domain[:dot_pos]
+        tld = domain[dot_pos:]
+        masked_domain = domain_name[:2] + '*' * (len(domain_name) - 2) + tld
+    else:
+        masked_domain = domain  # too short to mask
+    
+    return f"{masked_local}@{masked_domain}"
+
+# Register it as a Jinja2 global or filter
+templates.env.filters["mask_email"] = mask_email

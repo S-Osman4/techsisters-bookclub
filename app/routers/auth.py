@@ -5,8 +5,10 @@ import code
 import re
 import secrets
 import bleach
+import httpx
+import os
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from sqlalchemy.orm import Session
 from datetime import datetime
 from slowapi import Limiter
@@ -66,6 +68,27 @@ def sanitize_input(text: str, max_length: int = 200) -> str:
         cleaned = cleaned[:max_length]
     
     return cleaned
+
+HCAPTCHA_SECRET = os.environ.get("HCAPTCHA_SECRET", "your_secret_key")
+
+async def verify_hcaptcha(token: str, ip: str) -> tuple[bool, list]:
+    """Verify hCaptcha token with hCaptcha servers"""
+    if not token:
+        return False, ["missing-input-response"]
+    
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://hcaptcha.com/siteverify",
+            data={
+                "secret": HCAPTCHA_SECRET,
+                "response": token,
+                "sitekey": "041ce32e-c898-4648-bf00-88f8e6c41926",
+                "remoteip": ip,
+            },
+            timeout=5,
+        )
+    j = resp.json()
+    return (True, []) if j.get("success") else (False, j.get("error-codes", []))
 
 # ===== Code Verification =====
 @router.post("/verify-code", response_model=MessageResponse)
@@ -128,6 +151,7 @@ async def register(
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
+    h_captcha_response: str = Form("", alias="h-captcha-response"),
     from_param: str = Form(None, alias="from"),
     db: Session = Depends(get_db)
 ):
@@ -139,6 +163,15 @@ async def register(
     - Email must be unique
     - Password minimum 8 characters
     """
+    # Verify hCaptcha first
+    client_ip = request.client.host
+    captcha_ok, errors = await verify_hcaptcha(h_captcha_response, client_ip)
+    if not captcha_ok:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please complete the captcha verification."
+        )
+    
     # Check if code is verified
     if not request.session.get("code_verified") and not request.session.get("user_id"):
         raise HTTPException(
@@ -229,10 +262,10 @@ async def register(
             redirect_url = "/dashboard"
         
         # Return redirect response with HX-Redirect header for htmx
-        return {
-        "success": True,
-        "redirect": redirect_url
-    }
+        response = Response(status_code=200)
+        response.headers["HX-Redirect"] = redirect_url
+        return response
+        
             
     except Exception as e:
         db.rollback()
@@ -314,10 +347,9 @@ async def login(
         redirect_url = "/dashboard"
     
     # Return redirect response with HX-Redirect header for htmx
-    return {
-    "success": True,
-    "redirect": redirect_url
-}
+    response = Response(status_code=200)
+    response.headers["HX-Redirect"] = redirect_url
+    return response
 
 # ===== Logout =====
 @router.post("/logout")

@@ -862,3 +862,4 @@ def format_admin_log_message(log_action: str, log_target: str) -> str:
                 
         except Exception:
             return log_target or "Details not available"
+        

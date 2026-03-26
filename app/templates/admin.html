@@ -345,7 +345,7 @@ Club{% endblock %} {% block content %}
                 <p class="text-sm text-gray-600 mb-1">
                   Suggested by: <strong>{{ suggestion.user_name }}</strong>
                 </p>
-                <p class="text-xs text-gray-500">{{ suggestion.user_email }}</p>
+                <p class="text-xs text-gray-500">{{ suggestion.user_email | mask_email }}</p>
               </div>
             </div>
             
@@ -376,11 +376,12 @@ Club{% endblock %} {% block content %}
                 data-id="{{ suggestion.id }}"
                 data-title="{{ suggestion.title }}"
                 data-user-name="{{ suggestion.user_name }}"
-                data-user-email="{{ suggestion.user_email }}"
+                data-user-email="{{ suggestion.user_email | mask_email }}"
                 data-pdf-url="{{ suggestion.pdf_url }}"
                 data-cover-url="{{ suggestion.cover_image_url or '' }}"
               >
-                ✓ Approve
+                <span class="btn-text"> ✓ Approve </span>
+                <span class="loading-spinner"> Approving... </span>
               </button>
               <button
                 type="button"
@@ -389,7 +390,7 @@ Club{% endblock %} {% block content %}
                 data-id="{{ suggestion.id }}"
                 data-title="{{ suggestion.title }}"
                 data-user-name="{{ suggestion.user_name }}"
-                data-user-email="{{ suggestion.user_email }}"
+                data-user-email="{{ suggestion.user_email | mask_email }}"
                 data-pdf-url="{{ suggestion.pdf_url }}"
                 data-cover-url="{{ suggestion.cover_image_url or '' }}"
               >
@@ -424,7 +425,7 @@ Club{% endblock %} {% block content %}
               <p class="text-sm text-gray-600 mb-2">
                 Suggested by: <strong>{{ suggestion.user_name }}</strong>
               </p>
-              <p class="text-xs text-gray-500 mb-2">{{ suggestion.user_email }}</p>
+              <p class="text-xs text-gray-500 mb-2">{{ suggestion.user_email | mask_email }}</p>
               <div class="flex flex-wrap gap-2 text-sm">
                 <a href="{{ suggestion.pdf_url }}"
                   target="_blank"
@@ -452,11 +453,13 @@ Club{% endblock %} {% block content %}
                 data-id="{{ suggestion.id }}"
                 data-title="{{ suggestion.title }}"
                 data-user-name="{{ suggestion.user_name }}"
-                data-user-email="{{ suggestion.user_email }}"
+                data-user-email="{{ suggestion.user_email | mask_email }}"
                 data-pdf-url="{{ suggestion.pdf_url }}"
                 data-cover-url="{{ suggestion.cover_image_url or '' }}"
               >
-                ✓ Approve
+               <span class="btn-text"> ✓ Approve </span>
+               <span class="loading-spinner"> Approving... </span>
+               
               </button>
               <button
                 type="button"
@@ -465,7 +468,7 @@ Club{% endblock %} {% block content %}
                 data-id="{{ suggestion.id }}"
                 data-title="{{ suggestion.title }}"
                 data-user-name="{{ suggestion.user_name }}"
-                data-user-email="{{ suggestion.user_email }}"
+                data-user-email="{{ suggestion.user_email | mask_email }}"
                 data-pdf-url="{{ suggestion.pdf_url }}"
                 data-cover-url="{{ suggestion.cover_image_url or '' }}"
               >
@@ -890,7 +893,7 @@ Club{% endblock %} {% block content %}
                       <span class="text-teal-400">(You)</span>
                       {% endif %}
                     </div>
-                    <div class="text-sm text-gray-500">{{ user.email }}</div>
+                    <div class="text-sm text-gray-500">{{ user.email | mask_email }}</div>
                   </div>
                 </div>
               </td>
@@ -967,7 +970,7 @@ Club{% endblock %} {% block content %}
                   <span class="text-teal-400">(You)</span>
                   {% endif %}
                 </div>
-                <div class="text-xs text-gray-500">{{ user.email }}</div>
+                <div class="text-xs text-gray-500">{{ user.email | mask_email }}</div>
               </div>
             </div>
             
