@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     @property
     def is_testing(self) -> bool:
         return self.ENVIRONMENT == "test"
+    
+    @property
+    def debug(self) -> bool:
+        return self.is_development
 
     @property
     def async_database_url(self) -> str:
