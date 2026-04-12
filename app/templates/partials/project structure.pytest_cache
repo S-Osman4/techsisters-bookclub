@@ -1,0 +1,248 @@
+┣ 📂.pytest_cache
+┃ ┣ 📂v
+┃ ┃ ┗ 📂cache
+┃ ┃   ┣ 📜lastfailed
+┃ ┃   ┣ 📜nodeids
+┃ ┃   ┗ 📜stepwise
+┃ ┣ 📜.gitignore
+┃ ┣ 📜CACHEDIR.TAG
+┃ ┗ 📜README.md
+┣ 📂app
+┃ ┣ 📂__pycache__
+┃ ┃ ┣ 📜__init__.cpython-314.pyc
+┃ ┃ ┣ 📜database.cpython-314.pyc
+┃ ┃ ┣ 📜dependencies.cpython-314.pyc
+┃ ┃ ┣ 📜main.cpython-314.pyc
+┃ ┃ ┣ 📜models.cpython-314.pyc
+┃ ┃ ┗ 📜schemas.cpython-314.pyc
+┃ ┣ 📂api
+┃ ┃ ┣ 📂__pycache__
+┃ ┃ ┃ ┣ 📜__init__.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜admin.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜auth.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜books.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜deps.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜feedback.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜pages.cpython-314.pyc
+┃ ┃ ┃ ┗ 📜profile.cpython-314.pyc
+┃ ┃ ┣ 📜__init__.py
+┃ ┃ ┣ 📜admin.py
+┃ ┃ ┣ 📜auth.py
+┃ ┃ ┣ 📜books.py
+┃ ┃ ┣ 📜deps.py
+┃ ┃ ┣ 📜feedback.py
+┃ ┃ ┣ 📜pages.py
+┃ ┃ ┗ 📜profile.py
+┃ ┣ 📂core
+┃ ┃ ┣ 📂__pycache__
+┃ ┃ ┃ ┣ 📜__init__.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜config.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜exceptions.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜limiter.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜middleware.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜security.cpython-314.pyc
+┃ ┃ ┃ ┗ 📜template_helpers.cpython-314.pyc
+┃ ┃ ┣ 📜__init__.py
+┃ ┃ ┣ 📜config.py
+┃ ┃ ┣ 📜exceptions.py
+┃ ┃ ┣ 📜limiter.py
+┃ ┃ ┣ 📜middleware.py
+┃ ┃ ┣ 📜security.py
+┃ ┃ ┗ 📜template_helpers.py
+┃ ┣ 📂models
+┃ ┃ ┣ 📂__pycache__
+┃ ┃ ┃ ┣ 📜__init__.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜access_code.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜admin_action.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜base.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜book_suggestion.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜book.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜feedback.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜meeting.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜reading_progress.cpython-314.pyc
+┃ ┃ ┃ ┗ 📜user.cpython-314.pyc
+┃ ┃ ┣ 📜__init__.py
+┃ ┃ ┣ 📜access_code.py
+┃ ┃ ┣ 📜admin_action.py
+┃ ┃ ┣ 📜base.py
+┃ ┃ ┣ 📜book_suggestion.py
+┃ ┃ ┣ 📜book.py
+┃ ┃ ┣ 📜feedback.py
+┃ ┃ ┣ 📜meeting.py
+┃ ┃ ┣ 📜reading_progress.py
+┃ ┃ ┗ 📜user.py
+┃ ┣ 📂repositories
+┃ ┃ ┣ 📂__pycache__
+┃ ┃ ┃ ┣ 📜__init__.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜access_code.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜admin_action.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜base.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜book_suggestion.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜book.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜feedback.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜meeting.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜reading_progress.cpython-314.pyc
+┃ ┃ ┃ ┗ 📜user.cpython-314.pyc
+┃ ┃ ┣ 📜__init__.py
+┃ ┃ ┣ 📜access_code.py
+┃ ┃ ┣ 📜admin_action.py
+┃ ┃ ┣ 📜base.py
+┃ ┃ ┣ 📜book_suggestion.py
+┃ ┃ ┣ 📜book.py
+┃ ┃ ┣ 📜feedback.py
+┃ ┃ ┣ 📜meeting.py
+┃ ┃ ┣ 📜reading_progress.py
+┃ ┃ ┗ 📜user.py
+┃ ┣ 📂schemas
+┃ ┃ ┣ 📂__pycache__
+┃ ┃ ┃ ┣ 📜__init__.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜access_code.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜admin.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜book.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜common.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜feedback.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜meeting.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜progress.cpython-314.pyc
+┃ ┃ ┃ ┗ 📜user.cpython-314.pyc
+┃ ┃ ┣ 📜__init__.py
+┃ ┃ ┣ 📜access_code.py
+┃ ┃ ┣ 📜admin.py
+┃ ┃ ┣ 📜book.py
+┃ ┃ ┣ 📜common.py
+┃ ┃ ┣ 📜feedback.py
+┃ ┃ ┣ 📜meeting.py
+┃ ┃ ┣ 📜progress.py
+┃ ┃ ┗ 📜user.py
+┃ ┣ 📂services
+┃ ┃ ┣ 📂__pycache__
+┃ ┃ ┃ ┣ 📜__init__.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜admin.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜auth.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜book.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜feedback.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜meeting.cpython-314.pyc
+┃ ┃ ┃ ┣ 📜profile.cpython-314.pyc
+┃ ┃ ┃ ┗ 📜progress.cpython-314.pyc
+┃ ┃ ┣ 📜__init__.py
+┃ ┃ ┣ 📜admin.py
+┃ ┃ ┣ 📜auth.py
+┃ ┃ ┣ 📜book.py
+┃ ┃ ┣ 📜feedback.py
+┃ ┃ ┣ 📜meeting.py
+┃ ┃ ┣ 📜profile.py
+┃ ┃ ┗ 📜progress.py
+┃ ┣ 📂static
+┃ ┃ ┣ 📂css
+┃ ┃ ┃ ┗ 📜base.css
+┃ ┃ ┣ 📂dist
+┃ ┃ ┃ ┣ 📂pages
+┃ ┃ ┃ ┃ ┣ 📜admin.js
+┃ ┃ ┃ ┃ ┣ 📜admin.js.map
+┃ ┃ ┃ ┃ ┣ 📜dashboard.js
+┃ ┃ ┃ ┃ ┣ 📜dashboard.js.map
+┃ ┃ ┃ ┃ ┣ 📜feedback.js
+┃ ┃ ┃ ┃ ┣ 📜feedback.js.map
+┃ ┃ ┃ ┃ ┣ 📜index.js
+┃ ┃ ┃ ┃ ┣ 📜index.js.map
+┃ ┃ ┃ ┃ ┣ 📜login.js
+┃ ┃ ┃ ┃ ┣ 📜login.js.map
+┃ ┃ ┃ ┃ ┣ 📜past-books.js
+┃ ┃ ┃ ┃ ┣ 📜past-books.js.map
+┃ ┃ ┃ ┃ ┣ 📜profile.js
+┃ ┃ ┃ ┃ ┣ 📜profile.js.map
+┃ ┃ ┃ ┃ ┣ 📜register.js
+┃ ┃ ┃ ┃ ┣ 📜register.js.map
+┃ ┃ ┃ ┃ ┣ 📜upcoming-books.js
+┃ ┃ ┃ ┃ ┗ 📜upcoming-books.js.map
+┃ ┃ ┃ ┣ 📜csrf.js
+┃ ┃ ┃ ┣ 📜csrf.js.map
+┃ ┃ ┃ ┣ 📜htmx-hooks.js
+┃ ┃ ┃ ┣ 📜htmx-hooks.js.map
+┃ ┃ ┃ ┣ 📜main.css
+┃ ┃ ┃ ┣ 📜main.js
+┃ ┃ ┃ ┣ 📜main.js.map
+┃ ┃ ┃ ┣ 📜modal.js
+┃ ┃ ┃ ┣ 📜modal.js.map
+┃ ┃ ┃ ┣ 📜nav.js
+┃ ┃ ┃ ┣ 📜nav.js.map
+┃ ┃ ┃ ┣ 📜toast.js
+┃ ┃ ┃ ┣ 📜toast.js.map
+┃ ┃ ┃ ┣ 📜types.js
+┃ ┃ ┃ ┣ 📜types.js.map
+┃ ┃ ┃ ┣ 📜url-errors.js
+┃ ┃ ┃ ┗ 📜url-errors.js.map
+┃ ┃ ┗ 📂src
+┃ ┃   ┣ 📂css
+┃ ┃   ┃ ┗ 📜main.css
+┃ ┃   ┣ 📂dist
+┃ ┃   ┃ ┣ 📜main.css
+┃ ┃   ┃ ┗ 📜main.js
+┃ ┃   ┗ 📂ts
+┃ ┃     ┣ 📂pages
+┃ ┃     ┃ ┣ 📜admin.ts
+┃ ┃     ┃ ┣ 📜dashboard.ts
+┃ ┃     ┃ ┣ 📜feedback.ts
+┃ ┃     ┃ ┣ 📜index.ts
+┃ ┃     ┃ ┣ 📜login.ts
+┃ ┃     ┃ ┣ 📜past-books.ts
+┃ ┃     ┃ ┣ 📜profile.ts
+┃ ┃     ┃ ┗ 📜register.ts
+┃ ┃     ┣ 📜csrf.ts
+┃ ┃     ┣ 📜htmx-hooks.ts
+┃ ┃     ┣ 📜main.ts
+┃ ┃     ┣ 📜modal.ts
+┃ ┃     ┣ 📜nav.ts
+┃ ┃     ┣ 📜toast.ts
+┃ ┃     ┣ 📜types.ts
+┃ ┃     ┗ 📜url-errors.ts
+┃ ┣ 📂templates
+┃ ┃ ┣ 📂modals
+┃ ┃ ┃ ┣ 📜_access_code_modal.html
+┃ ┃ ┃ ┣ 📜_admin_code_modal.html
+┃ ┃ ┃ ┣ 📜_admin_complete_book_modal.html
+┃ ┃ ┃ ┣ 📜_admin_edit_book_modal.html
+┃ ┃ ┃ ┣ 📜_admin_meeting_modal.html
+┃ ┃ ┃ ┣ 📜_admin_set_current_modal.html
+┃ ┃ ┃ ┣ 📜_admin_suggestion_modal.html
+┃ ┃ ┃ ┣ 📜_admin_user_modal.html
+┃ ┃ ┃ ┗ 📜_delete_account_modal.html
+┃ ┃ ┣ 📂pages
+┃ ┃ ┃ ┣ 📜admin.html
+┃ ┃ ┃ ┣ 📜dashboard.html
+┃ ┃ ┃ ┣ 📜feedback.html
+┃ ┃ ┃ ┣ 📜index.html
+┃ ┃ ┃ ┣ 📜login.html
+┃ ┃ ┃ ┣ 📜past_books.html
+┃ ┃ ┃ ┣ 📜profile.html
+┃ ┃ ┃ ┣ 📜register.html
+┃ ┃ ┃ ┗ 📜upcoming_books.html
+┃ ┃ ┣ 📂partials
+┃ ┃ ┃ ┣ 📜_books_grid.html
+┃ ┃ ┃ ┣ 📜_community_progress.html
+┃ ┃ ┃ ┣ 📜_empty_state.html
+┃ ┃ ┃ ┣ 📜_footer.html
+┃ ┃ ┃ ┣ 📜_meeting_banner.html
+┃ ┃ ┃ ┗ 📜_nav.html
+┃ ┃ ┣ 📜base.html
+┃ ┃ ┗ 📜feedback.html
+┃ ┣ 📜__init__.py
+┃ ┣ 📜database.py
+┃ ┣ 📜dependencies.py
+┃ ┗ 📜main.py
+┣ 📂venv
+┣ 📜.dockerignore
+┣ 📜.env
+┣ 📜.env.example
+┣ 📜.gitignore
+┣ 📜alembic.ini
+┣ 📜assert
+┣ 📜cookies.txt
+┣ 📜Dockerfile
+┣ 📜package.json
+┣ 📜README.md
+┣ 📜render.yaml
+┣ 📜requirements.txt
+┣ 📜run.py
+┣ 📜seed.py
+┣ 📜tailwind.config.js
+┗ 📜tsconfig.json

@@ -1,72 +1,82 @@
-"""
-Database connection and session management
-"""
-from sqlalchemy import create_engine, text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+# app/database.py
+import logging
+from collections.abc import AsyncGenerator
 
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Get database URL
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is not set")
-
-# Create engine
-# For PostgreSQL on Supabase, we need to configure the connection
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,  # Verify connections before using them
-    pool_recycle=300,    # Recycle connections after 5 minutes
-    echo=False           # Set to True to see SQL queries (for debugging)
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
 )
 
-# Create SessionLocal class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from app.core.config import settings
 
-# Create Base class for models
-Base = declarative_base()
+logger = logging.getLogger(__name__)
 
-# Dependency to get database session
-def get_db():
+# ── Engine ────────────────────────────────────────────────────────────────────
+engine = create_async_engine(
+    settings.async_database_url,
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_timeout=settings.DB_POOL_TIMEOUT,
+    pool_recycle=settings.DB_POOL_RECYCLE,
+    pool_pre_ping=True,   # verify connection before using from pool
+    echo=settings.is_development,
+)
+
+# ── Session factory ───────────────────────────────────────────────────────────
+AsyncSessionFactory = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,  # keep ORM objects usable after commit
+    autoflush=False,
+    autocommit=False,
+)
+
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """
-    Dependency function that yields a database session.
-    FastAPI will automatically close the session after the request.
+    FastAPI dependency that yields an async database session.
+    Rolls back on exception, always closes on exit.
+
+    Usage:
+        async def my_route(db: AsyncSession = Depends(get_session)):
+            ...
     """
-    db = SessionLocal()
+    async with AsyncSessionFactory() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+
+async def create_all_tables() -> None:
+    """
+    Create all tables that do not yet exist.
+    Called once on application startup.
+    Does NOT drop or alter existing tables — use Alembic for migrations.
+    """
+    from app.models import Base  # noqa: F401 — import triggers model registration
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables created (or already exist)")
+
+
+async def check_connection() -> bool:
+    """
+    Verify the database is reachable.
+    Used in the health check endpoint.
+    """
+    from sqlalchemy import text
+
     try:
-        yield db
-    finally:
-        db.close()
-
-# Create all tables
-def create_tables():
-    """Create all database tables"""
-    Base.metadata.create_all(bind=engine)
-    print("✅ Database tables created!")
-
-
-# Test connection
-def test_connection():
-    """Test database connection"""
-    try:
-        db = SessionLocal()
-        db.execute(text("SELECT 1"))
-        db.close()
-        print("✅ Database connection successful!")
+        async with AsyncSessionFactory() as session:
+            await session.execute(text("SELECT 1"))
         return True
-    except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+    except Exception as exc:
+        logger.error("Database connection check failed: %s", exc)
         return False
-    
-    # Function to close database connection
-def disconnect():
-    """Close database connection pool"""
-    if engine:
-        engine.dispose()
-        print("✅ Database connections closed")

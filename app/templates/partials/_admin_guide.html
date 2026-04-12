@@ -1,0 +1,496 @@
+{# app/templates/partials/_admin_guide.html Collapsible admin guide — include at
+the top of admin.html. Collapsed by default. On mobile: one-at-a-time accordion.
+On desktop (≥640 px): sidebar-nav + content-panel layout. JS is compiled from
+admin_guide.ts — see static/ts/admin_guide.ts #}
+
+<section
+  id="admin-guide"
+  class="card mb-8 overflow-hidden border-l-4 border-l-secondary"
+  aria-labelledby="guide-heading"
+>
+  {# ── Outer toggle header ───────────────────────────────────────────────── #}
+  <button
+    type="button"
+    id="guide-toggle-btn"
+    onclick="AdminGuide.toggleOuter()"
+    class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+    aria-expanded="false"
+    aria-controls="guide-body"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0"
+        aria-hidden="true"
+      >
+        <svg
+          class="w-4 h-4 text-secondary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div>
+        <p id="guide-heading" class="font-semibold text-gray-900 text-sm">
+          Admin guide
+        </p>
+        <p class="text-xs text-gray-500">
+          How to manage the book club — click to expand
+        </p>
+      </div>
+    </div>
+    <svg
+      id="guide-chevron"
+      class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  </button>
+
+  {# ── Guide body — hidden by default ───────────────────────────────────── #}
+  <div id="guide-body" class="hidden border-t border-gray-100">
+    <div
+      id="guide-inner"
+      class="flex flex-col sm:grid sm:grid-cols-[220px_1fr]"
+    >
+      {# ── Desktop sidebar nav ───────────────────────────────────────────── #}
+      <nav
+        id="guide-nav"
+        class="hidden sm:flex flex-col gap-1 p-4 border-b sm:border-b-0 sm:border-r border-gray-100"
+        aria-label="Guide sections"
+      >
+        {% set nav_items = [ ("bc", "teal", "1", "Book cycle"), ("ra", "amber",
+        "2", "Reading assignment"), ("ac", "blue", "3", "Access code"), ("mt",
+        "coral", "4", "Meetings"), ("mem", "purple", "5", "Members"), ] %} {%
+        for id, colour, num, label in nav_items %}
+        <button
+          type="button"
+          id="nav-{{ id }}"
+          onclick="AdminGuide.selectSection('{{ id }}')"
+          class="guide-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full"
+          aria-selected="false"
+          role="tab"
+          aria-controls="dp-{{ id }}"
+        >
+          <span
+            class="guide-num guide-num--{{ colour }} w-5 h-5 rounded-full text-xs font-semibold flex items-center justify-center flex-shrink-0"
+          >
+            {{ num }}
+          </span>
+          {{ label }}
+        </button>
+        {% endfor %}
+      </nav>
+
+      {# ── Desktop content panels ────────────────────────────────────────── #}
+      <div id="guide-panels" class="hidden sm:block p-5 min-h-[240px]">
+        {# 1. Book cycle #}
+        <div
+          id="dp-bc"
+          class="guide-panel hidden"
+          role="tabpanel"
+          aria-labelledby="nav-bc"
+        >
+          <h3 class="guide-panel-heading">Running a book cycle</h3>
+          <ol class="guide-steps mt-3">
+            <li>
+              <span
+                >A member submits a suggestion. Review it under
+                <strong>Pending suggestions</strong> — approve to add to the
+                queue, or reject it.</span
+              >
+            </li>
+            <li>
+              <span
+                >When ready, click <strong>Set as current</strong> on any queued
+                book. Fill in the first reading assignment and total
+                chapters.</span
+              >
+            </li>
+            <li>
+              <span
+                >Each meeting, click <strong>Edit details</strong> on the
+                current book to advance the reading assignment to the next
+                chapters.</span
+              >
+            </li>
+            <li>
+              <span
+                >When finished, click <strong>Mark completed</strong>. This
+                moves it to past books and auto-completes all member progress
+                records.</span
+              >
+            </li>
+          </ol>
+        </div>
+
+        {# 2. Reading assignment #}
+        <div
+          id="dp-ra"
+          class="guide-panel hidden"
+          role="tabpanel"
+          aria-labelledby="nav-ra"
+        >
+          <h3 class="guide-panel-heading">Setting the reading assignment</h3>
+          <ul class="guide-steps mt-3">
+            <li>
+              <span
+                >The <strong>From</strong> and <strong>To</strong> chapter
+                fields define what members should read before the next
+                meeting.</span
+              >
+            </li>
+            <li>
+              <span
+                ><strong>Single chapter:</strong> enter the same number in both
+                fields — e.g. From <code class="guide-code">2</code> To
+                <code class="guide-code">2</code>. The To field auto-fills when
+                you tab away from From.</span
+              >
+            </li>
+            <li>
+              <span
+                ><strong>Range:</strong> enter different numbers — e.g. From
+                <code class="guide-code">1</code> To
+                <code class="guide-code">3</code>. Members see
+                <em>"Chapters 1–3"</em>.</span
+              >
+            </li>
+          </ul>
+          <p class="guide-tip mt-3">
+            A live preview appears as you type so you can see exactly what
+            members will read.
+          </p>
+        </div>
+
+        {# 3. Access code #}
+        <div
+          id="dp-ac"
+          class="guide-panel hidden"
+          role="tabpanel"
+          aria-labelledby="nav-ac"
+        >
+          <h3 class="guide-panel-heading">Access code</h3>
+          <ul class="guide-steps mt-3">
+            <li>
+              <span
+                >The access code gates entry to the platform. Only people with
+                the code can reach the dashboard.</span
+              >
+            </li>
+            <li>
+              <span
+                >Change it when you want to refresh membership access. Use
+                <strong>Generate</strong> for a random code, or type your
+                own.</span
+              >
+            </li>
+            <li>
+              <span
+                >Existing members won't be locked out — they're already logged
+                in. New members need the new code to register.</span
+              >
+            </li>
+          </ul>
+          <p class="guide-warn mt-3">
+            <strong
+              >Always post the new code in the WhatsApp group
+              immediately</strong
+            >
+            after changing it so new members can join.
+          </p>
+        </div>
+
+        {# 4. Meetings #}
+        <div
+          id="dp-mt"
+          class="guide-panel hidden"
+          role="tabpanel"
+          aria-labelledby="nav-mt"
+        >
+          <h3 class="guide-panel-heading">Meetings</h3>
+          <ul class="guide-steps mt-3">
+            <li>
+              <span
+                >There is one meeting record that you update each cycle. It
+                shows as a banner on the member dashboard.</span
+              >
+            </li>
+            <li>
+              <span
+                >Date and time are entered in
+                <strong>UK time</strong> (Europe/London) and automatically
+                converted for the system.</span
+              >
+            </li>
+            <li>
+              <span
+                >Tick <strong>Cancel this meeting</strong> to show a
+                cancellation banner instead. Add an optional note — e.g.
+                <em>"Taking a break for the holidays"</em>.</span
+              >
+            </li>
+            <li>
+              <span
+                >Members see a <strong>Join Now</strong> button when the meeting
+                is within 30 minutes of starting.</span
+              >
+            </li>
+          </ul>
+        </div>
+
+        {# 5. Members #}
+        <div
+          id="dp-mem"
+          class="guide-panel hidden"
+          role="tabpanel"
+          aria-labelledby="nav-mem"
+        >
+          <h3 class="guide-panel-heading">Managing members</h3>
+          <div class="grid sm:grid-cols-2 gap-3 mt-3">
+            <div class="guide-card">
+              <p class="font-medium text-gray-800 text-sm mb-1">
+                Promoting to admin
+              </p>
+              <p class="text-sm text-gray-600">
+                Grants full access to this admin panel. Only do this for trusted
+                members — you can demote them later.
+              </p>
+            </div>
+            <div class="guide-card">
+              <p class="font-medium text-gray-800 text-sm mb-1">
+                Last admin protection
+              </p>
+              <p class="text-sm text-gray-600">
+                You can't demote yourself if you're the only admin, and you
+                can't delete your account either. Promote someone else first.
+              </p>
+            </div>
+          </div>
+          <p class="guide-warn mt-3">
+            <strong>Good habit —</strong> always keep at least two admins active
+            so the club isn't blocked if one account becomes inaccessible.
+          </p>
+        </div>
+      </div>
+      {# /guide-panels #} {# ── Mobile accordion
+      ──────────────────────────────────────────────── #}
+      <div
+        id="guide-mobile"
+        class="sm:hidden flex flex-col divide-y divide-gray-100"
+      >
+        {% set accordion_items = [ ("bc", "teal", "1", "Running a book cycle"),
+        ("ra", "amber", "2", "Setting the reading assignment"), ("ac", "blue",
+        "3", "Access code"), ("mt", "coral", "4", "Meetings"), ("mem", "purple",
+        "5", "Managing members"), ] %} {% for id, colour, num, label in
+        accordion_items %}
+        <div>
+          <button
+            type="button"
+            id="mob-btn-{{ id }}"
+            onclick="AdminGuide.toggleMobile('{{ id }}')"
+            class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+            aria-expanded="false"
+            aria-controls="mob-body-{{ id }}"
+          >
+            <span
+              class="guide-num guide-num--{{ colour }} w-5 h-5 rounded-full text-xs font-semibold flex items-center justify-center flex-shrink-0"
+            >
+              {{ num }}
+            </span>
+            <span class="flex-1 text-sm font-medium text-gray-900"
+              >{{ label }}</span
+            >
+            <svg
+              id="mob-chev-{{ id }}"
+              class="w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <div
+            id="mob-body-{{ id }}"
+            class="hidden px-4 pb-4"
+            role="region"
+            aria-labelledby="mob-btn-{{ id }}"
+          >
+            {% if id == "bc" %}
+            <ol class="guide-steps">
+              <li>
+                <span
+                  >A member submits a suggestion. Review it under
+                  <strong>Pending suggestions</strong> — approve to add to the
+                  queue, or reject it.</span
+                >
+              </li>
+              <li>
+                <span
+                  >When ready, click <strong>Set as current</strong> on any
+                  queued book. Fill in the first reading assignment and total
+                  chapters.</span
+                >
+              </li>
+              <li>
+                <span
+                  >Each meeting, click <strong>Edit details</strong> on the
+                  current book to advance the reading assignment to the next
+                  chapters.</span
+                >
+              </li>
+              <li>
+                <span
+                  >When finished, click <strong>Mark completed</strong>. Moves
+                  it to past books and auto-completes all member progress
+                  records.</span
+                >
+              </li>
+            </ol>
+
+            {% elif id == "ra" %}
+            <ul class="guide-steps">
+              <li>
+                <span
+                  >The <strong>From</strong> and <strong>To</strong> chapter
+                  fields define what members should read before the next
+                  meeting.</span
+                >
+              </li>
+              <li>
+                <span
+                  ><strong>Single chapter:</strong> enter the same number in
+                  both fields — e.g. From <code class="guide-code">2</code> To
+                  <code class="guide-code">2</code>. The To field auto-fills
+                  when you tab away from From.</span
+                >
+              </li>
+              <li>
+                <span
+                  ><strong>Range:</strong> enter different numbers — e.g. From
+                  <code class="guide-code">1</code> To
+                  <code class="guide-code">3</code>. Members see
+                  <em>"Chapters 1–3"</em>.</span
+                >
+              </li>
+            </ul>
+            <p class="guide-tip mt-2">A live preview appears as you type.</p>
+
+            {% elif id == "ac" %}
+            <ul class="guide-steps">
+              <li>
+                <span
+                  >The access code gates entry to the platform. Only people with
+                  the code can reach the dashboard.</span
+                >
+              </li>
+              <li>
+                <span
+                  >Change it when you want to refresh membership access. Use
+                  <strong>Generate</strong> for a random code, or type your
+                  own.</span
+                >
+              </li>
+              <li>
+                <span
+                  >Existing members won't be locked out — they're already logged
+                  in. New members need the new code to register.</span
+                >
+              </li>
+            </ul>
+            <p class="guide-warn mt-2">
+              <strong
+                >Always post the new code in the WhatsApp group
+                immediately</strong
+              >
+              after changing it.
+            </p>
+
+            {% elif id == "mt" %}
+            <ul class="guide-steps">
+              <li>
+                <span
+                  >There is one meeting record updated each cycle. It shows as a
+                  banner on the member dashboard.</span
+                >
+              </li>
+              <li>
+                <span
+                  >Date and time are entered in
+                  <strong>UK time</strong> (Europe/London) and automatically
+                  converted for the system.</span
+                >
+              </li>
+              <li>
+                <span
+                  >Tick <strong>Cancel this meeting</strong> to show a
+                  cancellation banner. Add an optional note.</span
+                >
+              </li>
+              <li>
+                <span
+                  >Members see a <strong>Join Now</strong> button when the
+                  meeting is within 30 minutes of starting.</span
+                >
+              </li>
+            </ul>
+
+            {% elif id == "mem" %}
+            <div class="grid grid-cols-1 gap-2 mt-1">
+              <div class="guide-card">
+                <p class="font-medium text-gray-800 text-sm mb-1">
+                  Promoting to admin
+                </p>
+                <p class="text-sm text-gray-600">
+                  Grants full access to this admin panel. Only for trusted
+                  members — you can demote them later.
+                </p>
+              </div>
+              <div class="guide-card">
+                <p class="font-medium text-gray-800 text-sm mb-1">
+                  Last admin protection
+                </p>
+                <p class="text-sm text-gray-600">
+                  You can't demote yourself if you're the only admin. Promote
+                  someone else first.
+                </p>
+              </div>
+            </div>
+            <p class="guide-warn mt-2">
+              <strong>Good habit —</strong> always keep at least two admins
+              active.
+            </p>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {# /guide-mobile #}
+    </div>
+    {# /guide-inner #}
+  </div>
+  {# /guide-body #}
+</section>

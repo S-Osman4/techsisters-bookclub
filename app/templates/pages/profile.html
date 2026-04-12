@@ -1,0 +1,319 @@
+{# app/templates/pages/profile.html #} {% extends "base.html" %} {% block title
+%}Profile — TechSisters Book Club{% endblock %} {% block content %} {# Pass
+server data to profile.ts #}
+<div
+  id="profile-data"
+  data-is-only-admin="{{ 'true' if is_only_admin else 'false' }}"
+  data-current-name="{{ current_user.name }}"
+  aria-hidden="true"
+></div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+  {# ── Profile header ────────────────────────────────────────────────────── #}
+  <div
+    class="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8 pb-8 border-b border-gray-100"
+  >
+    {# Avatar #}
+    <div
+      class="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl font-bold text-white"
+      style="background: linear-gradient(135deg, #ff6b6b, #4ecdc4)"
+      aria-hidden="true"
+    >
+      {{ current_user.name[0].upper() }}
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <h1
+        id="profile-name-display"
+        class="font-heading text-2xl font-bold text-gray-900"
+      >
+        {{ current_user.name }}
+      </h1>
+      <p class="text-sm text-gray-500 mt-0.5">{{ current_user.email }}</p>
+      <div class="flex flex-wrap items-center gap-3 mt-2">
+        <span class="text-xs text-gray-400">
+          Member since {{ current_user.created_at.strftime("%d %B
+          %Y").lstrip("0") }}
+        </span>
+        {% if current_user.is_admin %}
+        <span class="badge badge-primary">Admin</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Stats ─────────────────────────────────────────────────────────────── #}
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+    <div class="card p-4 text-center">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.books_completed }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Books completed</p>
+    </div>
+    <div class="card p-4 text-center">
+      <p class="text-2xl font-bold text-gray-900">{{ stats.books_reading }}</p>
+      <p class="text-xs text-gray-500 mt-1">Currently reading</p>
+    </div>
+    <div class="card p-4 text-center">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.total_suggestions }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Books suggested</p>
+    </div>
+    <div class="card p-4 text-center">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.approved_suggestions }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Suggestions approved</p>
+    </div>
+  </div>
+
+  {# ── Account information ──────────────────────────────────────────────────
+  #}
+  <section class="card p-6 mb-6" aria-labelledby="account-heading">
+    <h2
+      id="account-heading"
+      class="font-heading text-lg font-bold text-gray-900 mb-5"
+    >
+      Account information
+    </h2>
+
+    <div class="space-y-5">
+      {# Update name #}
+      <div>
+        <label
+          for="new-name"
+          class="block text-sm font-medium text-gray-700 mb-1.5"
+        >
+          Display name
+        </label>
+        <form
+          hx-put="/api/profile/name"
+          hx-target="#name-result"
+          hx-swap="innerHTML"
+          hx-indicator="#name-btn"
+          class="flex flex-col sm:flex-row gap-3"
+        >
+          <input
+            type="text"
+            id="new-name"
+            name="new_name"
+            value="{{ current_user.name }}"
+            class="input flex-1"
+            minlength="2"
+            maxlength="50"
+            required
+          />
+          <button
+            id="name-btn"
+            type="submit"
+            class="btn btn-primary text-sm py-2.5 px-5 flex-shrink-0"
+          >
+            <span class="btn-text">Update name</span>
+            <span class="loading-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+        <div
+          id="name-result"
+          class="mt-2"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </div>
+
+      {# Email — read only #}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+          Email address
+        </label>
+        <input
+          type="email"
+          value="{{ current_user.email }}"
+          class="input bg-gray-50 cursor-not-allowed opacity-60"
+          disabled
+          aria-describedby="email-note"
+        />
+        <p id="email-note" class="text-xs text-gray-400 mt-1.5">
+          Email cannot be changed.
+        </p>
+      </div>
+
+      {# Role — read only #}
+      <div>
+        <p class="text-sm font-medium text-gray-700 mb-1.5">Role</p>
+        {% if current_user.is_admin %}
+        <span class="badge badge-primary">Admin</span>
+        {% else %}
+        <span class="badge badge-secondary">Member</span>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  {# ── Change password ──────────────────────────────────────────────────────
+  #}
+  <section class="card p-6 mb-6" aria-labelledby="password-heading">
+    <h2
+      id="password-heading"
+      class="font-heading text-lg font-bold text-gray-900 mb-5"
+    >
+      Change password
+    </h2>
+
+    <form
+      hx-put="/api/profile/password"
+      hx-target="#password-result"
+      hx-swap="innerHTML"
+      hx-indicator="#password-btn"
+      class="space-y-4"
+      id="password-form"
+    >
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label
+            for="current-password"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
+            Current password
+          </label>
+          <div class="relative">
+            <input
+              type="password"
+              id="current-password"
+              name="current_password"
+              class="input pr-11"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              onclick="togglePasswordVisibility('current-password', this)"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Show password"
+            >
+              <svg
+                id="eye-current-password"
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0
+                         8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542
+                         7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label
+            for="new-password"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
+            New password
+          </label>
+          <div class="relative">
+            <input
+              type="password"
+              id="new-password"
+              name="new_password"
+              class="input pr-11"
+              autocomplete="new-password"
+              minlength="8"
+              maxlength="100"
+              required
+            />
+            <button
+              type="button"
+              onclick="togglePasswordVisibility('new-password', this)"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Show password"
+            >
+              <svg
+                id="eye-new-password"
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0
+                         8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542
+                         7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </div>
+          <p class="text-xs text-gray-400 mt-1.5">
+            Minimum 8 characters with uppercase, lowercase, and a number.
+          </p>
+        </div>
+      </div>
+
+      <div id="password-result" role="status" aria-live="polite"></div>
+
+      <button id="password-btn" type="submit" class="btn btn-primary">
+        <span class="btn-text">Change password</span>
+        <span class="loading-spinner" aria-hidden="true"></span>
+      </button>
+    </form>
+  </section>
+
+  {# ── Danger zone ──────────────────────────────────────────────────────────
+  #}
+  <section class="card p-6 border-red-200" aria-labelledby="danger-heading">
+    <h2
+      id="danger-heading"
+      class="font-heading text-lg font-bold text-red-600 mb-2"
+    >
+      Danger zone
+    </h2>
+
+    {% if is_only_admin %}
+    <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 mb-4">
+      <p class="text-sm font-medium text-amber-800">Cannot delete account</p>
+      <p class="text-sm text-amber-700 mt-1">
+        You are the only admin. Promote another member to admin before deleting
+        your account.
+      </p>
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-600 mb-4">
+      Permanently delete your account and all associated data. This cannot be
+      undone.
+    </p>
+    <button
+      onclick="openModal('delete-account-modal')"
+      class="btn btn-danger text-sm"
+    >
+      Delete account
+    </button>
+    {% endif %}
+  </section>
+</div>
+
+{# Delete account modal #} {% include "modals/_delete_account_modal.html" %} {%
+endblock %} {% block extra_js %}
+<script type="module" src="/static/dist/pages/profile.js"></script>
+{% endblock %}

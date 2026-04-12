@@ -1,0 +1,101 @@
+{# app/templates/modals/_access_code_modal.html #}
+<div
+  id="access-code-modal"
+  class="modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="access-code-modal-title"
+>
+  <div class="modal-container" onclick="event.stopPropagation()">
+    {# Header #}
+    <div
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+    >
+      <h2
+        id="access-code-modal-title"
+        class="font-heading text-xl font-bold text-gray-900"
+      >
+        Enter Access Code
+      </h2>
+      <button
+        onclick="closeModal('access-code-modal')"
+        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    {# Body #}
+    <div class="px-6 py-5">
+      <p class="text-sm text-gray-600 mb-5">
+        The access code is shared in the
+        <strong class="text-teal-400"
+          >TechSisters Book Club WhatsApp group</strong
+        >. You need to be a TechSisters community member to access it.
+      </p>
+
+      <form
+        hx-post="/auth/verify-code"
+        hx-target="#code-result"
+        hx-swap="innerHTML"
+        hx-indicator="#code-btn"
+        class="space-y-4"
+      >
+        <div>
+          <label
+            for="access-code-input"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
+            Access Code
+          </label>
+          <input
+            type="text"
+            id="access-code-input"
+            name="code"
+            placeholder="Enter code from WhatsApp"
+            class="input uppercase tracking-widest"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            required
+          />
+        </div>
+
+        <div id="code-result" role="alert"></div>
+
+        <button id="code-btn" type="submit" class="btn btn-primary w-full">
+          <span class="btn-text">Verify Code</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <p class="mt-4 text-sm text-center text-gray-500">
+        Not a member yet? {% if whatsapp_link %}
+
+        <a
+          href="{{ whatsapp_link }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium text-primary hover:text-primary-dark transition-colors"
+        >
+          Learn how to join
+        </a>
+        {% else %} Contact a TechSisters admin. {% endif %}
+      </p>
+    </div>
+  </div>
+</div>

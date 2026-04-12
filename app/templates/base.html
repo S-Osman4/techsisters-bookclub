@@ -1,284 +1,60 @@
+{# app/templates/base.html #}
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}TS Book Club{% endblock %}</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- HTMX for dynamic updates -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://unpkg.com/heroicons@2.1.1/dist/heroicons.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- hCaptcha-->
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-
-    <!-- Custom styles -->
-    <link
-      rel="preload"
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-      as="style"
+    <meta
+      name="description"
+      content="TechSisters Book Club — a members-only reading community for women in tech."
     />
-    <link rel="stylesheet" href="/static/css/base.css" />
+    <meta name="theme-color" content="#FF6B6B" />
+    <title>{% block title %}TechSisters Book Club{% endblock %}</title>
+
+    {# Preconnect to font origins #}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    {# Compiled Tailwind CSS #}
+    <link rel="stylesheet" href="/static/dist/main.css" />
 
     {% block extra_css %}{% endblock %}
   </head>
-  <body class="bg-gray-50">
-    <!-- Navigation -->
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <!-- Logo -->
-          <div class="flex items-center">
-            <a
-              href="{% if request.session.get('user_id') %}/dashboard{% else %}/{% endif %}"
-              class="flex items-center"
-            >
-              <span class="flex items-center gap-2 text-2xl font-bold">
-                <i data-lucide="library" class="icon icon-lg icon-primary"></i>
-                <span class="gradient-bg bg-clip-text text-transparent">
-                  TS Book Club
-                </span>
-              </span>
-            </a>
-          </div>
 
-          <!-- Desktop Navigation -->
-          <div class="hidden md:flex items-center space-x-4">
-            {% if request.session.get('user_id') %}
-            <!-- Logged in -->
-            <span class="text-sm text-gray-600">
-              Hi,
-              <span class="font-semibold"
-                >{{ request.session.get('user_name') }}</span
-              >
-            </span>
-
-            {% if request.session.get('is_admin') %}
-            <a
-              href="/admin"
-              class="text-sm font-medium"
-              style="color: var(--primary)"
-            >
-              Admin Panel
-            </a>
-            {% endif %}
-
-            <a
-              href="/profile"
-              class="text-sm text-gray-600 hover:text-gray-900"
-            >
-              My Profile
-            </a>
-
-            <form method="POST" action="/auth/logout" class="inline">
-              <button
-                type="submit"
-                class="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Logout
-              </button>
-            </form>
-
-            {% elif request.session.get('code_verified') %}
-            <!-- Guest with code -->
-            <a
-              href="/register"
-              class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium"
-            >
-              Create Account
-            </a>
-            <a href="/login" class="text-sm text-gray-600 hover:text-gray-900">
-              Login
-            </a>
-
-            {% else %}
-            <!-- No access -->
-            <a href="/login" class="text-sm text-gray-600 hover:text-gray-900">
-              Login
-            </a>
-            <a
-              href="/"
-              class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium"
-            >
-              Enter Code
-            </a>
-            {% endif %}
-          </div>
-
-          <!-- Mobile menu button -->
-          <div class="md:hidden flex items-center">
-            <button
-              onclick="toggleMobileMenu()"
-              class="text-gray-600 hover:text-gray-900 focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              <svg
-                id="menu-icon"
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              <svg
-                id="close-icon"
-                class="w-6 h-6 hidden"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mobile Navigation Menu -->
-      <div
-        id="mobile-menu"
-        class="hidden md:hidden border-t border-gray-200 bg-white"
-      >
-        <div class="px-4 pt-2 pb-3 space-y-1">
-          {% if request.session.get('user_id') %}
-          <!-- Logged in mobile menu -->
-          <div class="px-3 py-2 text-sm text-gray-600 border-b border-gray-200">
-            Hi,
-            <span class="font-semibold"
-              >{{ request.session.get('user_name') }}</span
-            >
-          </div>
-
-          {% if request.session.get('is_admin') %}
-          <a
-            href="/admin"
-            class="block px-3 py-2 text-sm rounded-md font-medium"
-            style="color: var(--primary)"
-          >
-            🔧 Admin Panel
-          </a>
-          {% endif %}
-
-          <a
-            href="/profile"
-            class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
-          >
-            👤 My Profile
-          </a>
-
-          <form method="POST" action="/auth/logout" class="mt-2">
-            <button
-              type="submit"
-              class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
-            >
-              🚪 Logout
-            </button>
-          </form>
-
-          {% elif request.session.get('code_verified') %}
-          <!-- Guest mobile menu -->
-          <a
-            href="/register"
-            class="block px-3 py-2 text-sm text-white btn-primary rounded-md font-medium text-center"
-          >
-            Create Account
-          </a>
-          <a
-            href="/login"
-            class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
-          >
-            Login
-          </a>
-
-          {% else %}
-          <!-- No access mobile menu -->
-          <a
-            href="/login"
-            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
-          >
-            Login
-          </a>
-          <a
-            href="/"
-            class="block px-4 py-2 text-sm text-white btn-primary rounded-md font-medium text-center"
-          >
-            Enter Code
-          </a>
-          {% endif %}
-        </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
+  <body class="bg-[#F9FAFB] text-gray-900 font-body antialiased">
+    {# ── Navigation
+    ──────────────────────────────────────────────────────────── #} {% include
+    "partials/_nav.html" %} {# ── Page content
+    ────────────────────────────────────────────────────────── #}
     <main class="min-h-screen">{% block content %}{% endblock %}</main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t mt-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="text-center text-gray-600">
-          <p>&copy; 2026 TechSisters Book Club.</p>
+    {# ── Footer
+    ──────────────────────────────────────────────────────────────── #} {%
+    include "partials/_footer.html" %} {# ── Toast container
+    ─────────────────────────────────────────────────────── #}
+    <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
 
-          <!-- Social links -->
-          <div class="mt-4 flex items-center justify-center gap-4">
-            <a
-              href="https://www.linkedin.com/company/techsisterskenya/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex items-center gap-2 text-gray-600 hover:text-[var(--primary)] transition-colors duration-200"
-              aria-label="Visit TechSisters on LinkedIn"
-            >
-              <i data-lucide="linkedin" class="icon icon-lg"></i>
-              <span class="text-sm font-medium">LinkedIn</span>
-            </a>
+    {# ── Third party scripts
+    ─────────────────────────────────────────────────── #} {# HTMX: loaded
+    before our JS so initHtmxHooks() can attach listeners. Lucide: icon library,
+    re-run after every HTMX swap via htmx-hooks.ts. hCaptcha: only on register
+    page — loaded via block below. #}
+    <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"
+      defer
+    ></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
 
-            <a
-              href="https://www.instagram.com/tech_sisters/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex items-center gap-2 text-gray-600 hover:text-[var(--primary)] transition-colors duration-200"
-              aria-label="Visit TechSisters on Instagram"
-            >
-              <i data-lucide="instagram" class="icon icon-lg"></i>
-              <span class="text-sm font-medium">Instagram</span>
-            </a>
-          </div>
-
-          <!-- MVP feedback note -->
-          <p class="mt-6 text-xs text-gray-500">
-            This is an early MVP.
-            <a
-              href="/feedback"
-              class="underline hover:text-[var(--primary)] transition-colors"
-            >
-              Found a bug or have a suggestion?
-            </a>
-            Help us improve 💜
-          </p>
-        </div>
-      </div>
-    </footer>
-
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
-
-    <!-- JavaScript -->
-    <script src="/static/js/base.js"></script>
+    {# ── Compiled application JS
+    ─────────────────────────────────────────────── #} {# type="module" required
+    because TypeScript compiles to ES modules. defer is implied by
+    type="module". #}
+    <script type="module" src="/static/dist/main.js"></script>
 
     {% block extra_js %}{% endblock %}
   </body>

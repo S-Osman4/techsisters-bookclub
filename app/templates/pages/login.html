@@ -1,0 +1,113 @@
+{# app/templates/pages/login.html #}
+{% extends "base.html" %}
+
+{% block title %}Sign In — TechSisters Book Club{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center
+            py-12 px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-md">
+
+    <div class="text-center mb-8">
+      <h1 class="font-heading text-3xl font-bold text-gray-900 mb-2">
+        Welcome back
+      </h1>
+      <p class="text-gray-600 text-sm">
+        Sign in to track your progress and suggest books.
+      </p>
+    </div>
+
+    <div class="card p-8">
+      <form
+        hx-post="/auth/login"
+        hx-target="#login-result"
+        hx-swap="innerHTML"
+        hx-indicator="#login-btn"
+        class="space-y-5"
+        novalidate
+      >
+        <input type="hidden" name="from" value="{{ from_param }}" />
+
+        <div>
+          <label for="login-email"
+                 class="block text-sm font-medium text-gray-700 mb-1.5">
+            Email address
+          </label>
+          <input
+            type="email" id="login-email" name="email"
+            autocomplete="email" class="input"
+            placeholder="you@example.com" required
+          />
+        </div>
+
+        <div>
+          <label for="login-password"
+                 class="block text-sm font-medium text-gray-700 mb-1.5">
+            Password
+          </label>
+          <div class="relative">
+            <input
+              type="password" id="login-password" name="password"
+              autocomplete="current-password" class="input pr-11"
+              placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+              required minlength="8"
+            />
+            <button
+              type="button"
+              onclick="togglePasswordVisibility('login-password', this)"
+              class="absolute right-3 top-1/2 -translate-y-1/2
+                     text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Show password"
+            >
+              <svg id="eye-login-password" class="w-5 h-5" fill="none"
+                   stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0
+                         8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542
+                         7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="login-result" role="alert"></div>
+
+        <button id="login-btn" type="submit" class="btn btn-primary w-full py-3.5">
+          <span class="btn-text">Sign in</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+
+    <div class="mt-6 text-center space-y-2">
+      <p class="text-sm text-gray-600">
+        Don&rsquo;t have an account?
+        
+          <a href="/register{% if from_param %}?from={{ from_param }}{% endif %}"
+          class="font-medium text-primary hover:text-primary-dark transition-colors"
+        >
+          Create one free
+        </a>
+      </p>
+      <p class="text-sm text-gray-500">
+        Need the access code?
+        <button
+          onclick="openModal('access-code-modal')"
+          class="font-medium text-gray-600 hover:text-gray-900
+                 transition-colors underline-offset-2 hover:underline"
+        >
+          Enter it here
+        </button>
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/dist/pages/login.js"></script>
+{% endblock %}

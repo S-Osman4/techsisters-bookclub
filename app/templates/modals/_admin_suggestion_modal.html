@@ -1,0 +1,126 @@
+{# app/templates/modals/_admin_suggestion_modal.html #}
+<div
+  id="admin-suggestion-modal"
+  class="modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="suggestion-modal-title"
+>
+  <div class="modal-container" onclick="event.stopPropagation()">
+    <div
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+    >
+      <h2
+        id="suggestion-modal-title"
+        class="font-heading text-xl font-bold text-gray-900"
+      >
+        Review suggestion
+      </h2>
+      <button
+        onclick="closeModal('admin-suggestion-modal')"
+        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div class="px-6 py-5">
+      {# Book preview #}
+      <div
+        class="flex gap-4 mb-5 p-4 bg-gray-50 rounded-xl border border-gray-100"
+      >
+        <div
+          id="suggestion-modal-cover"
+          class="w-16 h-20 bg-gray-200 rounded flex-shrink-0 overflow-hidden flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
+                     5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
+                     18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
+                     5.477 14.754 5 16.5 5c1.747 0 3.332.477
+                     4.5 1.253v13C19.832 18.477 18.247 18 16.5
+                     18c-1.746 0-3.332.477-4.5 1.253"
+            />
+          </svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p
+            id="suggestion-modal-title-text"
+            class="font-semibold text-gray-900 mb-1"
+          ></p>
+          <p id="suggestion-modal-user" class="text-xs text-gray-500 mb-2"></p>
+
+          <a
+            id="suggestion-modal-pdf"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs text-primary hover:text-primary-dark transition-colors"
+          >
+            View PDF
+          </a>
+        </div>
+      </div>
+
+      {# Cover URL input — only for approve action #}
+      <div id="cover-input-section" class="mb-4">
+        <label
+          for="suggestion-cover-url"
+          class="block text-sm font-medium text-gray-700 mb-1.5"
+        >
+          Cover image URL
+          <span id="cover-required-badge" class="text-xs text-red-500 ml-1">
+            (required to approve)
+          </span>
+        </label>
+        <input
+          type="url"
+          id="suggestion-cover-url"
+          class="input"
+          placeholder="https://example.com/cover.jpg"
+        />
+      </div>
+
+      <div id="suggestion-modal-result" role="status" aria-live="polite"></div>
+
+      <div class="flex gap-3 mt-4">
+        <button
+          id="suggestion-confirm-btn"
+          onclick="confirmSuggestionAction()"
+          class="btn flex-1"
+        >
+          <span class="btn-text" id="suggestion-confirm-text">Confirm</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+        <button
+          onclick="closeModal('admin-suggestion-modal')"
+          class="btn btn-ghost flex-1"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

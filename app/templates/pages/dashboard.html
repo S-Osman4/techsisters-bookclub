@@ -1,0 +1,675 @@
+{# app/templates/pages/dashboard.html #} {% extends "base.html" %} {% block
+title %}Dashboard — TechSisters Book Club{% endblock %} {% block content %} {#
+Pass server data to dashboard.ts via data attributes. No logic here — just
+values the script needs. #}
+<div
+  id="dashboard-data"
+  data-is-guest="{{ 'true' if is_guest else 'false' }}"
+  data-book-id="{{ current_book.id if current_book else '' }}"
+  data-user-chapter="{{ user_progress.chapter if user_progress else '0' }}"
+  data-total-chapters="{{ current_book.total_chapters if current_book and current_book.total_chapters else '' }}"
+  aria-hidden="true"
+></div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+  {# ── Page header ───────────────────────────────────────────────────────── #}
+  <div class="mb-8">
+    {% if current_user %}
+    <h1 class="font-heading text-2xl sm:text-3xl font-bold text-gray-900">
+      Welcome back, {{ current_user.name.split()[0] }}
+    </h1>
+    <p class="text-gray-500 text-sm mt-1">
+      Track your progress and stay in sync with the community.
+    </p>
+    {% else %} {# ── Guest banner
+    ────────────────────────────────────────────────── #}
+    <div
+      class="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-5 py-4 mb-6"
+    >
+      <p class="text-sm text-gray-600">
+        You are browsing as a guest.
+
+        <a
+          href="/login?from=dashboard"
+          class="font-medium text-primary hover:text-primary-dark transition-colors"
+        >
+          Log in
+        </a>
+        or
+
+        <a
+          href="/register?from=dashboard"
+          class="font-medium text-primary hover:text-primary-dark transition-colors"
+        >
+          create an account
+        </a>
+        to unlock progress tracking and book suggestions.
+      </p>
+    </div>
+    <h1 class="font-heading text-2xl sm:text-3xl font-bold text-gray-900">
+      Book Club Dashboard
+    </h1>
+    <p class="text-gray-500 text-sm mt-1">
+      See what we are reading and join the community.
+    </p>
+    {% endif %}
+  </div>
+
+  {# ── Currently reading ─────────────────────────────────────────────────── #}
+  <section class="mb-8" aria-labelledby="current-book-heading">
+    <h2
+      id="current-book-heading"
+      class="font-heading text-xl font-bold text-gray-900 mb-4"
+    >
+      Currently reading
+    </h2>
+
+    {% if current_book %}
+    <div class="card p-6 border-l-4 border-l-primary">
+      <div class="flex flex-col sm:flex-row gap-6">
+        {# Cover #}
+        <div class="flex-shrink-0">
+          {% if current_book.cover_image_url %}
+          <img
+            src="{{ current_book.cover_image_url }}"
+            alt="{{ current_book.title }}"
+            loading="eager"
+            class="w-32 h-44 object-contain rounded-lg shadow-sm bg-gray-50"
+            onerror="
+              this.style.display = 'none';
+              this.nextElementSibling.style.display = 'flex';
+            "
+          />
+          <div
+            class="w-32 h-44 bg-gray-100 rounded-lg hidden items-center justify-center"
+          >
+            <svg
+              class="w-10 h-10 text-gray-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
+                           5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
+                           18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
+                           5.477 14.754 5 16.5 5c1.747 0 3.332.477
+                           4.5 1.253v13C19.832 18.477 18.247 18 16.5
+                           18c-1.746 0-3.332.477-4.5 1.253"
+              />
+            </svg>
+          </div>
+          {% else %}
+          <div
+            class="w-32 h-44 bg-gray-100 rounded-lg flex items-center justify-center"
+          >
+            <svg
+              class="w-10 h-10 text-gray-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
+                           5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
+                           18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
+                           5.477 14.754 5 16.5 5c1.747 0 3.332.477
+                           4.5 1.253v13C19.832 18.477 18.247 18 16.5
+                           18c-1.746 0-3.332.477-4.5 1.253"
+              />
+            </svg>
+          </div>
+          {% endif %}
+        </div>
+
+        {# Details #}
+        <div class="flex-1 min-w-0">
+          <h3 class="font-heading text-xl font-bold text-gray-900 mb-1">
+            {{ current_book.title }}
+          </h3>
+
+          {% if current_book.current_chapters %}
+          <span class="badge badge-primary mb-4 inline-block">
+            {{ current_book.current_chapters }}
+          </span>
+          {% endif %} {# Meeting banner #}
+          <div class="mb-5">{% include "partials/_meeting_banner.html" %}</div>
+
+          {# Actions #}
+          <div class="flex flex-wrap gap-3">
+            <a
+              href="{{ current_book.pdf_url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary text-sm py-2.5 px-5"
+            >
+              Download PDF
+            </a>
+            {% if current_book.total_chapters %}
+            <span class="flex items-center text-sm text-gray-500">
+              {{ current_book.total_chapters }} {{ current_book.total_chapters |
+              pluralise("chapter", "chapters") }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% else %} {# No current book #}
+    <div class="card p-8 text-center">
+      {% if upcoming_books %} {% with title = "No book selected yet", message =
+      "We have books in the queue. The next one will be announced in the
+      WhatsApp group." %} {% include "partials/_empty_state.html" %} {% endwith
+      %} {% else %} {% with title = "Taking a short break", message = "The next
+      book will be announced in the WhatsApp group. Stay tuned." %} {% include
+      "partials/_empty_state.html" %} {% endwith %} {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  {# ── Progress section (only when there is a current book) ─────────────── #}
+  {% if current_book %}
+  <section class="mb-8" aria-labelledby="progress-heading">
+    <h2
+      id="progress-heading"
+      class="font-heading text-xl font-bold text-gray-900 mb-4"
+    >
+      Reading progress
+    </h2>
+
+    <div class="grid sm:grid-cols-2 gap-6">
+      {# ── Your progress ─────────────────────────────────────────────────────── #}
+      <div class="card p-6">
+        <h3 class="font-semibold text-gray-800 mb-1">Your progress</h3>
+        <p class="text-sm text-gray-500 mb-4">Update your current chapter.</p>
+
+        {% if current_user %}
+        <form
+          hx-put="/api/books/progress"
+          hx-target="#progress-result"
+          hx-swap="innerHTML"
+          hx-indicator="#progress-btn"
+          class="space-y-4"
+        >
+          <input type="hidden" name="book_id" value="{{ current_book.id }}" />
+
+          <div>
+            {% if current_book.total_chapters %}
+            {# Known chapter count — use a select for ease of use #}
+            <label
+              for="chapter-select"
+              class="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Current chapter
+            </label>
+            <select id="chapter-select" name="chapter" class="input">
+              <option
+                value="0"
+                {% if not user_progress or user_progress.chapter == 0 %}selected{% endif %}
+              >
+                Not started
+              </option>
+              {% for i in range(1, current_book.total_chapters + 1) %}
+              <option
+                value="{{ i }}"
+                {% if user_progress and user_progress.chapter == i %}selected{% endif %}
+              >
+                Chapter {{ i }}
+              </option>
+              {% endfor %}
+              <option
+                value="-1"
+                {% if user_progress and user_progress.chapter == -1 %}selected{% endif %}
+              >
+                Completed ✓
+              </option>
+            </select>
+            {% else %}
+            {# Unknown chapter count — use a number input so any chapter works #}
+            <label
+              for="chapter-select"
+              class="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Current chapter
+              <span class="text-xs text-gray-400 ml-1 font-normal">
+                (enter 0 for not started, -1 for completed)
+              </span>
+            </label>
+            <input
+              type="number"
+              id="chapter-select"
+              name="chapter"
+              class="input"
+              min="-1"
+              step="1"
+              placeholder="e.g. 3"
+              value="{{ user_progress.chapter if user_progress else 0 }}"
+            />
+            <p class="text-xs text-gray-400 mt-1.5">
+              The admin hasn&rsquo;t set a total chapter count yet. Enter your
+              current chapter number.
+            </p>
+            {% endif %}
+          </div>
+
+          <div id="progress-result" role="status" aria-live="polite"></div>
+
+          <button
+            id="progress-btn"
+            type="submit"
+            class="btn btn-secondary w-full"
+          >
+            <span class="btn-text">Update progress</span>
+            <span class="loading-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+        {% else %}
+        {# Guest locked state #}
+        <div
+          class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center"
+        >
+          <p class="text-sm text-gray-600 mb-4">
+            Progress tracking is a member feature.
+          </p>
+          <a href="/login?from=dashboard" class="btn btn-secondary text-sm">
+            Log in to track progress
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      {# ── Community progress ─────────────────────────────────────────── #}
+      <div class="card p-6">
+        <h3 class="font-semibold text-gray-800 mb-1">Community progress</h3>
+        <p class="text-sm text-gray-500 mb-4">How the group is progressing.</p>
+        {% include "partials/_community_progress.html" %}
+      </div>
+    </div>
+  </section>
+  {% endif %} {# ── Suggest a book
+  ─────────────────────────────────────────────────────── #}
+  <section id="suggest-book" class="mb-8" aria-labelledby="suggest-heading">
+    <h2
+      id="suggest-heading"
+      class="font-heading text-xl font-bold text-gray-900 mb-1"
+    >
+      Suggest a book
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">
+      All suggestions are reviewed by admins before being added to the reading
+      queue.
+    </p>
+
+    {% if current_user %}
+    <div class="card p-6">
+      <form
+        hx-post="/api/books/suggestions"
+        hx-target="#suggestion-result"
+        hx-swap="innerHTML"
+        hx-indicator="#suggestion-btn"
+        class="space-y-4"
+        id="suggestion-form"
+      >
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label
+              for="suggest-title"
+              class="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Book title
+              <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="text"
+              id="suggest-title"
+              name="title"
+              class="input"
+              placeholder="e.g. Atomic Habits"
+              required
+              maxlength="200"
+            />
+          </div>
+          <div>
+            <label
+              for="suggest-pdf"
+              class="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              PDF URL
+              <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="url"
+              id="suggest-pdf"
+              name="pdf_url"
+              class="input"
+              placeholder="https://example.com/book.pdf"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            for="suggest-cover"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
+            Cover image URL
+            <span class="text-xs text-gray-400 ml-1">(optional)</span>
+          </label>
+          <input
+            type="url"
+            id="suggest-cover"
+            name="cover_image_url"
+            class="input"
+            placeholder="https://example.com/cover.jpg"
+          />
+          <p class="text-xs text-gray-400 mt-1.5">
+            Adding a cover helps admins identify the book quickly.
+          </p>
+        </div>
+
+        <div id="suggestion-result" role="status" aria-live="polite"></div>
+
+        <button id="suggestion-btn" type="submit" class="btn btn-primary">
+          <span class="btn-text">Submit suggestion</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+
+    {% else %} {# Guest locked state #}
+    <div
+      class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+    >
+      <p class="text-sm text-gray-600 mb-2">
+        Suggesting books is a member feature.
+      </p>
+      <p class="text-xs text-gray-400 mb-5">
+        Create an account to suggest books for the next reading cycle.
+      </p>
+
+      <a href="/login?from=suggest" class="btn btn-primary text-sm">
+        Log in to suggest a book
+      </a>
+    </div>
+    {% endif %}
+  </section>
+
+  {# ── Your suggestions (members only) ───────────────────────────────────── #}
+  {% if current_user %}
+  <section
+    id="your-suggestions"
+    class="mb-8"
+    aria-labelledby="my-suggestions-heading"
+  >
+    <h2
+      id="my-suggestions-heading"
+      class="font-heading text-xl font-bold text-gray-900 mb-4"
+    >
+      Your suggestions
+    </h2>
+
+    {% if user_suggestions %}
+    <div class="card divide-y divide-gray-100">
+      {% for suggestion in user_suggestions %}
+      <div class="flex items-center justify-between gap-4 px-5 py-4 flex-wrap">
+        <div class="flex items-center gap-4 min-w-0">
+          {% if suggestion.cover_image_url %}
+          <img
+            src="{{ suggestion.cover_image_url }}"
+            alt="{{ suggestion.title }}"
+            loading="lazy"
+            class="w-10 h-14 object-contain rounded flex-shrink-0 bg-gray-50"
+            onerror="this.style.display = 'none'"
+          />
+          {% endif %}
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate">
+              {{ suggestion.title }}
+            </p>
+
+            <a
+              href="{{ suggestion.pdf_url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-xs text-primary hover:text-primary-dark transition-colors"
+            >
+              View PDF
+            </a>
+          </div>
+        </div>
+        <div class="flex-shrink-0 text-right">
+          {% set status = suggestion.status %} {% if status == "pending" %}
+          <span class="badge badge-pending">Pending review</span>
+          <p class="text-xs text-gray-400 mt-1">Awaiting admin decision</p>
+          {% elif status == "approved" %}
+          <span class="badge badge-approved">Added to queue</span>
+          <p class="text-xs text-gray-400 mt-1">Approved by admin</p>
+          {% else %}
+          <span class="badge badge-rejected">Not selected</span>
+          <p class="text-xs text-gray-400 mt-1">Not selected this cycle</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card p-6">
+      {% with title = "No suggestions yet", message = "Submit your first book
+      suggestion above.", cta_text = "Suggest a book", cta_url = "#suggest-book"
+      %} {% include "partials/_empty_state.html" %} {% endwith %}
+    </div>
+    {% endif %}
+  </section>
+  {% endif %} {# ── Reading queue and history
+  ──────────────────────────────────────────── #}
+  <section aria-labelledby="library-heading">
+    <h2
+      id="library-heading"
+      class="font-heading text-xl font-bold text-gray-900 mb-4"
+    >
+      Reading queue &amp; history
+    </h2>
+
+    {# Tab navigation #}
+    <div
+      class="flex gap-2 mb-6 border-b border-gray-200"
+      role="tablist"
+      aria-label="Books sections"
+    >
+      <button
+        id="tab-upcoming"
+        role="tab"
+        aria-selected="true"
+        aria-controls="panel-upcoming"
+        class="px-4 py-2.5 text-sm font-medium border-b-2 border-primary text-primary -mb-px transition-colors"
+        onclick="switchTab('upcoming')"
+      >
+        Upcoming {% if upcoming_books %}
+        <span
+          class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary"
+        >
+          {{ upcoming_books | length }}
+        </span>
+        {% endif %}
+      </button>
+      <button
+        id="tab-past"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-past"
+        class="px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 -mb-px hover:text-gray-700 transition-colors"
+        onclick="switchTab('past')"
+      >
+        Past reads {% if past_books %}
+        <span
+          class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"
+        >
+          {{ past_books | length }}
+        </span>
+        {% endif %}
+      </button>
+    </div>
+
+    {# Upcoming panel #}
+    <div id="panel-upcoming" role="tabpanel" aria-labelledby="tab-upcoming">
+      {% if upcoming_books %}
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+        {% for book in upcoming_books[:10] %}
+        <article class="card-hover flex flex-col overflow-hidden group p-4">
+          <div
+            class="w-full h-32 flex items-center justify-center bg-gray-50 rounded-lg mb-3 overflow-hidden"
+          >
+            {% if book.cover_image_url %}
+            <img
+              src="{{ book.cover_image_url }}"
+              alt="{{ book.title }}"
+              loading="lazy"
+              class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+            />
+            {% else %}
+            <svg
+              class="w-8 h-8 text-gray-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5
+                             7.5 5S4.168 5.477 3 6.253v13C4.168 18.477
+                             5.754 18 7.5 18s3.332.477 4.5 1.253m0-13
+                             C13.168 5.477 14.754 5 16.5 5c1.747 0
+                             3.332.477 4.5 1.253v13C19.832 18.477
+                             18.247 18 16.5 18c-1.746 0-3.332.477
+                             -4.5 1.253"
+              />
+            </svg>
+            {% endif %}
+          </div>
+          <h3
+            class="text-xs font-semibold text-gray-800 line-clamp-2 leading-snug mb-2 flex-1"
+          >
+            {{ book.title }}
+          </h3>
+          <span class="badge badge-secondary text-xs self-start">
+            In queue
+          </span>
+          {% if book.pdf_url %}
+
+          <a
+            href="{{ book.pdf_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs text-primary hover:text-primary-dark transition-colors mt-2 inline-block"
+          >
+            Preview
+          </a>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </div>
+
+      {% if upcoming_books | length > 10 %}
+      <div class="text-center mt-2">
+        <a href="/upcoming-books" class="btn btn-ghost text-sm">
+          View all {{ upcoming_books | length }} upcoming books
+        </a>
+      </div>
+      {% endif %} {% else %} {% with title = "No upcoming books", message =
+      "Suggest a book above to add it to the queue.", cta_text = "Suggest a
+      book", cta_url = "#suggest-book" %} {% include
+      "partials/_empty_state.html" %} {% endwith %} {% endif %}
+    </div>
+
+    {# Past reads panel #}
+    <div
+      id="panel-past"
+      role="tabpanel"
+      aria-labelledby="tab-past"
+      class="hidden"
+    >
+      {% if past_books %}
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+        {% for book in past_books[:10] %}
+        <article class="card-hover flex flex-col overflow-hidden group p-4">
+          <div
+            class="w-full h-32 flex items-center justify-center bg-gray-50 rounded-lg mb-3 overflow-hidden"
+          >
+            {% if book.cover_image_url %}
+            <img
+              src="{{ book.cover_image_url }}"
+              alt="{{ book.title }}"
+              loading="lazy"
+              class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+            />
+            {% else %}
+            <svg
+              class="w-8 h-8 text-gray-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5
+                             7.5 5S4.168 5.477 3 6.253v13C4.168 18.477
+                             5.754 18 7.5 18s3.332.477 4.5 1.253m0-13
+                             C13.168 5.477 14.754 5 16.5 5c1.747 0
+                             3.332.477 4.5 1.253v13C19.832 18.477
+                             18.247 18 16.5 18c-1.746 0-3.332.477
+                             -4.5 1.253"
+              />
+            </svg>
+            {% endif %}
+          </div>
+          <h3
+            class="text-xs font-semibold text-gray-800 line-clamp-2 leading-snug mb-2 flex-1"
+          >
+            {{ book.title }}
+          </h3>
+          <span class="badge badge-primary text-xs self-start">
+            Completed
+          </span>
+          {% if book.pdf_url %}
+
+          <a
+            href="{{ book.pdf_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs text-primary hover:text-primary-dark transition-colors mt-2 inline-block"
+          >
+            Read PDF
+          </a>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </div>
+
+      {% if past_books | length > 10 %}
+      <div class="text-center mt-2">
+        <a href="/past-books" class="btn btn-ghost text-sm">
+          View all {{ past_books | length }} past books
+        </a>
+      </div>
+      {% endif %} {% else %} {% with title = "No past books yet", message =
+      "Completed books will appear here." %} {% include
+      "partials/_empty_state.html" %} {% endwith %} {% endif %}
+    </div>
+  </section>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script type="module" src="/static/dist/pages/dashboard.js"></script>
+{% endblock %}

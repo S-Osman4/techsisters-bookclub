@@ -1,0 +1,139 @@
+{# app/templates/modals/_admin_meeting_modal.html #}
+<div
+  id="admin-meeting-modal"
+  class="modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="meeting-modal-title"
+>
+  <div class="modal-container" onclick="event.stopPropagation()">
+    <div
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+    >
+      <h2
+        id="meeting-modal-title"
+        class="font-heading text-xl font-bold text-gray-900"
+      >
+        {% if meeting %}Edit meeting{% else %}Set meeting{% endif %}
+      </h2>
+      <button
+        onclick="closeModal('admin-meeting-modal')"
+        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div class="px-6 py-5 space-y-4">
+      <div>
+        <label
+          for="meeting-datetime"
+          class="block text-sm font-medium text-gray-700 mb-1.5"
+        >
+          Date and time (UK time)
+        </label>
+        <input
+          type="datetime-local"
+          id="meeting-datetime"
+          class="input"
+          value="{% if meeting and not meeting.is_cancelled %}{{ meeting.start_at.astimezone(uk_tz).strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+        />
+        <p class="text-xs text-gray-400 mt-1.5">
+          Times are entered and displayed in UK time (Europe/London).
+        </p>
+      </div>
+
+      <div>
+        <label
+          for="meeting-link"
+          class="block text-sm font-medium text-gray-700 mb-1.5"
+        >
+          Google Meet link
+        </label>
+        <input
+          type="url"
+          id="meeting-link"
+          class="input"
+          value="{{ meeting.meet_link if meeting else '' }}"
+          placeholder="https://meet.google.com/..."
+        />
+      </div>
+
+      {# Cancel toggle #}
+      <div class="border border-amber-200 rounded-lg p-4 bg-amber-50">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            id="meeting-cancelled"
+            class="w-4 h-4 rounded"
+            {%
+            if
+            meeting
+            and
+            meeting.is_cancelled
+            %}checked{%
+            endif
+            %}
+            onchange="toggleCancellationNote(this.checked)"
+          />
+          <span class="text-sm font-medium text-amber-800">
+            Cancel this meeting
+          </span>
+        </label>
+
+        <div
+          id="cancellation-note-section"
+          class="mt-3 {% if not meeting or not meeting.is_cancelled %}hidden{% endif %}"
+        >
+          <label
+            for="cancellation-note"
+            class="block text-xs text-amber-700 mb-1"
+          >
+            Reason (optional — shown to members)
+          </label>
+          <input
+            type="text"
+            id="cancellation-note"
+            class="input text-sm"
+            value="{{ meeting.cancellation_note
+                       if meeting and meeting.cancellation_note else '' }}"
+            placeholder="e.g. Taking a break for the holidays"
+            maxlength="200"
+          />
+        </div>
+      </div>
+
+      <div id="meeting-result" role="status" aria-live="polite"></div>
+
+      <div class="flex gap-3 pt-1">
+        <button
+          id="meeting-save-btn"
+          onclick="saveMeeting()"
+          class="btn btn-secondary flex-1"
+        >
+          <span class="btn-text">Save</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+        <button
+          onclick="closeModal('admin-meeting-modal')"
+          class="btn btn-ghost flex-1"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

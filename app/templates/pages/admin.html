@@ -1,0 +1,705 @@
+{# app/templates/pages/admin.html #}
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — TechSisters Book Club{% endblock %}
+
+{% block content %}
+
+{# Pass server data to admin.ts via data attributes #}
+<div
+  id="admin-data"
+  data-current-book-id="{{ current_book.id if current_book else '' }}"
+  data-current-book-title="{{ current_book.title if current_book else '' }}"
+  data-admin-count="{{ admin_count }}"
+  data-real-code="{{ access_code.code if access_code else '' }}"
+  aria-hidden="true"
+></div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+
+  {# ── Header ─────────────────────────────────────────────────────────────── #}
+  <div class="flex flex-col sm:flex-row sm:items-center
+              sm:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="font-heading text-2xl sm:text-3xl font-bold text-gray-900">
+        Admin Dashboard
+      </h1>
+      <p class="text-gray-500 text-sm mt-1">Manage the book club.</p>
+    </div>
+    
+      <a href="/dashboard"
+      class="btn btn-ghost text-sm self-start sm:self-auto"
+    >
+      &larr; Member view
+    </a>
+  </div>
+
+  {# ── Admin guide (collapsible) ──────────────────────────────────────────── #}
+  {% include "partials/_admin_guide.html" %}
+
+  {# ── Stats cards ─────────────────────────────────────────────────────────── #}
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+    <div class="card p-4 text-center col-span-1">
+      <p class="text-2xl font-bold text-gray-900">{{ stats.total_members }}</p>
+      <p class="text-xs text-gray-500 mt-1">Total members</p>
+    </div>
+    <div class="card p-4 text-center col-span-1">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.new_members_this_month }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">New this month</p>
+    </div>
+    <div class="card p-4 text-center col-span-1">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.pending_suggestions }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Pending suggestions</p>
+    </div>
+    <div class="card p-4 text-center col-span-1">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.books_in_queue }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Books in queue</p>
+    </div>
+    <div class="card p-4 text-center col-span-1">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.tracking_progress }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Tracking progress</p>
+    </div>
+    <div class="card p-4 text-center col-span-1">
+      <p class="text-2xl font-bold text-gray-900">
+        {{ stats.avg_chapter }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Avg chapter</p>
+    </div>
+  </div>
+
+  {# ── Access code ─────────────────────────────────────────────────────────── #}
+  <section class="card p-6 mb-6" aria-labelledby="code-heading">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <h2
+          id="code-heading"
+          class="font-heading text-lg font-bold text-gray-900 mb-1"
+        >
+          Access code
+        </h2>
+        {% if access_code %}
+          <div class="flex items-center gap-3 mt-2">
+            <span
+              id="code-display"
+              class="font-mono text-2xl font-bold text-primary
+                     tracking-widest select-all"
+              aria-label="Access code hidden"
+            >
+              &bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;
+            </span>
+            <button
+              id="code-reveal-btn"
+              onclick="toggleCodeReveal()"
+              class="text-sm text-gray-500 hover:text-gray-800
+                     transition-colors underline-offset-2 hover:underline"
+              aria-pressed="false"
+            >
+              Reveal
+            </button>
+            <button
+              onclick="copyAccessCode()"
+              class="text-sm text-gray-500 hover:text-gray-800
+                     transition-colors underline-offset-2 hover:underline"
+              aria-label="Copy access code"
+            >
+              Copy
+            </button>
+          </div>
+          <p class="text-xs text-gray-400 mt-1.5">
+            Last updated:
+            {{ access_code.updated_at.strftime("%d %B %Y at %H:%M") }} UTC
+          </p>
+        {% else %}
+          <p class="text-sm text-gray-500 mt-1">No access code configured.</p>
+        {% endif %}
+      </div>
+      <button
+        onclick="openModal('admin-code-modal')"
+        class="btn btn-primary text-sm flex-shrink-0"
+      >
+        Change code
+      </button>
+    </div>
+
+    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50
+                px-4 py-3">
+      <p class="text-sm text-amber-800">
+        After changing the code, post the new one in the
+        TechSisters Book Club WhatsApp group.
+      </p>
+    </div>
+  </section>
+
+  {# ── Current book ────────────────────────────────────────────────────────── #}
+  <section class="card p-6 mb-6" aria-labelledby="current-book-heading">
+    <h2
+      id="current-book-heading"
+      class="font-heading text-lg font-bold text-gray-900 mb-4"
+    >
+      Current book
+    </h2>
+
+    {% if current_book %}
+      <div class="flex flex-col sm:flex-row gap-5">
+        {# Cover #}
+        <div class="flex-shrink-0">
+          {% if current_book.cover_image_url %}
+            <img
+              src="{{ current_book.cover_image_url }}"
+              alt="{{ current_book.title }}"
+              class="w-24 h-32 object-contain rounded-lg bg-gray-50
+                     border border-gray-100"
+              loading="lazy"
+            />
+          {% else %}
+            <div class="w-24 h-32 bg-gray-100 rounded-lg flex
+                        items-center justify-center">
+              <svg class="w-8 h-8 text-gray-300" fill="none"
+                   stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
+                         5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
+                         18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
+                         5.477 14.754 5 16.5 5c1.747 0 3.332.477
+                         4.5 1.253v13C19.832 18.477 18.247 18 16.5
+                         18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+          {% endif %}
+        </div>
+
+        {# Info #}
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-gray-900 mb-1">
+            {{ current_book.title }}
+          </h3>
+          {% if current_book.current_chapters %}
+            <span class="badge badge-primary mb-3 inline-block">
+              {{ current_book.current_chapters }}
+            </span>
+          {% endif %}
+          <div class="flex flex-wrap gap-2 text-xs text-gray-500 mb-4">
+            
+              <a href="{{ current_book.pdf_url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-primary hover:text-primary-dark transition-colors"
+            >
+              View PDF
+            </a>
+            {% if current_book.total_chapters %}
+              <span>&middot;</span>
+              <span>
+                {{ current_book.total_chapters }}
+                {{ current_book.total_chapters
+                   | pluralise("chapter", "chapters") }}
+              </span>
+            {% endif %}
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              onclick="openModal('admin-edit-book-modal')"
+              class="btn btn-ghost text-sm py-2"
+            >
+              Edit details
+            </button>
+            <button
+              onclick="openModal('admin-complete-book-modal')"
+              class="btn btn-secondary text-sm py-2"
+            >
+              Mark completed
+            </button>
+          </div>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="rounded-xl border border-dashed border-gray-200
+                  bg-gray-50 p-6 text-center">
+        <p class="text-sm text-gray-600">No current book set.</p>
+        <p class="text-xs text-gray-400 mt-1">
+          Select a book from the approved queue below.
+        </p>
+      </div>
+    {% endif %}
+  </section>
+
+  {# ── Meeting ─────────────────────────────────────────────────────────────── #}
+  <section class="card p-6 mb-6" aria-labelledby="meeting-heading">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div class="flex-auto min-w-0">
+        <h2
+          id="meeting-heading"
+          class="font-heading text-lg font-bold text-gray-900 mb-3"
+        >
+          Meeting
+        </h2>
+        {% include "partials/_meeting_banner.html" %}
+      </div>
+      <button
+        onclick="openModal('admin-meeting-modal')"
+        class="btn btn-ghost text-sm flex-shrink-0"
+      >
+        {% if meeting %}Edit meeting{% else %}Set meeting{% endif %}
+      </button>
+    </div>
+  </section>
+
+  {# ── Pending suggestions ─────────────────────────────────────────────────── #}
+  <section class="card p-6 mb-6" aria-labelledby="pending-heading">
+    <h2
+      id="pending-heading"
+      class="font-heading text-lg font-bold text-gray-900 mb-4"
+    >
+      Pending suggestions
+      {% if pending_suggestions %}
+        <span class="ml-2 px-2 py-0.5 text-sm rounded-full
+                      bg-primary/10 text-primary font-normal">
+          {{ pending_suggestions | length }}
+        </span>
+      {% endif %}
+    </h2>
+
+    {% if pending_suggestions %}
+      <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+        {% for suggestion in pending_suggestions %}
+          <div class="flex flex-col sm:flex-row sm:items-center
+                      sm:justify-between gap-4 py-4 first:pt-0 last:pb-0">
+            <div class="flex items-start gap-4 min-w-0">
+              {% if suggestion.cover_image_url %}
+                <img
+                  src="{{ suggestion.cover_image_url }}"
+                  alt="{{ suggestion.title }}"
+                  loading="lazy"
+                  class="w-12 h-16 object-contain rounded flex-shrink-0
+                         bg-gray-50 border border-gray-100"
+                  onerror="this.style.display='none'"
+                />
+              {% else %}
+                <div class="w-12 h-16 bg-gray-100 rounded flex-shrink-0
+                            flex items-center justify-center">
+                  <svg class="w-5 h-5 text-gray-300" fill="none"
+                       stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="1.5"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
+                             5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
+                             18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
+                             5.477 14.754 5 16.5 5c1.747 0 3.332.477
+                             4.5 1.253v13C19.832 18.477 18.247 18 16.5
+                             18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+              {% endif %}
+
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold text-sm text-gray-900 truncate">
+                  {{ suggestion.title }}
+                </p>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  by {{ suggestion.user.name if suggestion.user else "Unknown" }}
+                  &middot;
+                  {{ suggestion.user.email | mask_email
+                     if suggestion.user else "" }}
+                </p>
+                
+                  <a href="{{ suggestion.pdf_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-xs text-primary hover:text-primary-dark
+                         transition-colors mt-1 inline-block"
+                >
+                  View PDF
+                </a>
+              </div>
+            </div>
+
+            <div class="flex gap-2 flex-shrink-0 sm:flex-col lg:flex-row">
+              <button
+                class="btn btn-secondary text-xs py-2 px-4 approve-btn"
+                data-id="{{ suggestion.id }}"
+                data-title="{{ suggestion.title }}"
+                data-cover="{{ suggestion.cover_image_url or '' }}"
+                data-pdf="{{ suggestion.pdf_url }}"
+                data-user="{{ suggestion.user.name
+                              if suggestion.user else 'Unknown' }}"
+              >
+                Approve
+              </button>
+              <button
+                class="btn btn-danger text-xs py-2 px-4 reject-btn"
+                data-id="{{ suggestion.id }}"
+                data-title="{{ suggestion.title }}"
+                       data-cover="{{ suggestion.cover_image_url or '' }}"
+                data-pdf="{{ suggestion.pdf_url }}"
+                data-user="{{ suggestion.user.name
+                              if suggestion.user else 'Unknown' }}"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      {% with
+        title   = "No pending suggestions",
+        message = "New suggestions from members will appear here."
+      %}
+        {% include "partials/_empty_state.html" %}
+      {% endwith %}
+    {% endif %}
+  </section>
+
+  {# ── Approved queue ──────────────────────────────────────────────────────── #}
+  <section class="card p-6 mb-6" aria-labelledby="queue-heading">
+    <h2
+      id="queue-heading"
+      class="font-heading text-lg font-bold text-gray-900 mb-4"
+    >
+      Approved queue
+    </h2>
+
+    {% if approved_queue %}
+      <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+        {% for book in approved_queue %}
+          <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+            {% if book.cover_image_url %}
+              <img
+                src="{{ book.cover_image_url }}"
+                alt="{{ book.title }}"
+                loading="lazy"
+                class="w-10 h-14 object-contain rounded flex-shrink-0
+                       bg-gray-50"
+                onerror="this.style.display='none'"
+              />
+            {% else %}
+              <div class="w-10 h-14 bg-gray-100 rounded flex-shrink-0
+                          flex items-center justify-center">
+                <svg class="w-4 h-4 text-gray-300" fill="none"
+                     stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
+                           5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
+                           18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
+                           5.477 14.754 5 16.5 5c1.747 0 3.332.477
+                           4.5 1.253v13C19.832 18.477 18.247 18 16.5
+                           18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+            {% endif %}
+
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-gray-900 truncate">
+                {{ book.title }}
+              </p>
+              <p class="text-xs text-gray-400">
+                Added {{ book.created_at.strftime("%d %b %Y") }}
+              </p>
+            </div>
+
+            {% if not current_book %}
+              <button
+                class="btn btn-primary text-xs py-2 px-4 flex-shrink-0
+                       set-current-btn"
+                data-id="{{ book.id }}"
+                data-title="{{ book.title }}"
+                data-cover="{{ book.cover_image_url or '' }}"
+              >
+                Set as current
+              </button>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      {% with
+        title   = "Queue is empty",
+        message = "Approved book suggestions will appear here."
+      %}
+        {% include "partials/_empty_state.html" %}
+      {% endwith %}
+    {% endif %}
+  </section>
+
+  {# ── User management ─────────────────────────────────────────────────────── #}
+  <section class="card p-6 mb-6" aria-labelledby="users-heading">
+    <div class="flex items-center justify-between mb-4">
+      <h2
+        id="users-heading"
+        class="font-heading text-lg font-bold text-gray-900"
+      >
+        Members
+      </h2>
+      <span class="text-xs text-gray-400">
+        {{ stats.total_members }}
+        {{ stats.total_members | pluralise("member", "members") }}
+        &middot; {{ admin_count }}
+        {{ admin_count | pluralise("admin", "admins") }}
+      </span>
+    </div>
+
+    {# Desktop table #}
+    <div class="hidden sm:block overflow-x-auto">
+      <div class="max-h-80 overflow-y-auto">
+        <table class="min-w-full" aria-label="Members list">
+          <thead class="sticky top-0 bg-white">
+            <tr class="border-b border-gray-100">
+              <th class="text-left text-xs font-medium text-gray-500
+                         uppercase tracking-wider py-3 pr-4">
+                Member
+              </th>
+              <th class="text-left text-xs font-medium text-gray-500
+                         uppercase tracking-wider py-3 pr-4">
+                Role
+              </th>
+              <th class="text-left text-xs font-medium text-gray-500
+                         uppercase tracking-wider py-3 pr-4">
+                Joined
+              </th>
+              <th class="text-left text-xs font-medium text-gray-500
+                         uppercase tracking-wider py-3">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            {% for user in all_users %}
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full flex items-center
+                             justify-center text-sm font-medium
+                             flex-shrink-0
+                             {% if user.is_admin %}
+                               bg-primary/10 text-primary
+                             {% else %}
+                               bg-secondary/10 text-secondary
+                             {% endif %}"
+                    >
+                      {{ user.name[0].upper() }}
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">
+                        {{ user.name }}
+                        {% if user.id == admin.id %}
+                          <span class="text-xs text-gray-400">(you)</span>
+                        {% endif %}
+                      </p>
+                      <p class="text-xs text-gray-400">
+                        {{ user.email | mask_email }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3 pr-4">
+                  {% if user.is_admin %}
+                    <span class="badge badge-primary text-xs">Admin</span>
+                  {% else %}
+                    <span class="badge badge-secondary text-xs">Member</span>
+                  {% endif %}
+                </td>
+                <td class="py-3 pr-4 text-xs text-gray-500">
+                  {{ user.created_at.strftime("%d %b %Y") }}
+                </td>
+                <td class="py-3">
+                  {% if user.id != admin.id %}
+                    {% if user.is_admin %}
+                      <button
+                        class="text-sm text-amber-600 hover:text-amber-800
+                               transition-colors demote-btn"
+                        data-id="{{ user.id }}"
+                        data-name="{{ user.name }}"
+                        {% if admin_count <= 1 %}
+                          disabled
+                          title="Cannot demote the last admin"
+                        {% endif %}
+                      >
+                        Demote
+                      </button>
+                    {% else %}
+                      <button
+                        class="text-sm text-secondary hover:text-secondary-dark
+                               transition-colors promote-btn"
+                        data-id="{{ user.id }}"
+                        data-name="{{ user.name }}"
+                      >
+                        Promote
+                      </button>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-xs text-gray-300">&mdash;</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# Mobile card list #}
+    <div class="sm:hidden divide-y divide-gray-100 max-h-96 overflow-y-auto">
+      {% for user in all_users %}
+        <div class="py-4 first:pt-0">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div
+                class="w-9 h-9 rounded-full flex items-center justify-center
+                       text-sm font-medium flex-shrink-0
+                       {% if user.is_admin %}
+                         bg-primary/10 text-primary
+                       {% else %}
+                         bg-secondary/10 text-secondary
+                       {% endif %}"
+              >
+                {{ user.name[0].upper() }}
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">
+                  {{ user.name }}
+                  {% if user.id == admin.id %}
+                    <span class="text-xs text-gray-400">(you)</span>
+                  {% endif %}
+                </p>
+                <p class="text-xs text-gray-400">
+                  {{ user.email | mask_email }}
+                </p>
+              </div>
+            </div>
+            {% if user.is_admin %}
+              <span class="badge badge-primary text-xs flex-shrink-0">
+                Admin
+              </span>
+            {% else %}
+              <span class="badge badge-secondary text-xs flex-shrink-0">
+                Member
+              </span>
+            {% endif %}
+          </div>
+          <div class="flex items-center justify-between mt-2 pl-12">
+            <span class="text-xs text-gray-400">
+              Joined {{ user.created_at.strftime("%d %b %Y") }}
+            </span>
+            {% if user.id != admin.id %}
+              {% if user.is_admin %}
+                <button
+                  class="text-sm text-amber-600 demote-btn"
+                  data-id="{{ user.id }}"
+                  data-name="{{ user.name }}"
+                  {% if admin_count <= 1 %}disabled{% endif %}
+                >
+                  Demote
+                </button>
+              {% else %}
+                <button
+                  class="text-sm text-secondary promote-btn"
+                  data-id="{{ user.id }}"
+                  data-name="{{ user.name }}"
+                >
+                  Promote
+                </button>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50
+                px-4 py-3">
+      <p class="text-xs text-gray-500">
+        Admins can manage books, meetings, and approve suggestions.
+        There must always be at least one admin.
+        All changes are logged.
+      </p>
+    </div>
+  </section>
+
+  {# ── Activity log ────────────────────────────────────────────────────────── #}
+  <section class="card p-6" aria-labelledby="logs-heading">
+    <h2
+      id="logs-heading"
+      class="font-heading text-lg font-bold text-gray-900 mb-4"
+    >
+      Recent activity
+    </h2>
+
+    {% if logs.logs %}
+      <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+        {% for log in logs.logs %}
+          <div class="py-3 first:pt-0 last:pb-0">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="w-7 h-7 rounded-full bg-gray-100 flex
+                         items-center justify-center text-xs
+                         font-medium text-gray-600 flex-shrink-0"
+                >
+                  {{ log.admin_name[0].upper()
+                     if log.admin_name else "?" }}
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm text-gray-700">
+                    <span class="font-medium">
+                      {{ log.admin_name or "Admin" }}
+                    </span>
+                    {{ log.action | replace("_", " ") }}
+                    {% if log.target_data %}
+                      {% if log.target_data.book_title %}
+                        &ldquo;{{ log.target_data.book_title }}&rdquo;
+                      {% elif log.target_data.user_name %}
+                        {{ log.target_data.user_name }}
+                      {% endif %}
+                    {% endif %}
+                  </p>
+                </div>
+              </div>
+              <span class="text-xs text-gray-400 flex-shrink-0">
+                {{ log.created_at.strftime("%d %b, %H:%M") }}
+              </span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      {% with
+        title   = "No activity yet",
+        message = "Admin actions will be recorded here."
+      %}
+        {% include "partials/_empty_state.html" %}
+      {% endwith %}
+    {% endif %}
+  </section>
+
+</div>
+
+{# ── Modals ──────────────────────────────────────────────────────────────────── #}
+{% include "modals/_admin_code_modal.html" %}
+{% include "modals/_admin_edit_book_modal.html" %}
+{% include "modals/_admin_complete_book_modal.html" %}
+{% include "modals/_admin_meeting_modal.html" %}
+{% include "modals/_admin_suggestion_modal.html" %}
+{% include "modals/_admin_set_current_modal.html" %}
+{% include "modals/_admin_user_modal.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/dist/pages/admin.js"></script>
+<script type="module" src="/static/dist/admin_guide.js"></script>
+{% endblock %}

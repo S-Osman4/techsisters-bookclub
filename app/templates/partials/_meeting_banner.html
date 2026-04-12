@@ -1,0 +1,175 @@
+{# app/templates/partials/_meeting_banner.html Variables: meeting, uk_tz #} {%
+set state = meeting | meeting_state %} {% if state == "cancelled" %} {# ──
+Cancelled / holiday ──────────────────────────────────────────────── #}
+<div class="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+  <div class="flex items-start gap-3">
+    <svg
+      class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667
+             1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464
+             0L3.34 16c-.77 1.333.192 3 1.732 3z"
+      />
+    </svg>
+    <div>
+      <p class="text-sm font-semibold text-amber-800">Meeting cancelled</p>
+      {% if meeting.cancellation_note %}
+      <p class="text-sm text-amber-700 mt-0.5">
+        {{ meeting.cancellation_note }}
+      </p>
+      {% endif %}
+      <p class="text-xs text-amber-600 mt-1">
+        The next meeting will be announced in the WhatsApp group.
+      </p>
+    </div>
+  </div>
+</div>
+
+{% elif state == "imminent" %} {# ── Starting soon
+────────────────────────────────────────────────────── #}
+<div class="rounded-xl border border-green-200 bg-green-50 px-5 py-4">
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+  >
+    <div class="flex items-center gap-3">
+      <span class="flex h-2.5 w-2.5 relative">
+        <span
+          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+        ></span>
+        <span
+          class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"
+        ></span>
+      </span>
+      <div>
+        <p class="text-sm font-semibold text-green-800">
+          Meeting starting soon
+        </p>
+        <p class="text-xs text-green-600 mt-0.5">
+          {{ meeting.start_at | format_meeting_time }} (UK time)
+        </p>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
+      <a
+        href="{{ meeting.meet_link }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-secondary text-sm py-2 px-4 text-center"
+      >
+        Join now
+      </a>
+
+      <button
+        onclick="copyMeetingLink('{{ meeting.meet_link|tojson }}')"
+        class="btn btn-ghost text-sm py-2 px-4"
+        title="Copy meeting link"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+          />
+        </svg>
+        <span>Copy link</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+{% elif state == "upcoming" %} {# ── Scheduled
+────────────────────────────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-white px-5 py-4">
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="flex-shrink-0 w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center"
+      >
+        <svg
+          class="w-5 h-5 text-secondary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2
+                     2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-800">Next meeting</p>
+        <p class="text-sm text-gray-600 mt-0.5">
+          {{ meeting.start_at | format_meeting_time }} (UK time)
+        </p>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
+      <a
+        href="{{ meeting.meet_link }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-ghost text-sm py-2 px-4 flex-shrink-0"
+      >
+        Join Meeting
+      </a>
+
+      <button
+        onclick="copyMeetingLink('{{ meeting.meet_link|tojson }}')"
+        class="btn btn-ghost text-sm py-2 px-4"
+        title="Copy meeting link"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+          />
+        </svg>
+        <span>Copy link</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+{% elif state == "past" %} {# ── Past / no next meeting scheduled
+────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
+  <p class="text-sm text-gray-600">
+    <span class="font-medium text-gray-700">Next meeting:</span>
+    To be announced in the WhatsApp group.
+  </p>
+</div>
+
+{% else %} {# ── None set
+─────────────────────────────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
+  <p class="text-sm text-gray-500">No meeting scheduled yet.</p>
+</div>
+
+{% endif %}

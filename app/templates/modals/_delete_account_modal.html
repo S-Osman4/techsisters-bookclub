@@ -1,0 +1,119 @@
+{# app/templates/modals/_delete_account_modal.html #}
+<div
+  id="delete-account-modal"
+  class="modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="delete-modal-title"
+>
+  <div class="modal-container" onclick="event.stopPropagation()">
+    {# Header #}
+    <div
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+    >
+      <h2
+        id="delete-modal-title"
+        class="font-heading text-xl font-bold text-red-600"
+      >
+        Delete account
+      </h2>
+      <button
+        onclick="closeModal('delete-account-modal')"
+        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    {# Body #}
+    <div class="px-6 py-5">
+      <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 mb-5">
+        <p class="text-sm font-medium text-red-800">
+          This action is permanent and cannot be undone.
+        </p>
+        <p class="text-sm text-red-700 mt-1">
+          Your suggestions, reading progress, and account data will be
+          permanently deleted.
+        </p>
+      </div>
+
+      <form
+        hx-delete="/api/profile/account"
+        hx-target="#delete-result"
+        hx-swap="innerHTML"
+        hx-indicator="#delete-btn"
+        class="space-y-4"
+        id="delete-form"
+      >
+        <div>
+          <label
+            for="delete-password"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
+            Confirm your password
+          </label>
+          <input
+            type="password"
+            id="delete-password"
+            name="password"
+            class="input"
+            required
+          />
+        </div>
+
+        <div>
+          <label
+            for="delete-confirmation"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
+            Type
+            <code
+              class="font-mono bg-gray-100 px-1 py-0.5 rounded text-gray-800 text-xs"
+            >
+              delete my account
+            </code>
+            to confirm
+          </label>
+          <input
+            type="text"
+            id="delete-confirmation"
+            name="confirmation"
+            class="input"
+            placeholder="delete my account"
+            required
+            autocomplete="off"
+          />
+        </div>
+
+        <div id="delete-result" role="alert"></div>
+
+        <div class="flex gap-3 pt-1">
+          <button id="delete-btn" type="submit" class="btn btn-danger flex-1">
+            <span class="btn-text">Yes, delete my account</span>
+            <span class="loading-spinner" aria-hidden="true"></span>
+          </button>
+          <button
+            type="button"
+            onclick="closeModal('delete-account-modal')"
+            class="btn btn-ghost flex-1"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

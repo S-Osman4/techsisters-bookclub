@@ -6,11 +6,17 @@ services:
     dockerfilePath: ./Dockerfile
     envVars:
       - key: DATABASE_URL
-        sync: false # Set manually in Render dashboard
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: ENVIRONMENT
         value: production
+      - key: HCAPTCHA_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
       - key: WHATSAPP_GROUP_LINK
         sync: false
     healthCheckPath: /health

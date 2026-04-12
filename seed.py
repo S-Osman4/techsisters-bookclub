@@ -1,176 +1,142 @@
+# seed.py
 """
-Seed database with initial data
-"""
-from app.database import SessionLocal, create_tables
-from app.models import User, AccessCode, Book, Meeting
-from datetime import datetime
+Seed script — run once after setting up the database.
 
-def seed_database():
-    """Seed the database with initial data"""
-    print("🌱 Starting database seed...")
-    
-    # Create tables if they don't exist
-    create_tables()
-    
-    # Create database session
-    db = SessionLocal()
-    
-    try:
-        # 1. Create Access Code
-        print("📝 Creating access code...")
-        existing_code = db.query(AccessCode).first()
-        if not existing_code:
-            access_code = AccessCode(code="TW2024DEC")
-            db.add(access_code)
-            print("   ✅ Access code: TW2024DEC")
+Creates:
+  - The singleton AccessCode row (id=1)
+  - The singleton Meeting row (id=1) with placeholder values
+  - An admin user from ADMIN_EMAIL / ADMIN_PASSWORD env vars
+
+Safe to re-run — existing rows are updated, not duplicated.
+
+Usage:
+    python seed.py
+"""
+import asyncio
+import logging
+import os
+import sys
+from datetime import datetime, timedelta, timezone
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s — %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+async def seed() -> None:
+    # Import here so .env is loaded first
+    from app.database import AsyncSessionFactory, create_all_tables
+    from app.models.access_code import AccessCode
+    from app.models.meeting import Meeting
+    from app.models.user import User
+    from app.core.security import hash_password
+
+    logger.info("Creating tables if they don't exist...")
+    await create_all_tables()
+
+    admin_email = os.getenv("ADMIN_EMAIL", "").strip()
+    admin_password = os.getenv("ADMIN_PASSWORD", "").strip()
+
+    if not admin_email or not admin_password:
+        logger.error(
+            "ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env to seed an admin user."
+        )
+        sys.exit(1)
+
+    async with AsyncSessionFactory() as session:
+        try:
+            await _seed_access_code(session)
+            await _seed_meeting(session)
+            await _seed_admin(session, admin_email, admin_password)
+            await session.commit()
+            logger.info("Seed complete.")
+        except Exception as exc:
+            await session.rollback()
+            logger.error("Seed failed: %s", exc)
+            raise
+
+
+async def _seed_access_code(session) -> None:
+    """Create or update the singleton access code."""
+    from sqlalchemy import select
+    from app.models.access_code import AccessCode
+
+    result = await session.execute(
+        select(AccessCode).where(AccessCode.id == 1)
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        logger.info("Access code already exists: %r — skipping.", existing.code)
+        return
+
+    code = AccessCode(id=1, code="TECHSISTERS2026")
+    session.add(code)
+    logger.info("Access code created: TECHSISTERS2026")
+
+
+async def _seed_meeting(session) -> None:
+    """Create the singleton meeting row with placeholder values."""
+    from sqlalchemy import select
+    from app.models.meeting import Meeting
+
+    result = await session.execute(
+        select(Meeting).where(Meeting.id == 1)
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        logger.info("Meeting row already exists — skipping.")
+        return
+
+    # Default: one week from now at 18:00 UTC
+    default_start = datetime.now(timezone.utc).replace(
+        hour=18, minute=0, second=0, microsecond=0
+    ) + timedelta(days=7)
+
+    meeting = Meeting(
+        id=1,
+        start_at=default_start,
+        meet_link="https://meet.google.com/placeholder",
+    )
+    session.add(meeting)
+    logger.info("Meeting row created with placeholder values.")
+
+
+async def _seed_admin(session, email: str, password: str) -> None:
+    """Create admin user if email does not already exist."""
+    from sqlalchemy import func, select
+    from app.models.user import User
+
+    result = await session.execute(
+        select(User).where(func.lower(User.email) == email.lower())
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        if not existing.is_admin:
+            existing.is_admin = True
+            logger.info("Existing user %r promoted to admin.", email)
         else:
-            print(f"   ⚠️  Access code already exists: {existing_code.code}")
-        
-        # 2. Create Admin User
-        print("👤 Creating admin user...")
-        existing_admin = db.query(User).filter(User.email == "admin@bookclub.com").first()
-        if not existing_admin:
-            admin = User(
-                name="Admin",
-                email="admin@bookclub.com",
-                password_hash=User.hash_password("admin123"),
-                is_admin=True
-            )
-            db.add(admin)
-            print("   ✅ Admin user created")
-            print("      Email: admin@bookclub.com")
-            print("      Password: admin123")
-            print("      ⚠️  CHANGE THIS PASSWORD IN PRODUCTION!")
-        else:
-            print("   ⚠️  Admin user already exists")
-        
-        # 3. Create Test User
-        print("👤 Creating test user...")
-        existing_test = db.query(User).filter(User.email == "test@example.com").first()
-        if not existing_test:
-            test_user = User(
-                name="Test User",
-                email="test@example.com",
-                password_hash=User.hash_password("password123"),
-                is_admin=False
-            )
-            db.add(test_user)
-            print("   ✅ Test user created")
-            print("      Email: test@example.com")
-            print("      Password: password123")
-        else:
-            print("   ⚠️  Test user already exists")
-        
-        # 4. Create Current Book
-        print("📚 Creating current book...")
-        existing_current = db.query(Book).filter(Book.status == "current").first()
-        if not existing_current:
-            current_book = Book(
-                title="The Pragmatic Programmer",
-                pdf_url="https://example.com/pragmatic-programmer.pdf",
-                cover_image_url="https://m.media-amazon.com/images/I/71f1jieYHNL._SL1500_.jpg",
-                status="current",
-                current_chapters="Chapters 1-2",
-                total_chapters=10
-            )
-            db.add(current_book)
-            print("   ✅ Current book: The Pragmatic Programmer")
-        else:
-            print(f"   ⚠️  Current book already exists: {existing_current.title}")
-        
-        # 5. Create Queued Books
-        print("📚 Creating queued books...")
-        queued_books = [
-            {
-                "title": "Clean Code",
-                "pdf_url": "https://example.com/clean-code.pdf",
-                "cover_image_url": "https://m.media-amazon.com/images/I/51E2055ZGUL._SL1000_.jpg",
-                "total_chapters": 15
-            },
-            {
-                "title": "Atomic Habits",
-                "pdf_url": "https://example.com/atomic-habits.pdf",
-                "cover_image_url": "https://m.media-amazon.com/images/I/91bYsX41DVL._SL1500_.jpg",
-                "total_chapters": 12
-            }
-        ]
-        
-        for book_data in queued_books:
-            existing = db.query(Book).filter(
-                Book.title == book_data["title"],
-                Book.status == "queued"
-            ).first()
-            
-            if not existing:
-                queued_book = Book(
-                    title=book_data["title"],
-                    pdf_url=book_data["pdf_url"],
-                    cover_image_url=book_data.get("cover_image_url"),
-                    status="queued",
-                    total_chapters=book_data["total_chapters"]
-                )
-                db.add(queued_book)
-                print(f"   ✅ Queued: {book_data['title']}")
-            else:
-                print(f"   ⚠️  Already queued: {book_data['title']}")
-        
-        # 6. Create Past Book
-        print("📚 Creating past book...")
-        existing_past = db.query(Book).filter(
-            Book.title == "Thinking, Fast and Slow",
-            Book.status == "completed"
-        ).first()
-        
-        if not existing_past:
-            past_book = Book(
-                title="Thinking, Fast and Slow",
-                pdf_url="https://example.com/thinking-fast-slow.pdf",
-                cover_image_url="https://m.media-amazon.com/images/I/71TKuIEn-uL._SL1500_.jpg",
-                status="completed",
-                total_chapters=8,
-                completed_date=datetime(2024, 11, 15)
-            )
-            db.add(past_book)
-            print("   ✅ Past book: Thinking, Fast and Slow")
-        else:
-            print("   ⚠️  Past book already exists")
-        
-        # 7. Create Meeting
-        print("📅 Creating meeting...")
-        existing_meeting = db.query(Meeting).first()
-        if not existing_meeting:
-            meeting = Meeting(
-                date="December 15, 2024",
-                time="7:00 PM EAT",
-                meet_link="https://meet.google.com/abc-defg-hij"
-            )
-            db.add(meeting)
-            print("   ✅ Meeting scheduled for December 15, 2024")
-        else:
-            print(f"   ⚠️  Meeting already exists: {existing_meeting.date}")
-        
-        # Commit all changes
-        db.commit()
-        print("\n🎉 Database seeded successfully!\n")
-        
-        # Print summary
-        print("=" * 50)
-        print("SUMMARY")
-        print("=" * 50)
-        print(f"Access Code:   TW2024DEC")
-        print(f"Admin Email:   admin@bookclub.com")
-        print(f"Admin Pass:    admin123")
-        print(f"Test Email:    test@example.com")
-        print(f"Test Pass:     password123")
-        print("=" * 50)
-        print("\n✅ You can now run the application!")
-        
-    except Exception as e:
-        print(f"\n❌ Error seeding database: {e}")
-        db.rollback()
-        raise
-    finally:
-        db.close()
+            logger.info("Admin user %r already exists — skipping.", email)
+        return
+
+    from app.core.security import hash_password
+    admin = User(
+        name="Admin",
+        email=email.lower(),
+        password_hash=hash_password(password),
+        is_admin=True,
+    )
+    session.add(admin)
+    logger.info("Admin user created: %s", email)
+
 
 if __name__ == "__main__":
-    seed_database()
+    asyncio.run(seed())

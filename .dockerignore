@@ -53,7 +53,7 @@ README.md
 
 ## Scripts (not needed in production)
 
-seed.py
+
 verify_updates.py
 migrate_add_book_covers.py
 

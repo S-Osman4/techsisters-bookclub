@@ -1,7 +1,7 @@
 """
 Admin API - manage code, books, suggestions, meetings
 """
-from fastapi import APIRouter, Depends, Form, HTTPException, status, Body
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
 from datetime import datetime, timedelta
@@ -117,7 +117,9 @@ async def update_access_code(
 @router.post("/code/generate", response_model=dict)
 async def generate_access_code_endpoint(
     admin: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    csrf_token: str = Form(...),
+    request: Request = Request
 ):
     """
     Generate a new random access code (does NOT save to database).
@@ -232,7 +234,9 @@ async def set_current_book(
     cover_image_url: str = Body(None, embed=True),
     total_chapters: int = Body(None, embed=True),
     admin: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    csrf_token: str = Form(...),
+    request: Request = Request
 ):
     """
     Set a queued book as current
@@ -304,7 +308,9 @@ async def set_current_book(
 @router.post("/books/complete", response_model=MessageResponse)
 async def complete_current_book(
     admin: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    csrf_token: str = Form(...),
+    request: Request = Request
 ):
     """
     Mark current book as completed

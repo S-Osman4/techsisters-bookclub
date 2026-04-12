@@ -1,0 +1,39 @@
+{# app/templates/partials/_empty_state.html Variables: icon (svg path d attr),
+title, message, cta_text, cta_url, cta_onclick #}
+<div class="empty-state">
+  {# Icon — simple SVG, consistent size #}
+  <div
+    class="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mx-auto mb-4"
+  >
+    <svg
+      class="w-6 h-6 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="{{ icon | default('M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253') }}"
+      />
+    </svg>
+  </div>
+
+  <p class="font-heading text-lg font-semibold text-gray-700 mb-1">
+    {{ title }}
+  </p>
+
+  {% if message %}
+  <p class="text-sm text-gray-500 max-w-xs mx-auto">{{ message }}</p>
+  {% endif %} {% if cta_text %} {% if cta_onclick %}
+  <button onclick="{{ cta_onclick }}" class="btn btn-secondary mt-5 text-sm">
+    {{ cta_text }}
+  </button>
+  {% elif cta_url %}
+  <a href="{{ cta_url }}" class="btn btn-secondary mt-5 text-sm">
+    {{ cta_text }}
+  </a>
+  {% endif %} {% endif %}
+</div>

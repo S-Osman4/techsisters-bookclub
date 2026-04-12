@@ -1,0 +1,133 @@
+{# app/templates/modals/_admin_user_modal.html #} {# Promote modal #}
+<div
+  id="admin-promote-modal"
+  class="modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="promote-modal-title"
+>
+  <div class="modal-container" onclick="event.stopPropagation()">
+    <div
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+    >
+      <h2
+        id="promote-modal-title"
+        class="font-heading text-xl font-bold text-gray-900"
+      >
+        Promote to admin
+      </h2>
+      <button
+        onclick="closeModal('admin-promote-modal')"
+        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-sm text-gray-600 mb-2">
+        Promote <strong id="promote-user-name" class="text-gray-900"></strong>
+        to admin?
+      </p>
+      <p class="text-sm text-gray-500 mb-5">
+        They will be able to manage books, meetings, and approve suggestions.
+      </p>
+      <div id="promote-result" role="status" aria-live="polite"></div>
+      <div class="flex gap-3 mt-4">
+        <button
+          id="promote-confirm-btn"
+          onclick="confirmUserAction('promote')"
+          class="btn btn-secondary flex-1"
+        >
+          <span class="btn-text">Yes, promote</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+        <button
+          onclick="closeModal('admin-promote-modal')"
+          class="btn btn-ghost flex-1"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Demote modal #}
+<div
+  id="admin-demote-modal"
+  class="modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="demote-modal-title"
+>
+  <div class="modal-container" onclick="event.stopPropagation()">
+    <div
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+    >
+      <h2
+        id="demote-modal-title"
+        class="font-heading text-xl font-bold text-gray-900"
+      >
+        Demote from admin
+      </h2>
+      <button
+        onclick="closeModal('admin-demote-modal')"
+        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-sm text-gray-600 mb-2">
+        Demote <strong id="demote-user-name" class="text-gray-900"></strong>
+        from admin?
+      </p>
+      <p class="text-sm text-gray-500 mb-5">
+        They will lose access to the admin panel and management features.
+      </p>
+      <div id="demote-result" role="status" aria-live="polite"></div>
+      <div class="flex gap-3 mt-4">
+        <button
+          id="demote-confirm-btn"
+          onclick="confirmUserAction('demote')"
+          class="btn btn-danger flex-1"
+        >
+          <span class="btn-text">Yes, demote</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+        <button
+          onclick="closeModal('admin-demote-modal')"
+          class="btn btn-ghost flex-1"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

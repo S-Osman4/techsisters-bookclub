@@ -1,0 +1,20 @@
+{
+  "name": "techsisters-bookclub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:css && npm run build:js",
+    "build:css": "tailwindcss -i ./app/static/src/css/main.css -o ./app/static/dist/main.css --minify",
+    "build:js": "tsc --project tsconfig.json",
+    "watch": "concurrently \"npm run watch:css\" \"npm run watch:js\"",
+    "watch:css": "tailwindcss -i ./app/static/src/css/main.css -o ./app/static/dist/main.css --watch",
+    "watch:js": "tsc --project tsconfig.json --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.7",
+    "concurrently": "^8.2.2",
+    "htmx.org": "^2.0.8",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.3"
+  }
+}
