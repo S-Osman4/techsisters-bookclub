@@ -75,7 +75,7 @@ class AuthService:
                     data={
                         "secret": settings.HCAPTCHA_SECRET,
                         "response": token,
-                        "remoteip": client_ip,
+                       # "remoteip": client_ip,
                     },
                 )
             data = response.json()
