@@ -159,19 +159,26 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
             # CSP is relaxed to allow HTMX inline event handlers and
             # CDN resources (Tailwind, Lucide, hCaptcha)
+            # hCaptcha requires: js.hcaptcha.com (script), newassets.hcaptcha.com (frame),
+            # and *.hcaptcha.com + *.hcaptcha.io (connect) for verification API calls.
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self' 'unsafe-inline' "
                     "https://cdn.tailwindcss.com "
                     "https://unpkg.com "
-                    "https://js.hcaptcha.com; "
+                    "https://js.hcaptcha.com "
+                    "https://newassets.hcaptcha.com; "
                 "style-src 'self' 'unsafe-inline' "
                     "https://cdn.tailwindcss.com "
-                    "https://fonts.googleapis.com; "
+                    "https://fonts.googleapis.com "
+                    "https://newassets.hcaptcha.com; "
                 "font-src 'self' https://fonts.gstatic.com; "
                 "img-src 'self' data: https:; "
-                "connect-src 'self' https://hcaptcha.com; "
-                "frame-src https://hcaptcha.com;"
+                "connect-src 'self' "
+                    "https://hcaptcha.com "
+                    "https://*.hcaptcha.com "
+                    "https://*.hcaptcha.io; "
+                "frame-src https://hcaptcha.com https://newassets.hcaptcha.com;"
             )
 
         return response
