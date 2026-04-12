@@ -109,8 +109,10 @@ async def register_page(request: Request):
         {
             **_base_context(request),
             "from_param": request.query_params.get("from", ""),
+             "hcaptcha_site_key": settings.HCAPTCHA_SITE_KEY,
         },
     )
+
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────

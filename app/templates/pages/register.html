@@ -1,25 +1,23 @@
-{# app/templates/pages/register.html #}
-{% extends "base.html" %}
-
-{% block title %}Create Account — TechSisters Book Club{% endblock %}
-
-{% block extra_css %}
+{# app/templates/pages/register.html #} {% extends "base.html" %} {% block title
+%}Create Account — TechSisters Book Club{% endblock %} {% block extra_css %}
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-{% endblock %}
-
-{% block content %}
-<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center
-            py-12 px-4 sm:px-6 lg:px-8">
+{% endblock %} {% block content %}
+<div
+  class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+>
   <div class="w-full max-w-md">
-
     <div class="text-center mb-8">
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
-                   text-xs font-medium bg-green-100 text-green-700 mb-4">
+      <span
+        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 mb-4"
+      >
         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd"
+          <path
+            fill-rule="evenodd"
             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414
                0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0
-               011.414 0z" clip-rule="evenodd" />
+               011.414 0z"
+            clip-rule="evenodd"
+          />
         </svg>
         Access code verified
       </span>
@@ -28,13 +26,10 @@
         Create your account
       </h1>
       <p class="text-gray-600 text-sm">
-        {% if from_param == "suggest" %}
-          Create an account to suggest books for the club.
-        {% elif from_param == "dashboard" %}
-          Create an account to track your reading progress.
-        {% else %}
-          Join to track progress, suggest books, and more.
-        {% endif %}
+        {% if from_param == "suggest" %} Create an account to suggest books for
+        the club. {% elif from_param == "dashboard" %} Create an account to
+        track your reading progress. {% else %} Join to track progress, suggest
+        books, and more. {% endif %}
       </p>
     </div>
 
@@ -51,58 +46,89 @@
         <input type="hidden" name="from" value="{{ from_param }}" />
 
         <div>
-          <label for="reg-name"
-                 class="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            for="reg-name"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Full name
           </label>
           <input
-            type="text" id="reg-name" name="name"
-            autocomplete="name" class="input"
+            type="text"
+            id="reg-name"
+            name="name"
+            autocomplete="name"
+            class="input"
             placeholder="Jane Doe"
-            minlength="2" maxlength="50" required
+            minlength="2"
+            maxlength="50"
+            required
           />
         </div>
 
         <div>
-          <label for="reg-email"
-                 class="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            for="reg-email"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Email address
           </label>
           <input
-            type="email" id="reg-email" name="email"
-            autocomplete="email" class="input"
-            placeholder="you@example.com" required
+            type="email"
+            id="reg-email"
+            name="email"
+            autocomplete="email"
+            class="input"
+            placeholder="you@example.com"
+            required
           />
         </div>
 
         <div>
-          <label for="reg-password"
-                 class="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            for="reg-password"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Password
           </label>
           <div class="relative">
             <input
-              type="password" id="reg-password" name="password"
-              autocomplete="new-password" class="input pr-11"
+              type="password"
+              id="reg-password"
+              name="password"
+              autocomplete="new-password"
+              class="input pr-11"
               placeholder="At least 8 characters"
-              minlength="8" maxlength="100" required
+              minlength="8"
+              maxlength="100"
+              required
             />
             <button
               type="button"
               onclick="togglePasswordVisibility('reg-password', this)"
-              class="absolute right-3 top-1/2 -translate-y-1/2
-                     text-gray-400 hover:text-gray-600 transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Show password"
             >
-              <svg id="eye-reg-password" class="w-5 h-5" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0
+              <svg
+                id="eye-reg-password"
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0
                          8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542
-                         7-4.477 0-8.268-2.943-9.542-7z" />
+                         7-4.477 0-8.268-2.943-9.542-7z"
+                />
               </svg>
             </button>
           </div>
@@ -112,39 +138,58 @@
         </div>
 
         <div>
-          <label for="reg-confirm"
-                 class="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            for="reg-confirm"
+            class="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Confirm password
           </label>
           <div class="relative">
             <input
-              type="password" id="reg-confirm" name="confirm_password"
-              autocomplete="new-password" class="input pr-11"
+              type="password"
+              id="reg-confirm"
+              name="confirm_password"
+              autocomplete="new-password"
+              class="input pr-11"
               placeholder="Repeat your password"
-              minlength="8" required
+              minlength="8"
+              required
             />
             <button
               type="button"
               onclick="togglePasswordVisibility('reg-confirm', this)"
-              class="absolute right-3 top-1/2 -translate-y-1/2
-                     text-gray-400 hover:text-gray-600 transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Show password"
             >
-              <svg id="eye-reg-confirm" class="w-5 h-5" fill="none"
-                   stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0
+              <svg
+                id="eye-reg-confirm"
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0
                          8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542
-                         7-4.477 0-8.268-2.943-9.542-7z" />
+                         7-4.477 0-8.268-2.943-9.542-7z"
+                />
               </svg>
             </button>
           </div>
-          <p id="password-match-msg"
-             class="text-xs mt-1.5 hidden"
-             aria-live="polite"></p>
+          <p
+            id="password-match-msg"
+            class="text-xs mt-1.5 hidden"
+            aria-live="polite"
+          ></p>
         </div>
 
         <div class="flex justify-center">
@@ -152,6 +197,7 @@
             class="h-captcha"
             data-sitekey="041ce32e-c898-4648-bf00-88f8e6c41926"
           ></div>
+          <!-- DEBUG: {{ hcaptcha_site_key }} -->
         </div>
 
         <div id="register-result" role="alert"></div>
@@ -171,19 +217,17 @@
     <div class="mt-6 text-center">
       <p class="text-sm text-gray-600">
         Already have an account?
-        
-          <a href="/login{% if from_param %}?from={{ from_param }}{% endif %}"
+
+        <a
+          href="/login{% if from_param %}?from={{ from_param }}{% endif %}"
           class="font-medium text-primary hover:text-primary-dark transition-colors"
         >
           Sign in
         </a>
       </p>
     </div>
-
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script type="module" src="/static/dist/pages/register.js"></script>
 {% endblock %}
