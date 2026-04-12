@@ -58,7 +58,7 @@ class AuthService:
     async def verify_hcaptcha(self, token: str, client_ip: str) -> None:
         """
         Verify hCaptcha token with hCaptcha servers.
-        Raises ExternalServiceError if verification fails.
+        Raises ValidationError if verification fails.
         Skips verification in test/development environments.
         """
         if settings.is_development or settings.is_testing:
@@ -69,20 +69,32 @@ class AuthService:
             raise ValidationError("Please complete the captcha verification.")
 
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
                     "https://hcaptcha.com/siteverify",
                     data={
                         "secret": settings.HCAPTCHA_SECRET,
                         "response": token,
-                       # "remoteip": client_ip,
                     },
                 )
             data = response.json()
+            # Log the full response so we can debug secret/sitekey issues
+            logger.info("hCaptcha response: %s", data)
+
             if not data.get("success"):
                 errors = data.get("error-codes", [])
-                logger.warning("hCaptcha failed: %s", errors)
+                logger.warning("hCaptcha failed with error codes: %s", errors)
+                # Give a more specific error message based on error code
+                if "invalid-input-secret" in errors:
+                    logger.error("hCaptcha secret key is invalid — check HCAPTCHA_SECRET env var")
+                    raise ValidationError("Captcha configuration error. Please contact support.")
+                if "invalid-input-response" in errors:
+                    raise ValidationError("Captcha expired or invalid. Please try again.")
+                if "sitekey-secret-mismatch" in errors:
+                    logger.error("hCaptcha sitekey/secret mismatch — check both env vars match the same hCaptcha site")
+                    raise ValidationError("Captcha configuration error. Please contact support.")
                 raise ValidationError("Captcha verification failed. Please try again.")
+
         except httpx.TimeoutException:
             logger.error("hCaptcha verification timed out")
             raise ExternalServiceError("Captcha service unavailable. Please try again.")
