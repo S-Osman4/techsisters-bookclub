@@ -140,7 +140,7 @@ async def shutdown():
 
 
 # ── Health check ──────────────────────────────────────────────────────────────
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     from app.database import check_connection
     db_ok = await check_connection()
