@@ -8,17 +8,17 @@
 >
   <div class="modal-container" onclick="event.stopPropagation()">
     <div
-      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-dark-border"
     >
       <h2
         id="promote-modal-title"
-        class="font-heading text-xl font-bold text-gray-900"
+        class="font-heading text-xl font-bold text-gray-900 dark:text-white"
       >
         Promote to admin
       </h2>
       <button
         onclick="closeModal('admin-promote-modal')"
-        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-elevated transition-colors"
         aria-label="Close"
       >
         <svg
@@ -37,11 +37,15 @@
       </button>
     </div>
     <div class="px-6 py-5">
-      <p class="text-sm text-gray-600 mb-2">
-        Promote <strong id="promote-user-name" class="text-gray-900"></strong>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+        Promote
+        <strong
+          id="promote-user-name"
+          class="text-gray-900 dark:text-white"
+        ></strong>
         to admin?
       </p>
-      <p class="text-sm text-gray-500 mb-5">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
         They will be able to manage books, meetings, and approve suggestions.
       </p>
       <div id="promote-result" role="status" aria-live="polite"></div>
@@ -75,17 +79,17 @@
 >
   <div class="modal-container" onclick="event.stopPropagation()">
     <div
-      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-dark-border"
     >
       <h2
         id="demote-modal-title"
-        class="font-heading text-xl font-bold text-gray-900"
+        class="font-heading text-xl font-bold text-gray-900 dark:text-white"
       >
         Demote from admin
       </h2>
       <button
         onclick="closeModal('admin-demote-modal')"
-        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-elevated transition-colors"
         aria-label="Close"
       >
         <svg
@@ -104,11 +108,15 @@
       </button>
     </div>
     <div class="px-6 py-5">
-      <p class="text-sm text-gray-600 mb-2">
-        Demote <strong id="demote-user-name" class="text-gray-900"></strong>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+        Demote
+        <strong
+          id="demote-user-name"
+          class="text-gray-900 dark:text-white"
+        ></strong>
         from admin?
       </p>
-      <p class="text-sm text-gray-500 mb-5">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
         They will lose access to the admin panel and management features.
       </p>
       <div id="demote-result" role="status" aria-live="polite"></div>

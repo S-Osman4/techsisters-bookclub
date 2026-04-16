@@ -1,7 +1,8 @@
-{# app/templates/partials/_admin_guide.html Collapsible admin guide — include at
-the top of admin.html. Collapsed by default. On mobile: one-at-a-time accordion.
-On desktop (≥640 px): sidebar-nav + content-panel layout. JS is compiled from
-admin_guide.ts — see static/ts/admin_guide.ts #}
+{# app/templates/partials/_admin_guide.html #} {# Collapsible admin guide —
+include at the top of admin.html. Collapsed by default. #} {# On mobile:
+one-at-a-time accordion. On desktop (≥640 px): sidebar-nav + content-panel
+layout. #} {# JS is compiled from admin_guide.ts — see static/ts/admin_guide.ts
+#}
 
 <section
   id="admin-guide"
@@ -13,13 +14,13 @@ admin_guide.ts — see static/ts/admin_guide.ts #}
     type="button"
     id="guide-toggle-btn"
     onclick="AdminGuide.toggleOuter()"
-    class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+    class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
     aria-expanded="false"
     aria-controls="guide-body"
   >
     <div class="flex items-center gap-3">
       <div
-        class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0"
+        class="w-8 h-8 rounded-lg bg-secondary/10 dark:bg-secondary/20 flex items-center justify-center flex-shrink-0"
         aria-hidden="true"
       >
         <svg
@@ -37,17 +38,20 @@ admin_guide.ts — see static/ts/admin_guide.ts #}
         </svg>
       </div>
       <div>
-        <p id="guide-heading" class="font-semibold text-gray-900 text-sm">
+        <p
+          id="guide-heading"
+          class="font-semibold text-gray-900 dark:text-white text-sm"
+        >
           Admin guide
         </p>
-        <p class="text-xs text-gray-500">
+        <p class="text-xs text-gray-500 dark:text-gray-400">
           How to manage the book club — click to expand
         </p>
       </div>
     </div>
     <svg
       id="guide-chevron"
-      class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0"
+      class="w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform duration-200 flex-shrink-0"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -82,7 +86,7 @@ admin_guide.ts — see static/ts/admin_guide.ts #}
           type="button"
           id="nav-{{ id }}"
           onclick="AdminGuide.selectSection('{{ id }}')"
-          class="guide-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full"
+          class="guide-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors w-full"
           aria-selected="false"
           role="tab"
           aria-controls="dp-{{ id }}"
@@ -264,19 +268,23 @@ admin_guide.ts — see static/ts/admin_guide.ts #}
           <h3 class="guide-panel-heading">Managing members</h3>
           <div class="grid sm:grid-cols-2 gap-3 mt-3">
             <div class="guide-card">
-              <p class="font-medium text-gray-800 text-sm mb-1">
+              <p
+                class="font-medium text-gray-800 dark:text-gray-200 text-sm mb-1"
+              >
                 Promoting to admin
               </p>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm text-gray-600 dark:text-gray-400">
                 Grants full access to this admin panel. Only do this for trusted
                 members — you can demote them later.
               </p>
             </div>
             <div class="guide-card">
-              <p class="font-medium text-gray-800 text-sm mb-1">
+              <p
+                class="font-medium text-gray-800 dark:text-gray-200 text-sm mb-1"
+              >
                 Last admin protection
               </p>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm text-gray-600 dark:text-gray-400">
                 You can't demote yourself if you're the only admin, and you
                 can't delete your account either. Promote someone else first.
               </p>
@@ -304,7 +312,7 @@ admin_guide.ts — see static/ts/admin_guide.ts #}
             type="button"
             id="mob-btn-{{ id }}"
             onclick="AdminGuide.toggleMobile('{{ id }}')"
-            class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+            class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
             aria-expanded="false"
             aria-controls="mob-body-{{ id }}"
           >
@@ -313,12 +321,13 @@ admin_guide.ts — see static/ts/admin_guide.ts #}
             >
               {{ num }}
             </span>
-            <span class="flex-1 text-sm font-medium text-gray-900"
+            <span
+              class="flex-1 text-sm font-medium text-gray-900 dark:text-white"
               >{{ label }}</span
             >
             <svg
               id="mob-chev-{{ id }}"
-              class="w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0"
+              class="w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -461,19 +470,23 @@ admin_guide.ts — see static/ts/admin_guide.ts #}
             {% elif id == "mem" %}
             <div class="grid grid-cols-1 gap-2 mt-1">
               <div class="guide-card">
-                <p class="font-medium text-gray-800 text-sm mb-1">
+                <p
+                  class="font-medium text-gray-800 dark:text-gray-200 text-sm mb-1"
+                >
                   Promoting to admin
                 </p>
-                <p class="text-sm text-gray-600">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
                   Grants full access to this admin panel. Only for trusted
                   members — you can demote them later.
                 </p>
               </div>
               <div class="guide-card">
-                <p class="font-medium text-gray-800 text-sm mb-1">
+                <p
+                  class="font-medium text-gray-800 dark:text-gray-200 text-sm mb-1"
+                >
                   Last admin protection
                 </p>
-                <p class="text-sm text-gray-600">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
                   You can't demote yourself if you're the only admin. Promote
                   someone else first.
                 </p>

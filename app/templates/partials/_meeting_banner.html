@@ -1,10 +1,12 @@
-{# app/templates/partials/_meeting_banner.html Variables: meeting, uk_tz #} {%
-set state = meeting | meeting_state %} {% if state == "cancelled" %} {# ──
+{# app/templates/partials/_meeting_banner.html #} {# Variables: meeting, uk_tz
+#} {% set state = meeting | meeting_state %} {% if state == "cancelled" %} {# ──
 Cancelled / holiday ──────────────────────────────────────────────── #}
-<div class="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+<div
+  class="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-5 py-4"
+>
   <div class="flex items-start gap-3">
     <svg
-      class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
+      class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -19,13 +21,15 @@ Cancelled / holiday ────────────────────
       />
     </svg>
     <div>
-      <p class="text-sm font-semibold text-amber-800">Meeting cancelled</p>
+      <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+        Meeting cancelled
+      </p>
       {% if meeting.cancellation_note %}
-      <p class="text-sm text-amber-700 mt-0.5">
+      <p class="text-sm text-amber-700 dark:text-amber-400 mt-0.5">
         {{ meeting.cancellation_note }}
       </p>
       {% endif %}
-      <p class="text-xs text-amber-600 mt-1">
+      <p class="text-xs text-amber-600 dark:text-amber-500 mt-1">
         The next meeting will be announced in the WhatsApp group.
       </p>
     </div>
@@ -34,24 +38,26 @@ Cancelled / holiday ────────────────────
 
 {% elif state == "imminent" %} {# ── Starting soon
 ────────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-green-200 bg-green-50 px-5 py-4">
+<div
+  class="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 px-5 py-4"
+>
   <div
     class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
   >
     <div class="flex items-center gap-3">
       <span class="flex h-2.5 w-2.5 relative">
         <span
-          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 dark:bg-green-500 opacity-75"
         ></span>
         <span
-          class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"
+          class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500 dark:bg-green-400"
         ></span>
       </span>
       <div>
-        <p class="text-sm font-semibold text-green-800">
+        <p class="text-sm font-semibold text-green-800 dark:text-green-300">
           Meeting starting soon
         </p>
-        <p class="text-xs text-green-600 mt-0.5">
+        <p class="text-xs text-green-600 dark:text-green-400 mt-0.5">
           {{ meeting.start_at | format_meeting_time }} (UK time)
         </p>
       </div>
@@ -93,13 +99,15 @@ Cancelled / holiday ────────────────────
 
 {% elif state == "upcoming" %} {# ── Scheduled
 ────────────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 bg-white px-5 py-4">
+<div
+  class="rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-surface px-5 py-4"
+>
   <div
     class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
   >
     <div class="flex items-center gap-3">
       <div
-        class="flex-shrink-0 w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center"
+        class="flex-shrink-0 w-9 h-9 rounded-lg bg-secondary/10 dark:bg-secondary/20 flex items-center justify-center"
       >
         <svg
           class="w-5 h-5 text-secondary"
@@ -117,8 +125,10 @@ Cancelled / holiday ────────────────────
         </svg>
       </div>
       <div>
-        <p class="text-sm font-semibold text-gray-800">Next meeting</p>
-        <p class="text-sm text-gray-600 mt-0.5">
+        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Next meeting
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
           {{ meeting.start_at | format_meeting_time }} (UK time)
         </p>
       </div>
@@ -159,17 +169,25 @@ Cancelled / holiday ────────────────────
 
 {% elif state == "past" %} {# ── Past / no next meeting scheduled
 ────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
-  <p class="text-sm text-gray-600">
-    <span class="font-medium text-gray-700">Next meeting:</span>
+<div
+  class="rounded-xl border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-elevated px-5 py-4"
+>
+  <p class="text-sm text-gray-600 dark:text-gray-400">
+    <span class="font-medium text-gray-700 dark:text-gray-300"
+      >Next meeting:</span
+    >
     To be announced in the WhatsApp group.
   </p>
 </div>
 
 {% else %} {# ── None set
 ─────────────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
-  <p class="text-sm text-gray-500">No meeting scheduled yet.</p>
+<div
+  class="rounded-xl border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-elevated px-5 py-4"
+>
+  <p class="text-sm text-gray-500 dark:text-gray-400">
+    No meeting scheduled yet.
+  </p>
 </div>
 
 {% endif %}

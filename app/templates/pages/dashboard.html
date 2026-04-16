@@ -1,7 +1,6 @@
 {# app/templates/pages/dashboard.html #} {% extends "base.html" %} {% block
 title %}Dashboard — TechSisters Book Club{% endblock %} {% block content %} {#
-Pass server data to dashboard.ts via data attributes. No logic here — just
-values the script needs. #}
+Pass server data to dashboard.ts via data attributes #}
 <div
   id="dashboard-data"
   data-is-guest="{{ 'true' if is_guest else 'false' }}"
@@ -15,18 +14,20 @@ values the script needs. #}
   {# ── Page header ───────────────────────────────────────────────────────── #}
   <div class="mb-8">
     {% if current_user %}
-    <h1 class="font-heading text-2xl sm:text-3xl font-bold text-gray-900">
+    <h1
+      class="font-heading text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white"
+    >
       Welcome back, {{ current_user.name.split()[0] }}
     </h1>
-    <p class="text-gray-500 text-sm mt-1">
+    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
       Track your progress and stay in sync with the community.
     </p>
     {% else %} {# ── Guest banner
     ────────────────────────────────────────────────── #}
     <div
-      class="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-5 py-4 mb-6"
+      class="rounded-xl border border-dashed border-gray-300 dark:border-dark-border bg-gray-50 dark:bg-dark-surface px-5 py-4 mb-6"
     >
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-gray-600 dark:text-gray-400">
         You are browsing as a guest.
 
         <a
@@ -46,10 +47,12 @@ values the script needs. #}
         to unlock progress tracking and book suggestions.
       </p>
     </div>
-    <h1 class="font-heading text-2xl sm:text-3xl font-bold text-gray-900">
+    <h1
+      class="font-heading text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white"
+    >
       Book Club Dashboard
     </h1>
-    <p class="text-gray-500 text-sm mt-1">
+    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
       See what we are reading and join the community.
     </p>
     {% endif %}
@@ -59,7 +62,7 @@ values the script needs. #}
   <section class="mb-8" aria-labelledby="current-book-heading">
     <h2
       id="current-book-heading"
-      class="font-heading text-xl font-bold text-gray-900 mb-4"
+      class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-4"
     >
       Currently reading
     </h2>
@@ -74,17 +77,17 @@ values the script needs. #}
             src="{{ current_book.cover_image_url }}"
             alt="{{ current_book.title }}"
             loading="eager"
-            class="w-32 h-44 object-contain rounded-lg shadow-sm bg-gray-50"
+            class="w-32 h-44 object-contain rounded-lg shadow-sm bg-gray-50 dark:bg-dark-elevated"
             onerror="
               this.style.display = 'none';
               this.nextElementSibling.style.display = 'flex';
             "
           />
           <div
-            class="w-32 h-44 bg-gray-100 rounded-lg hidden items-center justify-center"
+            class="w-32 h-44 bg-gray-100 dark:bg-dark-elevated rounded-lg hidden items-center justify-center"
           >
             <svg
-              class="w-10 h-10 text-gray-300"
+              class="w-10 h-10 text-gray-300 dark:text-gray-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -104,10 +107,10 @@ values the script needs. #}
           </div>
           {% else %}
           <div
-            class="w-32 h-44 bg-gray-100 rounded-lg flex items-center justify-center"
+            class="w-32 h-44 bg-gray-100 dark:bg-dark-elevated rounded-lg flex items-center justify-center"
           >
             <svg
-              class="w-10 h-10 text-gray-300"
+              class="w-10 h-10 text-gray-300 dark:text-gray-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -130,7 +133,9 @@ values the script needs. #}
 
         {# Details #}
         <div class="flex-1 min-w-0">
-          <h3 class="font-heading text-xl font-bold text-gray-900 mb-1">
+          <h3
+            class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-1"
+          >
             {{ current_book.title }}
           </h3>
 
@@ -152,7 +157,9 @@ values the script needs. #}
               Download PDF
             </a>
             {% if current_book.total_chapters %}
-            <span class="flex items-center text-sm text-gray-500">
+            <span
+              class="flex items-center text-sm text-gray-500 dark:text-gray-400"
+            >
               {{ current_book.total_chapters }} {{ current_book.total_chapters |
               pluralise("chapter", "chapters") }}
             </span>
@@ -179,16 +186,20 @@ values the script needs. #}
   <section class="mb-8" aria-labelledby="progress-heading">
     <h2
       id="progress-heading"
-      class="font-heading text-xl font-bold text-gray-900 mb-4"
+      class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-4"
     >
       Reading progress
     </h2>
 
     <div class="grid sm:grid-cols-2 gap-6">
-      {# ── Your progress ─────────────────────────────────────────────────────── #}
+      {# ── Your progress ─────────────────────────────────────────────────── #}
       <div class="card p-6">
-        <h3 class="font-semibold text-gray-800 mb-1">Your progress</h3>
-        <p class="text-sm text-gray-500 mb-4">Update your current chapter.</p>
+        <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">
+          Your progress
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Update your current chapter.
+        </p>
 
         {% if current_user %}
         <form
@@ -201,63 +212,51 @@ values the script needs. #}
           <input type="hidden" name="book_id" value="{{ current_book.id }}" />
 
           <div>
-            {% if current_book.total_chapters %}
-            {# Known chapter count — use a select for ease of use #}
-            <label
-              for="chapter-select"
-              class="block text-sm font-medium text-gray-700 mb-1.5"
-            >
-              Current chapter
-            </label>
-            <select id="chapter-select" name="chapter" class="input">
-              <option
-                value="0"
-                {% if not user_progress or user_progress.chapter == 0 %}selected{% endif %}
-              >
-                Not started
-              </option>
-              {% for i in range(1, current_book.total_chapters + 1) %}
-              <option
-                value="{{ i }}"
-                {% if user_progress and user_progress.chapter == i %}selected{% endif %}
-              >
-                Chapter {{ i }}
-              </option>
-              {% endfor %}
-              <option
-                value="-1"
-                {% if user_progress and user_progress.chapter == -1 %}selected{% endif %}
-              >
-                Completed ✓
-              </option>
-            </select>
-            {% else %}
-            {# Unknown chapter count — use a number input so any chapter works #}
-            <label
-              for="chapter-select"
-              class="block text-sm font-medium text-gray-700 mb-1.5"
-            >
-              Current chapter
-              <span class="text-xs text-gray-400 ml-1 font-normal">
-                (enter 0 for not started, -1 for completed)
-              </span>
-            </label>
-            <input
-              type="number"
-              id="chapter-select"
-              name="chapter"
-              class="input"
-              min="-1"
-              step="1"
-              placeholder="e.g. 3"
-              value="{{ user_progress.chapter if user_progress else 0 }}"
-            />
-            <p class="text-xs text-gray-400 mt-1.5">
-              The admin hasn&rsquo;t set a total chapter count yet. Enter your
-              current chapter number.
-            </p>
-            {% endif %}
-          </div>
+          {% if current_book.total_chapters %}
+          <label
+            for="chapter-select"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+          >
+            Current chapter
+          </label>
+          <select id="chapter-select" name="chapter" class="input">
+            <option value="0" {% if not user_progress or user_progress.chapter == 0 %}selected{% endif %}>
+              Not started
+            </option>
+            {% for i in range(1, current_book.total_chapters + 1) %}
+            <option value="{{ i }}" {% if user_progress and user_progress.chapter == i %}selected{% endif %}>
+              Chapter {{ i }}
+            </option>
+            {% endfor %}
+            <option value="-1" {% if user_progress and user_progress.chapter == -1 %}selected{% endif %}>
+              Completed ✓
+            </option>
+          </select>
+          {% else %}
+          <label
+            for="chapter-select"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+          >
+            Current chapter
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-1 font-normal">
+              (enter 0 for not started, -1 for completed)
+            </span>
+          </label>
+          <input
+            type="number"
+            id="chapter-select"
+            name="chapter"
+            class="input"
+            min="-1"
+            step="1"
+            placeholder="e.g. 3"
+            value="{{ user_progress.chapter if user_progress else 0 }}"
+          />
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+            The admin hasn’t set a total chapter count yet. Enter your current chapter number.
+          </p>
+          {% endif %}
+        </div>
 
           <div id="progress-result" role="status" aria-live="polite"></div>
 
@@ -270,12 +269,11 @@ values the script needs. #}
             <span class="loading-spinner" aria-hidden="true"></span>
           </button>
         </form>
-        {% else %}
-        {# Guest locked state #}
+        {% else %} {# Guest locked state #}
         <div
-          class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center"
+          class="rounded-xl border border-dashed border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface p-6 text-center"
         >
-          <p class="text-sm text-gray-600 mb-4">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Progress tracking is a member feature.
           </p>
           <a href="/login?from=dashboard" class="btn btn-secondary text-sm">
@@ -287,22 +285,26 @@ values the script needs. #}
 
       {# ── Community progress ─────────────────────────────────────────── #}
       <div class="card p-6">
-        <h3 class="font-semibold text-gray-800 mb-1">Community progress</h3>
-        <p class="text-sm text-gray-500 mb-4">How the group is progressing.</p>
+        <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">
+          Community progress
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          How the group is progressing.
+        </p>
         {% include "partials/_community_progress.html" %}
       </div>
     </div>
   </section>
   {% endif %} {# ── Suggest a book
-  ─────────────────────────────────────────────────────── #}
+  ─────────────────────────────────────────────────── #}
   <section id="suggest-book" class="mb-8" aria-labelledby="suggest-heading">
     <h2
       id="suggest-heading"
-      class="font-heading text-xl font-bold text-gray-900 mb-1"
+      class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-1"
     >
       Suggest a book
     </h2>
-    <p class="text-sm text-gray-500 mb-4">
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
       All suggestions are reviewed by admins before being added to the reading
       queue.
     </p>
@@ -321,7 +323,7 @@ values the script needs. #}
           <div>
             <label
               for="suggest-title"
-              class="block text-sm font-medium text-gray-700 mb-1.5"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
             >
               Book title
               <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
@@ -339,7 +341,7 @@ values the script needs. #}
           <div>
             <label
               for="suggest-pdf"
-              class="block text-sm font-medium text-gray-700 mb-1.5"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
             >
               PDF URL
               <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
@@ -358,10 +360,12 @@ values the script needs. #}
         <div>
           <label
             for="suggest-cover"
-            class="block text-sm font-medium text-gray-700 mb-1.5"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Cover image URL
-            <span class="text-xs text-gray-400 ml-1">(optional)</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-1"
+              >(optional)</span
+            >
           </label>
           <input
             type="url"
@@ -370,7 +374,7 @@ values the script needs. #}
             class="input"
             placeholder="https://example.com/cover.jpg"
           />
-          <p class="text-xs text-gray-400 mt-1.5">
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
             Adding a cover helps admins identify the book quickly.
           </p>
         </div>
@@ -386,12 +390,12 @@ values the script needs. #}
 
     {% else %} {# Guest locked state #}
     <div
-      class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+      class="rounded-xl border border-dashed border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface p-8 text-center"
     >
-      <p class="text-sm text-gray-600 mb-2">
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
         Suggesting books is a member feature.
       </p>
-      <p class="text-xs text-gray-400 mb-5">
+      <p class="text-xs text-gray-400 dark:text-gray-500 mb-5">
         Create an account to suggest books for the next reading cycle.
       </p>
 
@@ -402,8 +406,8 @@ values the script needs. #}
     {% endif %}
   </section>
 
-  {# ── Your suggestions (members only) ───────────────────────────────────── #}
-  {% if current_user %}
+  {# ── Your suggestions (members only) ───────────────────────────────── #} {%
+  if current_user %}
   <section
     id="your-suggestions"
     class="mb-8"
@@ -411,13 +415,13 @@ values the script needs. #}
   >
     <h2
       id="my-suggestions-heading"
-      class="font-heading text-xl font-bold text-gray-900 mb-4"
+      class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-4"
     >
       Your suggestions
     </h2>
 
     {% if user_suggestions %}
-    <div class="card divide-y divide-gray-100">
+    <div class="card divide-y divide-gray-100 dark:divide-dark-border">
       {% for suggestion in user_suggestions %}
       <div class="flex items-center justify-between gap-4 px-5 py-4 flex-wrap">
         <div class="flex items-center gap-4 min-w-0">
@@ -426,12 +430,14 @@ values the script needs. #}
             src="{{ suggestion.cover_image_url }}"
             alt="{{ suggestion.title }}"
             loading="lazy"
-            class="w-10 h-14 object-contain rounded flex-shrink-0 bg-gray-50"
+            class="w-10 h-14 object-contain rounded flex-shrink-0 bg-gray-50 dark:bg-dark-elevated"
             onerror="this.style.display = 'none'"
           />
           {% endif %}
           <div class="min-w-0">
-            <p class="text-sm font-semibold text-gray-900 truncate">
+            <p
+              class="text-sm font-semibold text-gray-900 dark:text-white truncate"
+            >
               {{ suggestion.title }}
             </p>
 
@@ -448,13 +454,19 @@ values the script needs. #}
         <div class="flex-shrink-0 text-right">
           {% set status = suggestion.status %} {% if status == "pending" %}
           <span class="badge badge-pending">Pending review</span>
-          <p class="text-xs text-gray-400 mt-1">Awaiting admin decision</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Awaiting admin decision
+          </p>
           {% elif status == "approved" %}
           <span class="badge badge-approved">Added to queue</span>
-          <p class="text-xs text-gray-400 mt-1">Approved by admin</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Approved by admin
+          </p>
           {% else %}
           <span class="badge badge-rejected">Not selected</span>
-          <p class="text-xs text-gray-400 mt-1">Not selected this cycle</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Not selected this cycle
+          </p>
           {% endif %}
         </div>
       </div>
@@ -469,18 +481,18 @@ values the script needs. #}
     {% endif %}
   </section>
   {% endif %} {# ── Reading queue and history
-  ──────────────────────────────────────────── #}
+  ──────────────────────────────────────── #}
   <section aria-labelledby="library-heading">
     <h2
       id="library-heading"
-      class="font-heading text-xl font-bold text-gray-900 mb-4"
+      class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-4"
     >
       Reading queue &amp; history
     </h2>
 
     {# Tab navigation #}
     <div
-      class="flex gap-2 mb-6 border-b border-gray-200"
+      class="flex gap-2 mb-6 border-b border-gray-200 dark:border-dark-border"
       role="tablist"
       aria-label="Books sections"
     >
@@ -505,12 +517,12 @@ values the script needs. #}
         role="tab"
         aria-selected="false"
         aria-controls="panel-past"
-        class="px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 -mb-px hover:text-gray-700 transition-colors"
+        class="px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 -mb-px hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         onclick="switchTab('past')"
       >
         Past reads {% if past_books %}
         <span
-          class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"
+          class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-dark-elevated text-gray-500 dark:text-gray-400"
         >
           {{ past_books | length }}
         </span>
@@ -525,7 +537,7 @@ values the script needs. #}
         {% for book in upcoming_books[:10] %}
         <article class="card-hover flex flex-col overflow-hidden group p-4">
           <div
-            class="w-full h-32 flex items-center justify-center bg-gray-50 rounded-lg mb-3 overflow-hidden"
+            class="w-full h-32 flex items-center justify-center bg-gray-50 dark:bg-dark-elevated rounded-lg mb-3 overflow-hidden"
           >
             {% if book.cover_image_url %}
             <img
@@ -536,7 +548,7 @@ values the script needs. #}
             />
             {% else %}
             <svg
-              class="w-8 h-8 text-gray-300"
+              class="w-8 h-8 text-gray-300 dark:text-gray-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -557,7 +569,7 @@ values the script needs. #}
             {% endif %}
           </div>
           <h3
-            class="text-xs font-semibold text-gray-800 line-clamp-2 leading-snug mb-2 flex-1"
+            class="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 leading-snug mb-2 flex-1"
           >
             {{ book.title }}
           </h3>
@@ -565,7 +577,6 @@ values the script needs. #}
             In queue
           </span>
           {% if book.pdf_url %}
-
           <a
             href="{{ book.pdf_url }}"
             target="_blank"
@@ -603,7 +614,7 @@ values the script needs. #}
         {% for book in past_books[:10] %}
         <article class="card-hover flex flex-col overflow-hidden group p-4">
           <div
-            class="w-full h-32 flex items-center justify-center bg-gray-50 rounded-lg mb-3 overflow-hidden"
+            class="w-full h-32 flex items-center justify-center bg-gray-50 dark:bg-dark-elevated rounded-lg mb-3 overflow-hidden"
           >
             {% if book.cover_image_url %}
             <img
@@ -614,7 +625,7 @@ values the script needs. #}
             />
             {% else %}
             <svg
-              class="w-8 h-8 text-gray-300"
+              class="w-8 h-8 text-gray-300 dark:text-gray-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -635,7 +646,7 @@ values the script needs. #}
             {% endif %}
           </div>
           <h3
-            class="text-xs font-semibold text-gray-800 line-clamp-2 leading-snug mb-2 flex-1"
+            class="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 leading-snug mb-2 flex-1"
           >
             {{ book.title }}
           </h3>
@@ -643,7 +654,6 @@ values the script needs. #}
             Completed
           </span>
           {% if book.pdf_url %}
-
           <a
             href="{{ book.pdf_url }}"
             target="_blank"

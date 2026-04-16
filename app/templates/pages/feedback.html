@@ -2,10 +2,12 @@
 %}Feedback — TechSisters Book Club{% endblock %} {% block content %}
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="mb-8">
-    <h1 class="font-heading text-3xl font-bold text-gray-900 mb-2">
+    <h1
+      class="font-heading text-3xl font-bold text-gray-900 dark:text-white mb-2"
+    >
       Share your feedback
     </h1>
-    <p class="text-gray-600">
+    <p class="text-gray-600 dark:text-gray-400">
       This is an early platform. Your feedback goes directly to the site owner
       and helps improve the experience for everyone.
     </p>
@@ -26,7 +28,7 @@
       <div>
         <label
           for="feedback-type"
-          class="block text-sm font-medium text-gray-700 mb-1.5"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           Type of feedback
           <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
@@ -43,7 +45,7 @@
       <div>
         <label
           for="feedback-message"
-          class="block text-sm font-medium text-gray-700 mb-1.5"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           Message
           <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
@@ -58,7 +60,7 @@
           minlength="1"
           maxlength="2000"
         ></textarea>
-        <p class="text-xs text-gray-400 mt-1.5 text-right">
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 text-right">
           <span id="char-count">0</span> / 2000
         </p>
       </div>
@@ -67,10 +69,12 @@
       <div>
         <label
           for="feedback-email"
-          class="block text-sm font-medium text-gray-700 mb-1.5"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           Email address
-          <span class="text-xs text-gray-400 ml-1">(optional)</span>
+          <span class="text-xs text-gray-400 dark:text-gray-500 ml-1"
+            >(optional)</span
+          >
         </label>
         <input
           type="email"
@@ -95,7 +99,7 @@
     </form>
   </div>
 
-  <p class="text-center text-xs text-gray-400 mt-6">
+  <p class="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
     Thank you for helping make TechSisters Book Club better.
   </p>
 </div>

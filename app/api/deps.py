@@ -4,6 +4,7 @@ from typing import Optional
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import ValidationError
 
 from app.core.exceptions import AppError
 from app.database import get_session
@@ -112,9 +113,26 @@ async def require_code_verified(request: Request) -> bool:
 
 # ── Error mapping ─────────────────────────────────────────────────────────────
 
-def handle_app_error(exc: AppError) -> HTTPException:
+def handle_app_error(exc: Exception) -> HTTPException:
     """
-    Convert a domain AppError into a FastAPI HTTPException.
-    Call this in route exception handlers.
+    Convert domain AppError or Pydantic ValidationError into a FastAPI HTTPException.
     """
-    return HTTPException(status_code=exc.status_code, detail=exc.detail)
+    if isinstance(exc, ValidationError):
+        # Format Pydantic errors into a readable string
+        errors = exc.errors()
+        messages = []
+        for err in errors:
+            loc = " -> ".join(str(x) for x in err["loc"])
+            messages.append(f"{loc}: {err['msg']}")
+        detail = "; ".join(messages) if messages else "Invalid input."
+        return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+
+    if isinstance(exc, AppError):
+        return HTTPException(status_code=exc.status_code, detail=exc.detail)
+
+    # Fallback for unexpected errors (shouldn't happen here)
+    logger.exception("Unhandled exception in handle_app_error")
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="An unexpected error occurred.",
+    )

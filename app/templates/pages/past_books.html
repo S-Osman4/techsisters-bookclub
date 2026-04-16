@@ -4,10 +4,12 @@ title %}Past Books — TechSisters Book Club{% endblock %} {% block content %}
   {# ── Header ───────────────────────────────────────────────────────────────
   #}
   <div class="mb-8">
-    <h1 class="font-heading text-3xl font-bold text-gray-900 mb-1">
+    <h1
+      class="font-heading text-3xl font-bold text-gray-900 dark:text-white mb-1"
+    >
       Past books
     </h1>
-    <p class="text-gray-500 text-sm">
+    <p class="text-gray-500 dark:text-gray-400 text-sm">
       {{ total_count }} {{ total_count | pluralise("book", "books") }} completed
     </p>
   </div>
@@ -35,7 +37,7 @@ title %}Past Books — TechSisters Book Club{% endblock %} {% block content %}
         class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
       >
         <svg
-          class="w-4 h-4 text-gray-400"
+          class="w-4 h-4 text-gray-400 dark:text-gray-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -54,7 +56,7 @@ title %}Past Books — TechSisters Book Club{% endblock %} {% block content %}
     {% if search %}
     <button
       onclick="clearSearch()"
-      class="mt-2 text-sm text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1"
+      class="mt-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors flex items-center gap-1"
     >
       <svg
         class="w-3.5 h-3.5"

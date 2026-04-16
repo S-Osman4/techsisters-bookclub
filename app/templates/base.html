@@ -18,6 +18,18 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        const saved = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        if (saved === "dark" || (!saved && prefersDark)) {
+          document.documentElement.classList.add("dark");
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
 
     {# Compiled Tailwind CSS #}
     <link rel="stylesheet" href="/static/dist/main.css" />
@@ -25,7 +37,7 @@
     {% block extra_css %}{% endblock %}
   </head>
 
-  <body class="bg-[#F9FAFB] text-gray-900 font-body antialiased">
+  <body class="font-body antialiased">
     {# ── Navigation
     ──────────────────────────────────────────────────────────── #} {% include
     "partials/_nav.html" %} {# ── Page content
@@ -39,10 +51,7 @@
     <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
 
     {# ── Third party scripts
-    ─────────────────────────────────────────────────── #} {# HTMX: loaded
-    before our JS so initHtmxHooks() can attach listeners. Lucide: icon library,
-    re-run after every HTMX swap via htmx-hooks.ts. hCaptcha: only on register
-    page — loaded via block below. #}
+    ─────────────────────────────────────────────────── #}
     <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
     <script
       src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"
@@ -51,9 +60,7 @@
     <script src="https://unpkg.com/lucide@latest" defer></script>
 
     {# ── Compiled application JS
-    ─────────────────────────────────────────────── #} {# type="module" required
-    because TypeScript compiles to ES modules. defer is implied by
-    type="module". #}
+    ─────────────────────────────────────────────── #}
     <script type="module" src="/static/dist/main.js"></script>
 
     {% block extra_js %}{% endblock %}

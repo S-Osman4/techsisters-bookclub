@@ -8,17 +8,17 @@
 >
   <div class="modal-container" onclick="event.stopPropagation()">
     <div
-      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-dark-border"
     >
       <h2
         id="suggestion-modal-title"
-        class="font-heading text-xl font-bold text-gray-900"
+        class="font-heading text-xl font-bold text-gray-900 dark:text-white"
       >
         Review suggestion
       </h2>
       <button
         onclick="closeModal('admin-suggestion-modal')"
-        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-elevated transition-colors"
         aria-label="Close"
       >
         <svg
@@ -40,14 +40,14 @@
     <div class="px-6 py-5">
       {# Book preview #}
       <div
-        class="flex gap-4 mb-5 p-4 bg-gray-50 rounded-xl border border-gray-100"
+        class="flex gap-4 mb-5 p-4 bg-gray-50 dark:bg-dark-elevated rounded-xl border border-gray-100 dark:border-dark-border"
       >
         <div
           id="suggestion-modal-cover"
-          class="w-16 h-20 bg-gray-200 rounded flex-shrink-0 overflow-hidden flex items-center justify-center"
+          class="w-16 h-20 bg-gray-200 dark:bg-dark-elevated rounded flex-shrink-0 overflow-hidden flex items-center justify-center"
         >
           <svg
-            class="w-6 h-6 text-gray-400"
+            class="w-6 h-6 text-gray-400 dark:text-gray-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -68,9 +68,12 @@
         <div class="min-w-0 flex-1">
           <p
             id="suggestion-modal-title-text"
-            class="font-semibold text-gray-900 mb-1"
+            class="font-semibold text-gray-900 dark:text-white mb-1"
           ></p>
-          <p id="suggestion-modal-user" class="text-xs text-gray-500 mb-2"></p>
+          <p
+            id="suggestion-modal-user"
+            class="text-xs text-gray-500 dark:text-gray-400 mb-2"
+          ></p>
 
           <a
             id="suggestion-modal-pdf"
@@ -88,10 +91,13 @@
       <div id="cover-input-section" class="mb-4">
         <label
           for="suggestion-cover-url"
-          class="block text-sm font-medium text-gray-700 mb-1.5"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           Cover image URL
-          <span id="cover-required-badge" class="text-xs text-red-500 ml-1">
+          <span
+            id="cover-required-badge"
+            class="text-xs text-red-500 dark:text-red-400 ml-1"
+          >
             (required to approve)
           </span>
         </label>

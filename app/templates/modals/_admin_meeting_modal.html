@@ -8,17 +8,17 @@
 >
   <div class="modal-container" onclick="event.stopPropagation()">
     <div
-      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+      class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-dark-border"
     >
       <h2
         id="meeting-modal-title"
-        class="font-heading text-xl font-bold text-gray-900"
+        class="font-heading text-xl font-bold text-gray-900 dark:text-white"
       >
         {% if meeting %}Edit meeting{% else %}Set meeting{% endif %}
       </h2>
       <button
         onclick="closeModal('admin-meeting-modal')"
-        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-elevated transition-colors"
         aria-label="Close"
       >
         <svg
@@ -41,7 +41,7 @@
       <div>
         <label
           for="meeting-datetime"
-          class="block text-sm font-medium text-gray-700 mb-1.5"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           Date and time (UK time)
         </label>
@@ -51,7 +51,7 @@
           class="input"
           value="{% if meeting and not meeting.is_cancelled %}{{ meeting.start_at.astimezone(uk_tz).strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
         />
-        <p class="text-xs text-gray-400 mt-1.5">
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
           Times are entered and displayed in UK time (Europe/London).
         </p>
       </div>
@@ -59,7 +59,7 @@
       <div>
         <label
           for="meeting-link"
-          class="block text-sm font-medium text-gray-700 mb-1.5"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           Google Meet link
         </label>
@@ -73,12 +73,14 @@
       </div>
 
       {# Cancel toggle #}
-      <div class="border border-amber-200 rounded-lg p-4 bg-amber-50">
+      <div
+        class="border border-amber-200 dark:border-amber-800 rounded-lg p-4 bg-amber-50 dark:bg-amber-950/30"
+      >
         <label class="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
             id="meeting-cancelled"
-            class="w-4 h-4 rounded"
+            class="w-4 h-4 rounded dark:bg-dark-elevated dark:border-dark-border"
             {%
             if
             meeting
@@ -89,7 +91,7 @@
             %}
             onchange="toggleCancellationNote(this.checked)"
           />
-          <span class="text-sm font-medium text-amber-800">
+          <span class="text-sm font-medium text-amber-800 dark:text-amber-300">
             Cancel this meeting
           </span>
         </label>
@@ -100,7 +102,7 @@
         >
           <label
             for="cancellation-note"
-            class="block text-xs text-amber-700 mb-1"
+            class="block text-xs text-amber-700 dark:text-amber-400 mb-1"
           >
             Reason (optional — shown to members)
           </label>

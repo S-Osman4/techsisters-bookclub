@@ -11,7 +11,7 @@ server data to profile.ts #}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
   {# ── Profile header ────────────────────────────────────────────────────── #}
   <div
-    class="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8 pb-8 border-b border-gray-100"
+    class="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8 pb-8 border-b border-gray-100 dark:border-dark-border"
   >
     {# Avatar #}
     <div
@@ -25,13 +25,15 @@ server data to profile.ts #}
     <div class="flex-1 min-w-0">
       <h1
         id="profile-name-display"
-        class="font-heading text-2xl font-bold text-gray-900"
+        class="font-heading text-2xl font-bold text-gray-900 dark:text-white"
       >
         {{ current_user.name }}
       </h1>
-      <p class="text-sm text-gray-500 mt-0.5">{{ current_user.email }}</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        {{ current_user.email }}
+      </p>
       <div class="flex flex-wrap items-center gap-3 mt-2">
-        <span class="text-xs text-gray-400">
+        <span class="text-xs text-gray-400 dark:text-gray-500">
           Member since {{ current_user.created_at.strftime("%d %B
           %Y").lstrip("0") }}
         </span>
@@ -45,26 +47,36 @@ server data to profile.ts #}
   {# ── Stats ─────────────────────────────────────────────────────────────── #}
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
     <div class="card p-4 text-center">
-      <p class="text-2xl font-bold text-gray-900">
+      <p class="text-2xl font-bold text-gray-900 dark:text-white">
         {{ stats.books_completed }}
       </p>
-      <p class="text-xs text-gray-500 mt-1">Books completed</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        Books completed
+      </p>
     </div>
     <div class="card p-4 text-center">
-      <p class="text-2xl font-bold text-gray-900">{{ stats.books_reading }}</p>
-      <p class="text-xs text-gray-500 mt-1">Currently reading</p>
+      <p class="text-2xl font-bold text-gray-900 dark:text-white">
+        {{ stats.books_reading }}
+      </p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        Currently reading
+      </p>
     </div>
     <div class="card p-4 text-center">
-      <p class="text-2xl font-bold text-gray-900">
+      <p class="text-2xl font-bold text-gray-900 dark:text-white">
         {{ stats.total_suggestions }}
       </p>
-      <p class="text-xs text-gray-500 mt-1">Books suggested</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        Books suggested
+      </p>
     </div>
     <div class="card p-4 text-center">
-      <p class="text-2xl font-bold text-gray-900">
+      <p class="text-2xl font-bold text-gray-900 dark:text-white">
         {{ stats.approved_suggestions }}
       </p>
-      <p class="text-xs text-gray-500 mt-1">Suggestions approved</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        Suggestions approved
+      </p>
     </div>
   </div>
 
@@ -73,7 +85,7 @@ server data to profile.ts #}
   <section class="card p-6 mb-6" aria-labelledby="account-heading">
     <h2
       id="account-heading"
-      class="font-heading text-lg font-bold text-gray-900 mb-5"
+      class="font-heading text-lg font-bold text-gray-900 dark:text-white mb-5"
     >
       Account information
     </h2>
@@ -83,7 +95,7 @@ server data to profile.ts #}
       <div>
         <label
           for="new-name"
-          class="block text-sm font-medium text-gray-700 mb-1.5"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           Display name
         </label>
@@ -123,24 +135,31 @@ server data to profile.ts #}
 
       {# Email — read only #}
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+        <label
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+        >
           Email address
         </label>
         <input
           type="email"
           value="{{ current_user.email }}"
-          class="input bg-gray-50 cursor-not-allowed opacity-60"
+          class="input bg-gray-50 dark:bg-dark-elevated cursor-not-allowed opacity-60"
           disabled
           aria-describedby="email-note"
         />
-        <p id="email-note" class="text-xs text-gray-400 mt-1.5">
+        <p
+          id="email-note"
+          class="text-xs text-gray-400 dark:text-gray-500 mt-1.5"
+        >
           Email cannot be changed.
         </p>
       </div>
 
       {# Role — read only #}
       <div>
-        <p class="text-sm font-medium text-gray-700 mb-1.5">Role</p>
+        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          Role
+        </p>
         {% if current_user.is_admin %}
         <span class="badge badge-primary">Admin</span>
         {% else %}
@@ -155,7 +174,7 @@ server data to profile.ts #}
   <section class="card p-6 mb-6" aria-labelledby="password-heading">
     <h2
       id="password-heading"
-      class="font-heading text-lg font-bold text-gray-900 mb-5"
+      class="font-heading text-lg font-bold text-gray-900 dark:text-white mb-5"
     >
       Change password
     </h2>
@@ -172,7 +191,7 @@ server data to profile.ts #}
         <div>
           <label
             for="current-password"
-            class="block text-sm font-medium text-gray-700 mb-1.5"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Current password
           </label>
@@ -188,7 +207,7 @@ server data to profile.ts #}
             <button
               type="button"
               onclick="togglePasswordVisibility('current-password', this)"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               aria-label="Show password"
             >
               <svg
@@ -220,7 +239,7 @@ server data to profile.ts #}
         <div>
           <label
             for="new-password"
-            class="block text-sm font-medium text-gray-700 mb-1.5"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             New password
           </label>
@@ -238,7 +257,7 @@ server data to profile.ts #}
             <button
               type="button"
               onclick="togglePasswordVisibility('new-password', this)"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               aria-label="Show password"
             >
               <svg
@@ -265,7 +284,7 @@ server data to profile.ts #}
               </svg>
             </button>
           </div>
-          <p class="text-xs text-gray-400 mt-1.5">
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
             Minimum 8 characters with uppercase, lowercase, and a number.
           </p>
         </div>
@@ -282,24 +301,31 @@ server data to profile.ts #}
 
   {# ── Danger zone ──────────────────────────────────────────────────────────
   #}
-  <section class="card p-6 border-red-200" aria-labelledby="danger-heading">
+  <section
+    class="card p-6 border-red-200 dark:border-red-800"
+    aria-labelledby="danger-heading"
+  >
     <h2
       id="danger-heading"
-      class="font-heading text-lg font-bold text-red-600 mb-2"
+      class="font-heading text-lg font-bold text-red-600 dark:text-red-400 mb-2"
     >
       Danger zone
     </h2>
 
     {% if is_only_admin %}
-    <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 mb-4">
-      <p class="text-sm font-medium text-amber-800">Cannot delete account</p>
-      <p class="text-sm text-amber-700 mt-1">
+    <div
+      class="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 mb-4"
+    >
+      <p class="text-sm font-medium text-amber-800 dark:text-amber-300">
+        Cannot delete account
+      </p>
+      <p class="text-sm text-amber-700 dark:text-amber-400 mt-1">
         You are the only admin. Promote another member to admin before deleting
         your account.
       </p>
     </div>
     {% else %}
-    <p class="text-sm text-gray-600 mb-4">
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
       Permanently delete your account and all associated data. This cannot be
       undone.
     </p>

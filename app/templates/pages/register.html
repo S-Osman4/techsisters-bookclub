@@ -8,7 +8,7 @@
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
       <span
-        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 mb-4"
+        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-500 mb-4"
       >
         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
           <path
@@ -22,10 +22,12 @@
         Access code verified
       </span>
 
-      <h1 class="font-heading text-3xl font-bold text-gray-900 mb-2">
+      <h1
+        class="font-heading text-3xl font-bold text-gray-900 dark:text-white mb-2"
+      >
         Create your account
       </h1>
-      <p class="text-gray-600 text-sm">
+      <p class="text-gray-600 dark:text-gray-400 text-sm">
         {% if from_param == "suggest" %} Create an account to suggest books for
         the club. {% elif from_param == "dashboard" %} Create an account to
         track your reading progress. {% else %} Join to track progress, suggest
@@ -49,7 +51,7 @@
         <div>
           <label
             for="reg-name"
-            class="block text-sm font-medium text-gray-700 mb-1.5"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Full name
           </label>
@@ -69,7 +71,7 @@
         <div>
           <label
             for="reg-email"
-            class="block text-sm font-medium text-gray-700 mb-1.5"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Email address
           </label>
@@ -87,7 +89,7 @@
         <div>
           <label
             for="reg-password"
-            class="block text-sm font-medium text-gray-700 mb-1.5"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Password
           </label>
@@ -106,7 +108,7 @@
             <button
               type="button"
               onclick="togglePasswordVisibility('reg-password', this)"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               aria-label="Show password"
             >
               <svg
@@ -133,7 +135,7 @@
               </svg>
             </button>
           </div>
-          <p class="text-xs text-gray-400 mt-1.5">
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
             Uppercase, lowercase, and a number required.
           </p>
         </div>
@@ -141,7 +143,7 @@
         <div>
           <label
             for="reg-confirm"
-            class="block text-sm font-medium text-gray-700 mb-1.5"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Confirm password
           </label>
@@ -159,7 +161,7 @@
             <button
               type="button"
               onclick="togglePasswordVisibility('reg-confirm', this)"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               aria-label="Show password"
             >
               <svg
@@ -216,9 +218,8 @@
     </div>
 
     <div class="mt-6 text-center">
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-gray-600 dark:text-gray-400">
         Already have an account?
-
         <a
           href="/login{% if from_param %}?from={{ from_param }}{% endif %}"
           class="font-medium text-primary hover:text-primary-dark transition-colors"

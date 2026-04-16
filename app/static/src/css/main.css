@@ -29,6 +29,189 @@
   --transition-base: all 0.2s ease;
 }
 
+/* ── Dark mode variables ──────────────────────────────────── */
+[data-theme="dark"] {
+  --color-bg: #1a1a2e;
+  --color-card: #22223a;
+  --color-text: #e8e8f2;
+  --color-text-muted: #9898b8;
+  --color-border: #3c3c60;
+
+  /* brand colors — pulled back ~15% in saturation */
+  --color-primary: #cc5555;
+  --color-primary-dark: #bb4444;
+  --color-primary-light: #dd7777;
+  --color-secondary: #3bada6;
+  --color-secondary-dark: #2a9a93;
+  --color-accent: #c9b84a;
+  --color-accent-dark: #b8a838;
+}
+
+/* ── Dark component overrides ─────────────────────────────── */
+[data-theme="dark"] body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .card {
+  background-color: var(--color-card);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] nav {
+  background-color: #22223a;
+  border-color: #3c3c60;
+}
+
+[data-theme="dark"] .input {
+  background-color: #353558;
+  border-color: #3c3c60;
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .input:focus {
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="dark"] .modal-container {
+  background-color: #2c2c48;
+}
+
+[data-theme="dark"] .btn-ghost {
+  background-color: transparent;
+  border-color: #5c5c80;
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .btn-ghost:hover {
+  background-color: #2c2c48;
+}
+
+[data-theme="dark"] .empty-state {
+  border-color: #3c3c60;
+  background: linear-gradient(to bottom right, #22223a, #1a1a2e);
+}
+
+[data-theme="dark"] footer {
+  background-color: #22223a;
+  border-color: #3c3c60;
+}
+
+[data-theme="dark"] table thead {
+  background-color: #22223a;
+}
+
+[data-theme="dark"] tr:hover {
+  background-color: #2c2c48;
+}
+
+/* ── Admin guide dark overrides ────────────────────────────── */
+[data-theme="dark"] .guide-card {
+  background-color: #2c2c48; /* matches modal-container */
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .guide-tip {
+  background-color: #1a2f2a; /* darker teal-ish */
+  border-left-color: #1d9e75;
+  color: #b8e0d0; /* light teal text, readable */
+}
+
+[data-theme="dark"] .guide-warn {
+  background-color: #2f2a1a; /* darker amber-ish */
+  border-left-color: #ba7517;
+  color: #f0d9b0; /* light amber text, readable */
+}
+
+/* Number badges – keep the same structure as light mode but dark background */
+[data-theme="dark"] .guide-num--teal {
+  background-color: #1a3a2f;
+  color: #6ed9d3;
+}
+[data-theme="dark"] .guide-num--amber {
+  background-color: #3a2e1a;
+  color: #ffd93d;
+}
+[data-theme="dark"] .guide-num--blue {
+  background-color: #1a2f4a;
+  color: #8ab4f8;
+}
+[data-theme="dark"] .guide-num--coral {
+  background-color: #4a2a1a;
+  color: #ffa07a;
+}
+[data-theme="dark"] .guide-num--purple {
+  background-color: #2a1a4a;
+  color: #c4a5ff;
+}
+
+/* Bullet points in guide steps */
+[data-theme="dark"] .guide-steps li::before {
+  background-color: #6b7280; /* light enough to see on dark */
+}
+
+/* Inline code blocks */
+[data-theme="dark"] .guide-code {
+  background-color: #353558;
+  border-color: #4a4a6e;
+  color: var(--color-text);
+}
+
+/* Panel headings (already inherit from body, but ensure) */
+[data-theme="dark"] .guide-panel-heading {
+  color: var(--color-text);
+}
+[data-theme="dark"] .guide-steps {
+  color: var(--color-text-muted); /* #9898B8 – readable muted text */
+}
+
+[data-theme="dark"] .guide-steps strong {
+  color: var(--color-text); /* #E8E8F2 – bright for emphasis */
+}
+
+[data-theme="dark"] .guide-steps em {
+  color: var(--color-secondary);
+}
+
+/* Mobile accordion dividers already use border-color, but ensure consistency */
+[data-theme="dark"] .divide-gray-100,
+[data-theme="dark"] .border-gray-100 {
+  border-color: var(--color-border);
+}
+
+/* ── Hero gradient (base - light mode) ───────────────────────────── */
+.gradient-bg {
+  position: relative;
+  z-index: 0;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 40%, #4ecdc4 100%);
+  overflow: hidden; /* prevents pseudo-element bleed */
+}
+
+/* ── Dark mode: adjusted gradient + overlay ─────────────────────── */
+[data-theme="dark"] .gradient-bg {
+  background: linear-gradient(135deg, #cc5555 0%, #bb6666 40%, #3bada6 100%);
+}
+
+/* Overlay layer */
+[data-theme="dark"] .gradient-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6); /* tweak between 0.55–0.7 if needed */
+  z-index: 1;
+  pointer-events: none; /* allows clicks on buttons */
+}
+
+/* Content stays above overlay */
+.gradient-bg > * {
+  position: relative;
+  z-index: 2;
+}
+
 /* ── Base ──────────────────────────────────────────────────────────────────── */
 @layer base {
   body {
