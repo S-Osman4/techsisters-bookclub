@@ -245,6 +245,9 @@ class BookService:
         if not book:
             raise NotFoundError("No current book is set.")
 
+        # Track old total_chapters before any update
+        old_total = book.total_chapters
+
         updates: dict = {}
 
         if title is not None:
@@ -261,6 +264,10 @@ class BookService:
         if updates:
             book = await self.book_repo.update_fields(book, **updates)
 
+        # If total_chapters changed (and is not None), adjust existing progress
+        if total_chapters is not None and total_chapters != old_total:
+            await self._adjust_user_progress_for_total_change(book.id, total_chapters)
+
         await self.log_repo.log(
             admin_id=admin_id,
             action="update_current_book",
@@ -273,6 +280,28 @@ class BookService:
 
         logger.info("Admin %s updated current book %s: fields=%s", admin_id, book.id, list(updates.keys()))
         return book
+    
+    async def _adjust_user_progress_for_total_change(self, book_id: int, new_total: int) -> None:
+        """
+        Clamp existing progress.chapter values to the new total.
+        - If chapter == -1 (completed), leave unchanged.
+        - If chapter > new_total, reset to 0 (not started).
+        - Otherwise, keep as is.
+        """
+        from app.models.reading_progress import ReadingProgress
+
+        # Fetch all progress records for this book
+        progress_records = await self.progress_repo.get_all_for_book(book_id)
+
+        for progress in progress_records:
+            if progress.chapter == -1:   # completed flag
+                continue
+            if progress.chapter > new_total:
+                progress.chapter = 0
+                self.session.add(progress)   # mark as dirty
+
+        await self.session.commit()
+        logger.info("Adjusted progress for book_id=%s: new_total=%s", book_id, new_total)
 
     async def complete_current_book(self, admin_id: int) -> Book:
         """Mark the current book as completed."""

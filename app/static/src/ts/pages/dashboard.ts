@@ -61,6 +61,7 @@ function handleProgressResponse(evt: Event): void {
       if (data.message) {
         showToast(data.message, "success");
         event.detail.target.innerHTML = "";
+        document.body.dispatchEvent(new Event("progress-updated"));
       }
     } catch {
       // Non-JSON

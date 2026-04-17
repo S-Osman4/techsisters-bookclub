@@ -291,7 +291,15 @@ Pass server data to dashboard.ts via data attributes #}
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
           How the group is progressing.
         </p>
-        {% include "partials/_community_progress.html" %}
+        <div id="community-progress-container">
+          {% include "partials/_community_progress.html" %}
+        </div>
+        <div hx-get="/api/books/progress/community/html"
+            hx-trigger="progress-updated from:body"
+            hx-target="#community-progress-container"
+            hx-swap="outerHTML"
+            style="display: none;">
+        </div>
       </div>
     </div>
   </section>

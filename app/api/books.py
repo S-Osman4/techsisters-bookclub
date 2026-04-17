@@ -2,6 +2,9 @@
 import logging
 from typing import Annotated, Optional
 
+from fastapi.responses import HTMLResponse
+from app.api.pages import templates
+
 from fastapi import APIRouter, Depends, Form, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -111,6 +114,22 @@ async def update_progress(
 
     return MessageResponse(message="Progress updated.")
 
+@router.get("/progress/community/html", response_class=HTMLResponse)
+async def get_community_progress_html(
+    request: Request,
+    db: AsyncSession = Depends(get_session),
+    _: bool = Depends(require_code_verified),
+):
+    service = ProgressService(db)
+    stats = await service.get_community_stats()
+
+    return templates.TemplateResponse(
+        "partials/_community_progress.html",
+        {
+            "request": request,
+            "community_stats": stats
+        }
+    )
 
 @router.get("/progress/my")
 async def get_my_progress(

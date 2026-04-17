@@ -404,7 +404,8 @@
     @apply hidden;
   }
 
-  .btn.htmx-request .btn-text {
+  .btn.htmx-request .btn-text,
+  .btn.htmx-request .btn-icon {
     @apply hidden;
   }
 

@@ -1,39 +1,41 @@
 {# app/templates/partials/_community_progress.html #} {# Variables:
-community_stats (CommunityProgressResponse | None) #} {% if community_stats and
-community_stats.total_readers > 0 %}
-<div class="space-y-3">
-  <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-    {{ community_stats.total_readers }} {{ community_stats.total_readers |
-    pluralise("member", "members") }} tracking progress
-  </p>
+community_stats (CommunityProgressResponse | None) #}
+<div id="community-progress-container">
+  {% if community_stats and community_stats.total_readers > 0 %}
+  <div class="space-y-3">
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+      {{ community_stats.total_readers }} {{ community_stats.total_readers |
+      pluralise("member", "members") }} tracking progress
+    </p>
 
-  {% for stat in community_stats.stats %}
-  <div>
-    <div class="flex items-center justify-between mb-1">
-      <span class="text-sm text-gray-700 dark:text-gray-300"
-        >{{ stat.label }}</span
-      >
-      <span class="text-xs text-gray-500 dark:text-gray-400">
-        {{ stat.count }} {{ stat.count | pluralise("member", "members") }}
-        &middot; {{ stat.percentage }}%
-      </span>
-    </div>
-    <div
-      class="w-full bg-gray-100 dark:bg-dark-elevated rounded-full h-2 overflow-hidden"
-    >
+    {% for stat in community_stats.stats %}
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm text-gray-700 dark:text-gray-300"
+          >{{ stat.label }}</span
+        >
+        <span class="text-xs text-gray-500 dark:text-gray-400">
+          {{ stat.count }} {{ stat.count | pluralise("member", "members") }}
+          &middot; {{ stat.percentage }}%
+        </span>
+      </div>
       <div
-        class="progress-bar h-2 rounded-full"
-        style="width: {{ stat.percentage }}%;"
-        role="progressbar"
-        aria-valuenow="{{ stat.percentage }}"
-        aria-valuemin="0"
-        aria-valuemax="100"
-      ></div>
+        class="w-full bg-gray-100 dark:bg-dark-elevated rounded-full h-2 overflow-hidden"
+      >
+        <div
+          class="progress-bar h-2 rounded-full"
+          style="width: {{ stat.percentage }}%;"
+          role="progressbar"
+          aria-valuenow="{{ stat.percentage }}"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        ></div>
+      </div>
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
 
-{% else %} {% with title = "No progress logged yet", message = "Be the first to
-update your reading progress." %} {% include "partials/_empty_state.html" %} {%
-endwith %} {% endif %}
+  {% else %} {% with title = "No progress logged yet", message = "Be the first
+  to update your reading progress." %} {% include "partials/_empty_state.html"
+  %} {% endwith %} {% endif %}
+</div>
