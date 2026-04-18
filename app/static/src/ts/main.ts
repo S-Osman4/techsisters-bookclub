@@ -13,6 +13,41 @@ import { showToast } from "./toast.js";
 
 // main.ts
 
+function initProgressBar(): void {
+  const bar = document.getElementById("nprogress");
+  if (!bar) return;
+
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
+  function show() {
+    if (timer) clearTimeout(timer);
+    bar!.style.transform = "scaleX(0.7)";
+    bar!.style.opacity = "1";
+  }
+
+  function finish() {
+    bar!.style.transform = "scaleX(1)";
+    timer = setTimeout(() => {
+      bar!.style.opacity = "0";
+      bar!.style.transform = "scaleX(0)";
+    }, 300);
+  }
+
+  // Full page navigations
+  document.addEventListener("click", (e) => {
+    const a = (e.target as Element).closest("a");
+    if (a && a.href && !a.target && !a.href.startsWith("#") &&
+        new URL(a.href).origin === location.origin) {
+      show();
+    }
+  });
+
+  // HTMX requests
+  document.addEventListener("htmx:beforeRequest", show);
+  document.addEventListener("htmx:afterRequest", finish);
+  document.addEventListener("pageshow", finish); // catches back/forward
+}
+
 /**
  * Apply the given theme to the document and update all theme icons.
  */
@@ -69,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initUrlErrors(); // your existing init
   initTheme(); // <-- theme initialization
   initThemeToggle(); // <-- theme toggle button initialization
+  initProgressBar();
   if (window.lucide) window.lucide.createIcons();
 });
 

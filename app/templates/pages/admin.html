@@ -48,11 +48,11 @@
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">New this month</p>
     </div>
     <div class="card p-4 text-center col-span-1">
-      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.pending_suggestions }}</p>
+      <p id="stat-pending-count" class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.pending_suggestions }}</p>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pending suggestions</p>
     </div>
     <div class="card p-4 text-center col-span-1">
-      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.books_in_queue }}</p>
+      <p id="stat-queue-count" class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.books_in_queue }}</p>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Books in queue</p>
     </div>
     <div class="card p-4 text-center col-span-1">
@@ -258,7 +258,7 @@
     </h2>
 
     {% if pending_suggestions %}
-      <div class="divide-y divide-gray-100 dark:divide-dark-border max-h-96 overflow-y-auto">
+      <div id="pending-suggestions-list" class="divide-y divide-gray-100 dark:divide-dark-border max-h-96 overflow-y-auto">
         {% for suggestion in pending_suggestions %}
           <div class="flex flex-col sm:flex-row sm:items-center
                       sm:justify-between gap-4 py-4 first:pt-0 last:pb-0">
@@ -358,7 +358,7 @@
     </h2>
 
     {% if approved_queue %}
-      <div class="divide-y divide-gray-100 dark:divide-dark-border max-h-80 overflow-y-auto">
+      <div id="approved-queue-list" class="divide-y divide-gray-100 dark:divide-dark-border max-h-80 overflow-y-auto">
         {% for book in approved_queue %}
           <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
             {% if book.cover_image_url %}

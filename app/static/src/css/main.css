@@ -212,6 +212,73 @@
   z-index: 2;
 }
 
+[data-theme="dark"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  box-shadow: 0 4px 15px rgba(204, 85, 85, 0.4);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #6ed9d3 100%);
+  box-shadow: 0 4px 15px rgba(59, 173, 166, 0.4);
+}
+
+[data-theme="dark"] .btn-danger {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  box-shadow: 0 4px 15px rgba(185, 28, 28, 0.3);
+}
+
+[data-theme="dark"] .progress-bar { background: linear-gradient(90deg, var(--color-primary), var(--color-secondary)); }
+
+[data-theme="dark"] .badge-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  /* Keep text white for contrast */
+  color: white;
+}
+
+[data-theme="dark"] .badge-secondary {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #6ed9d3 100%);
+  color: white;
+}
+
+/* Button hover shadows in dark mode */
+[data-theme="dark"] .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 8px 25px rgba(204, 85, 85, 0.5);
+}
+
+[data-theme="dark"] .btn-secondary:hover:not(:disabled) {
+  box-shadow: 0 8px 25px rgba(59, 173, 166, 0.5);
+}
+
+[data-theme="dark"] .btn-danger:hover:not(:disabled) {
+  box-shadow: 0 8px 25px rgba(185, 28, 28, 0.4);
+}
+
+/* Status badges (pending/approved/rejected) dark overrides */
+[data-theme="dark"] .badge-pending {
+  @apply bg-yellow-900/30 text-yellow-200;
+}
+
+[data-theme="dark"] .badge-approved {
+  @apply bg-green-900/30 text-green-200;
+}
+
+[data-theme="dark"] .badge-rejected {
+  @apply bg-red-900/30 text-red-200;
+}
+
+/* Toast dark mode (safe fallback) */
+[data-theme="dark"] .toast {
+  background: var(--color-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Card-hover border colour in dark mode */
+[data-theme="dark"] .card-hover:hover {
+  border-color: rgba(204, 85, 85, 0.4);
+}
+
 /* ── Base ──────────────────────────────────────────────────────────────────── */
 @layer base {
   body {
@@ -441,6 +508,48 @@
   }
 }
 
+/* ── Hero gradient base (image + overlay) ───────────────────────────── */
+.gradient-bg {
+  position: relative;
+  z-index: 0;
+  background-image: url('/static/images/books-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.gradient-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 40%, #4ecdc4 100%);
+  opacity: 0.85;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.gradient-bg > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .gradient-bg::before {
+  background: linear-gradient(135deg, #a04040 0%, #b05555 40%, #2a8a82 100%);
+  opacity: 0.92;
+}
+
+/* Optional extra darkening layer */
+[data-theme="dark"] .gradient-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1;
+  pointer-events: none;
+}
+
 /* ── Admin Guide specific styles ───────────────────────────────────────────── */
 .guide-num {
   @apply inline-flex items-center justify-center;
@@ -581,4 +690,8 @@
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+@view-transition {
+  navigation: auto;
 }

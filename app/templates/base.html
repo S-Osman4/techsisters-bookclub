@@ -9,6 +9,7 @@
       content="TechSisters Book Club — a members-only reading community for women in tech."
     />
     <meta name="theme-color" content="#FF6B6B" />
+    <meta name="view-transition" content="same-origin" />
     <title>{% block title %}TechSisters Book Club{% endblock %}</title>
 
     {# Preconnect to font origins #}
@@ -64,5 +65,21 @@
     <script type="module" src="/static/dist/main.js"></script>
 
     {% block extra_js %}{% endblock %}
+
+    <style>
+      #nprogress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+        z-index: 9999;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+      }
+    </style>
+    <div id="nprogress" aria-hidden="true"></div>
   </body>
 </html>

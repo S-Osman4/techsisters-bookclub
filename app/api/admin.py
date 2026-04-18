@@ -13,8 +13,8 @@ from app.database import get_session
 from app.models.user import User
 from app.schemas.access_code import AccessCodeResponse, AccessCodeUpdate
 from app.schemas.admin import AdminLogDetailResponse, AdminStatsResponse
-from app.schemas.book import BookUpdate, SetCurrentBook
-from app.schemas.common import MessageResponse
+from app.schemas.book import BookUpdate, SetCurrentBook, BookResponse
+from app.schemas.common import MessageResponse, SuccessResponse
 from app.schemas.meeting import MeetingResponse, MeetingUpdate
 from app.schemas.user import UserResponse
 from app.services.admin import AdminService
@@ -178,14 +178,14 @@ async def get_pending_suggestions(
     return await service.get_pending_suggestions()
 
 
-@router.put("/suggestions/{suggestion_id}/approve", response_model=MessageResponse)
+@router.put("/suggestions/{suggestion_id}/approve", response_model=SuccessResponse)
 async def approve_suggestion(
     suggestion_id: int,
     cover_image_url: Annotated[Optional[str], Body(embed=True)] = None,
     admin: User = Depends(require_admin),
     db: AsyncSession = Depends(get_session),
 ):
-    """Approve a suggestion. cover_image_url falls back to the suggestion's own cover."""
+    """Approve a suggestion. Returns the newly created queued book."""
     try:
         service = BookService(db)
         book = await service.approve_suggestion(
@@ -193,10 +193,16 @@ async def approve_suggestion(
             cover_image_url=cover_image_url or "",
             admin_id=admin.id,
         )
+        # Convert ORM instance to Pydantic schema
+        book_data = BookResponse.model_validate(book)
+        
+        return SuccessResponse(
+            success=True,
+            data=book_data,
+            message="Suggestion approved and added to queue."
+        )
     except AppError as exc:
         raise handle_app_error(exc)
-
-    return MessageResponse(message="Suggestion approved and added to queue.")
 
 
 @router.put("/suggestions/{suggestion_id}/reject", response_model=MessageResponse)
