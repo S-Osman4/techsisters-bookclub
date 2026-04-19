@@ -86,7 +86,7 @@ function reloadAfter(ms = 1200): void {
  * Simple HTML escaping to prevent XSS when inserting user‑provided strings.
  */
 function escapeHtml(text: string): string {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
@@ -95,13 +95,13 @@ function escapeHtml(text: string): string {
  * Format an ISO date string into "DD Mon YYYY" (e.g. "18 Apr 2026").
  */
 function formatDate(isoString: string | null | undefined): string {
-  if (!isoString) return 'Recently added';
+  if (!isoString) return "Recently added";
   const date = new Date(isoString);
-  if (isNaN(date.getTime())) return 'Recently added';
-  return date.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
+  if (isNaN(date.getTime())) return "Recently added";
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 }
 /**
@@ -122,20 +122,41 @@ function addBookToQueue(book: {
   cover_image_url: string | null;
   created_at: string;
 }): void {
-  const queueList = document.getElementById('approved-queue-list');
-  if (!queueList) return;
+  // Find the queue section
+  const queueSection = document.querySelector(
+    'section[aria-labelledby="queue-heading"]',
+  );
+  if (!queueSection) {
+    return;
+  }
 
-  // Remove empty state if it exists (look for a parent container pattern)
-  const emptyState = queueList.querySelector('.empty-state')?.closest('.py-4');
-  if (emptyState) emptyState.remove();
+  let queueList = document.getElementById("approved-queue-list");
+
+  // If the list doesn't exist, remove the empty state and create the list
+  if (!queueList) {
+    // Remove the empty state container (the whole div with class "empty-state")
+    const emptyStateDiv = queueSection.querySelector(".empty-state");
+    if (emptyStateDiv) {
+      emptyStateDiv.remove();
+    }
+
+    // Create the list container
+    queueList = document.createElement("div");
+    queueList.id = "approved-queue-list";
+    queueList.className =
+      "divide-y divide-gray-100 dark:divide-dark-border max-h-80 overflow-y-auto";
+    queueSection.appendChild(queueList);
+  }
+
+  if (!queueList) return; // fallback
 
   const currentBookId = getAdminData().currentBookId;
 
-  const itemDiv = document.createElement('div');
-  itemDiv.className = 'flex items-center gap-4 py-3 first:pt-0 last:pb-0';
+  const itemDiv = document.createElement("div");
+  itemDiv.className = "flex items-center gap-4 py-3 first:pt-0 last:pb-0";
 
   // Build cover image HTML
-  let coverHtml = '';
+  let coverHtml = "";
   if (book.cover_image_url) {
     coverHtml = `<img src="${escapeHtml(book.cover_image_url)}" alt="${escapeHtml(book.title)}" loading="lazy" class="w-10 h-14 object-contain rounded flex-shrink-0 bg-gray-50 dark:bg-dark-elevated" onerror="this.style.display='none'">`;
   } else {
@@ -146,10 +167,10 @@ function addBookToQueue(book: {
     </div>`;
   }
 
-  // Set as current button only if no current book exists
+  // "Set as current" button only if no current book exists
   const setCurrentBtn = currentBookId
-    ? ''
-    : `<button class="btn btn-primary text-xs py-2 px-4 flex-shrink-0 set-current-btn" data-id="${book.id}" data-title="${escapeHtml(book.title)}" data-cover="${book.cover_image_url || ''}">Set as current</button>`;
+    ? ""
+    : `<button class="btn btn-primary text-xs py-2 px-4 flex-shrink-0 set-current-btn" data-id="${book.id}" data-title="${escapeHtml(book.title)}" data-cover="${book.cover_image_url || ""}">Set as current</button>`;
 
   itemDiv.innerHTML = `
     ${coverHtml}
@@ -168,12 +189,14 @@ function addBookToQueue(book: {
  * If no pending items remain, show the empty state.
  */
 function removeSuggestionFromPending(suggestionId: string): void {
-  const pendingList = document.getElementById('pending-suggestions-list');
+  const pendingList = document.getElementById("pending-suggestions-list");
   if (!pendingList) return;
 
   // Find the button with matching data-id and then its parent item container
-  const approveBtn = document.querySelector(`.approve-btn[data-id="${suggestionId}"]`);
-  const itemContainer = approveBtn?.closest('.py-4'); // the div containing this suggestion
+  const approveBtn = document.querySelector(
+    `.approve-btn[data-id="${suggestionId}"]`,
+  );
+  const itemContainer = approveBtn?.closest(".py-4"); // the div containing this suggestion
   if (itemContainer) {
     itemContainer.remove();
   }
@@ -192,12 +215,12 @@ function removeSuggestionFromPending(suggestionId: string): void {
 }
 
 function updatePendingBadge(newCount: number): void {
-  const badge = document.getElementById('pending-count-badge');
+  const badge = document.getElementById("pending-count-badge");
   if (badge) badge.textContent = String(newCount);
 }
 
 function updateQueueBadge(newCount: number): void {
-  const badge = document.getElementById('queue-count-badge');
+  const badge = document.getElementById("queue-count-badge");
   if (badge) badge.textContent = String(newCount);
 }
 
@@ -611,71 +634,98 @@ async function confirmSuggestionAction(): Promise<void> {
   const { id, action } = currentSuggestion;
 
   if (action === "approve") {
-  const coverUrl =
-    (document.getElementById("suggestion-cover-url") as HTMLInputElement | null)
-      ?.value.trim() ?? "";
+    const coverUrl =
+      (
+        document.getElementById(
+          "suggestion-cover-url",
+        ) as HTMLInputElement | null
+      )?.value.trim() ?? "";
 
-  if (!coverUrl) {
-    showResult("suggestion-modal-result", "A cover image URL is required to approve a book.", true);
-    return;
-  }
-
-  setButtonLoading("suggestion-confirm-btn", true, "Approving...");
-  try {
-    const response = await apiFetch(`/api/admin/suggestions/${id}/approve`, "PUT", {
-      cover_image_url: coverUrl,
-    });
-
-    // The API now returns { success: true, data: BookResponse, message: string }
-    if (response.success) {
-      const book = (response as any).data as {
-        id: number;
-        title: string;
-        cover_image_url: string | null;
-        created_at: string;
-      };
-
-      // 1. Add the book to the queue visually
-      addBookToQueue(book);
-
-      // 2. Remove the suggestion from the pending list
-      removeSuggestionFromPending(id);
-
-      // 3. Update stats
-      const pendingEl = document.getElementById('stat-pending-count');
-      const queueEl = document.getElementById('stat-queue-count');
-      if (pendingEl) {
-        const newPending = Math.max(0, parseInt(pendingEl.textContent || '0', 10) - 1);
-        pendingEl.textContent = String(newPending);
-        updatePendingBadge(newPending);
-      }
-      if (queueEl) {
-        const newQueue = parseInt(queueEl.textContent || '0', 10) + 1;
-        queueEl.textContent = String(newQueue);
-        updateQueueBadge(newQueue);
-      }
-
-      showToast(response.message ?? "Suggestion approved.", "success");
-      closeModal("admin-suggestion-modal");
-    } else {
-      showResult("suggestion-modal-result", (response as any).detail ?? "Failed to approve.", true);
+    if (!coverUrl) {
+      showResult(
+        "suggestion-modal-result",
+        "A cover image URL is required to approve a book.",
+        true,
+      );
+      return;
     }
-  } catch {
-    showResult("suggestion-modal-result", "Network error.", true);
-  } finally {
-    setButtonLoading("suggestion-confirm-btn", false);
-  }
+
+    setButtonLoading("suggestion-confirm-btn", true, "Approving...");
+    try {
+      const response = await apiFetch(
+        `/api/admin/suggestions/${id}/approve`,
+        "PUT",
+        {
+          cover_image_url: coverUrl,
+        },
+      );
+
+      // The API now returns { success: true, data: BookResponse, message: string }
+      if (response.success) {
+        const book = (response as any).data as {
+          id: number;
+          title: string;
+          cover_image_url: string | null;
+          created_at: string;
+        };
+
+        // 1. Add the book to the queue visually
+        addBookToQueue(book);
+
+        // 2. Remove the suggestion from the pending list
+        removeSuggestionFromPending(id);
+
+        // 3. Update stats
+        const pendingEl = document.getElementById("stat-pending-count");
+        const queueEl = document.getElementById("stat-queue-count");
+        if (pendingEl) {
+          const newPending = Math.max(
+            0,
+            parseInt(pendingEl.textContent || "0", 10) - 1,
+          );
+          updateStatCount("stat-pending-count", newPending); // ✅ replaces manual textContent
+          updatePendingBadge(newPending);
+        }
+        if (queueEl) {
+          const newQueue = parseInt(queueEl.textContent || "0", 10) + 1;
+          updateStatCount("stat-queue-count", newQueue); // ✅ replaces manual textContent
+          updateQueueBadge(newQueue);
+        }
+
+        showToast(response.message ?? "Suggestion approved.", "success");
+        closeModal("admin-suggestion-modal");
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showResult(
+          "suggestion-modal-result",
+          (response as any).detail ?? "Failed to approve.",
+          true,
+        );
+      }
+    } catch {
+      showResult("suggestion-modal-result", "Network error.", true);
+    } finally {
+      setButtonLoading("suggestion-confirm-btn", false);
+    }
   } else {
     // Reject branch remains the same (for now, could also be made dynamic)
     setButtonLoading("suggestion-confirm-btn", true, "Rejecting...");
     try {
-      const data = await apiFetch(`/api/admin/suggestions/${id}/reject`, "PUT", {});
+      const data = await apiFetch(
+        `/api/admin/suggestions/${id}/reject`,
+        "PUT",
+        {},
+      );
       if (data.success) {
         showToast(data.message ?? "Suggestion rejected.", "success");
         closeModal("admin-suggestion-modal");
         reloadAfter(); // Keep reload for simplicity, or apply same dynamic removal
       } else {
-        showResult("suggestion-modal-result", data.detail ?? "Failed to reject.", true);
+        showResult(
+          "suggestion-modal-result",
+          data.detail ?? "Failed to reject.",
+          true,
+        );
       }
     } catch {
       showResult("suggestion-modal-result", "Network error.", true);
@@ -704,7 +754,6 @@ function handleEditToInput(this: HTMLInputElement) {
 let pendingBookId = "";
 
 function openSetCurrentModal(btn: HTMLElement): void {
-  console.log("📂 openSetCurrentModal, pendingBookId:", btn.dataset.id);
   pendingBookId = btn.dataset.id ?? "";
   const title = btn.dataset.title ?? "";
   const cover = btn.dataset.cover ?? "";
@@ -741,8 +790,6 @@ function openSetCurrentModal(btn: HTMLElement): void {
 }
 
 async function setCurrentBook(): Promise<void> {
-  console.log("🔥 setCurrentBook called");
-
   const { from: chapterFrom, to: chapterTo } = getChapterValues("set-current");
   const cover =
     (
@@ -765,14 +812,6 @@ async function setCurrentBook(): Promise<void> {
     );
     return;
   }
-
-  // Log what we're about to send
-  console.log("setCurrentBook payload:", {
-    chapter_from: chapterFrom,
-    chapter_to: chapterTo ?? chapterFrom,
-    cover_image_url: cover || undefined,
-    total_chapters: total ? parseInt(total, 10) : undefined,
-  });
 
   setButtonLoading("set-current-btn", true, "Setting...");
   try {
@@ -917,10 +956,12 @@ function init(): void {
     editTo.removeEventListener("input", handleEditToInput);
     editTo.addEventListener("input", handleEditToInput);
   }
-const queueSection = document.getElementById('approved-queue-list')?.closest('.card');
+  const queueSection = document
+    .getElementById("approved-queue-list")
+    ?.closest(".card");
   if (queueSection) {
-    queueSection.addEventListener('click', (e) => {
-      const target = (e.target as HTMLElement).closest('.set-current-btn');
+    queueSection.addEventListener("click", (e) => {
+      const target = (e.target as HTMLElement).closest(".set-current-btn");
       if (target instanceof HTMLElement) {
         e.preventDefault();
         openSetCurrentModal(target);

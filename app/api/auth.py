@@ -2,11 +2,11 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request, Response, status
+from fastapi import APIRouter, Depends, Form, Request, Response, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, handle_app_error
-from app.core.exceptions import AppError
+from app.core.exceptions import AppError, UnauthorizedError
 from app.database import get_session
 from app.core.limiter import limiter
 from app.models.user import User
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/verify-code", response_model=MessageResponse)
-@limiter.limit("10/minute")
+@limiter.limit("5/minute")
 async def verify_code(
     request: Request,
     code: Annotated[str, Form()],
@@ -33,6 +33,8 @@ async def verify_code(
         service = AuthService(db)
         await service.verify_access_code(code)
     except AppError as exc:
+        if isinstance(exc, UnauthorizedError):
+            raise HTTPException(status_code=403, detail=exc.detail)
         raise handle_app_error(exc)
 
     request.session["code_verified"] = True

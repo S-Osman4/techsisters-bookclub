@@ -414,81 +414,82 @@ Pass server data to dashboard.ts via data attributes #}
     {% endif %}
   </section>
 
-  {# ── Your suggestions (members only) ───────────────────────────────── #} {%
-  if current_user %}
-  <section
-    id="your-suggestions"
-    class="mb-8"
-    aria-labelledby="my-suggestions-heading"
-  >
-    <h2
-      id="my-suggestions-heading"
-      class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-4"
+  {# ── Your suggestions (members only) ───────────────────────────────── #}
+    {% if current_user %}
+    <section
+      id="your-suggestions"
+      class="mb-8"
+      aria-labelledby="my-suggestions-heading"
     >
-      Your suggestions
-    </h2>
+      <h2
+        id="my-suggestions-heading"
+        class="font-heading text-xl font-bold text-gray-900 dark:text-white mb-4"
+      >
+        Your suggestions
+      </h2>
 
-    {% if user_suggestions %}
-    <div class="card divide-y divide-gray-100 dark:divide-dark-border">
-      {% for suggestion in user_suggestions %}
-      <div class="flex items-center justify-between gap-4 px-5 py-4 flex-wrap">
-        <div class="flex items-center gap-4 min-w-0">
-          {% if suggestion.cover_image_url %}
-          <img
-            src="{{ suggestion.cover_image_url }}"
-            alt="{{ suggestion.title }}"
-            loading="lazy"
-            class="w-10 h-14 object-contain rounded flex-shrink-0 bg-gray-50 dark:bg-dark-elevated"
-            onerror="this.style.display = 'none'"
-          />
-          {% endif %}
+      {% if user_suggestions %}
+      <div class="card divide-y divide-gray-100 dark:divide-dark-border">
+        {% for suggestion in user_suggestions %}
+        <div class="grid grid-cols-[auto,1fr,auto] gap-4 px-5 py-4 items-center">
+          {# Cover image (fixed width) #}
+          <div class="flex-shrink-0">
+            {% if suggestion.cover_image_url %}
+            <img
+              src="{{ suggestion.cover_image_url }}"
+              alt="{{ suggestion.title }}"
+              loading="lazy"
+              class="w-10 h-14 object-contain rounded bg-gray-50 dark:bg-dark-elevated"
+              onerror="this.style.display = 'none'"
+            />
+            {% else %}
+            <div class="w-10 h-14 bg-gray-100 dark:bg-dark-elevated rounded flex items-center justify-center">
+              <svg class="w-5 h-5 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            {% endif %}
+          </div>
+
+          {# Title and PDF link – allow up to 3 lines #}
           <div class="min-w-0">
-            <p
-              class="text-sm font-semibold text-gray-900 dark:text-white truncate"
-            >
+            <p class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-3" title="{{ suggestion.title }}">
               {{ suggestion.title }}
             </p>
-
-            <a
-              href="{{ suggestion.pdf_url }}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-xs text-primary hover:text-primary-dark transition-colors"
-            >
+            <a href="{{ suggestion.pdf_url }}" target="_blank" rel="noopener noreferrer"
+              class="text-xs text-primary hover:text-primary-dark transition-colors inline-block mt-0.5">
               View PDF
             </a>
           </div>
+
+          {# Status badge (fixed width, no wrap) #}
+          <div class="text-right whitespace-nowrap">
+            {% set status = suggestion.status %}
+            {% if status == "pending" %}
+              <span class="badge badge-pending">Pending review</span>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Awaiting admin decision</p>
+            {% elif status == "approved" %}
+              <span class="badge badge-approved">Added to queue</span>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Approved by admin</p>
+            {% else %}
+              <span class="badge badge-rejected">Not selected</span>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Not selected this cycle</p>
+            {% endif %}
+          </div>
         </div>
-        <div class="flex-shrink-0 text-right">
-          {% set status = suggestion.status %} {% if status == "pending" %}
-          <span class="badge badge-pending">Pending review</span>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-            Awaiting admin decision
-          </p>
-          {% elif status == "approved" %}
-          <span class="badge badge-approved">Added to queue</span>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-            Approved by admin
-          </p>
-          {% else %}
-          <span class="badge badge-rejected">Not selected</span>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-            Not selected this cycle
-          </p>
-          {% endif %}
-        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="card p-6">
-      {% with title = "No suggestions yet", message = "Submit your first book
-      suggestion above.", cta_text = "Suggest a book", cta_url = "#suggest-book"
-      %} {% include "partials/_empty_state.html" %} {% endwith %}
-    </div>
+      {% else %}
+      <div class="card p-6">
+        {% with title = "No suggestions yet", message = "Submit your first book suggestion above.", cta_text = "Suggest a book", cta_url = "#suggest-book" %}
+          {% include "partials/_empty_state.html" %}
+        {% endwith %}
+      </div>
+      {% endif %}
+    </section>
     {% endif %}
-  </section>
-  {% endif %} {# ── Reading queue and history
+  {# ── Reading queue and history
   ──────────────────────────────────────── #}
   <section aria-labelledby="library-heading">
     <h2

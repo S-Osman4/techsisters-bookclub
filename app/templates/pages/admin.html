@@ -250,7 +250,7 @@
     >
       Pending suggestions
       {% if pending_suggestions %}
-        <span class="ml-2 px-2 py-0.5 text-sm rounded-full
+        <span id="pending-count-badge" class="ml-2 px-2 py-0.5 text-sm rounded-full
                       bg-primary/10 text-primary font-normal">
           {{ pending_suggestions | length }}
         </span>
@@ -355,6 +355,10 @@
       class="font-heading text-lg font-bold text-gray-900 dark:text-white mb-4"
     >
       Approved queue
+      <span id="queue-count-badge" class="ml-2 px-2 py-0.5 text-sm rounded-full
+        bg-primary/10 text-primary font-normal">
+        {{ approved_queue | length }}
+      </span>
     </h2>
 
     {% if approved_queue %}
