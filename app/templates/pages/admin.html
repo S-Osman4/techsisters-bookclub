@@ -250,179 +250,31 @@
     >
       Pending suggestions
       {% if pending_suggestions %}
-        <span id="pending-count-badge" class="ml-2 px-2 py-0.5 text-sm rounded-full
+        <span class="ml-2 px-2 py-0.5 text-sm rounded-full
                       bg-primary/10 text-primary font-normal">
           {{ pending_suggestions | length }}
         </span>
       {% endif %}
     </h2>
 
-    {% if pending_suggestions %}
-      <div id="pending-suggestions-list" class="divide-y divide-gray-100 dark:divide-dark-border max-h-96 overflow-y-auto">
-        {% for suggestion in pending_suggestions %}
-          <div class="flex flex-col sm:flex-row sm:items-center
-                      sm:justify-between gap-4 py-4 first:pt-0 last:pb-0">
-            <div class="flex items-start gap-4 min-w-0">
-              {% if suggestion.cover_image_url %}
-                <img
-                  src="{{ suggestion.cover_image_url }}"
-                  alt="{{ suggestion.title }}"
-                  loading="lazy"
-                  class="w-12 h-16 object-contain rounded flex-shrink-0
-                         bg-gray-50 dark:bg-dark-elevated border border-gray-100 dark:border-dark-border"
-                  onerror="this.style.display='none'"
-                />
-              {% else %}
-                <div class="w-12 h-16 bg-gray-100 dark:bg-dark-elevated rounded flex-shrink-0
-                            flex items-center justify-center">
-                  <svg class="w-5 h-5 text-gray-300 dark:text-gray-600" fill="none"
-                       stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          stroke-width="1.5"
-                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
-                             5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
-                             18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
-                             5.477 14.754 5 16.5 5c1.747 0 3.332.477
-                             4.5 1.253v13C19.832 18.477 18.247 18 16.5
-                             18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-              {% endif %}
-
-              <div class="min-w-0 flex-1">
-                <p class="font-semibold text-sm text-gray-900 dark:text-white truncate">
-                  {{ suggestion.title }}
-                </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  by {{ suggestion.user.name if suggestion.user else "Unknown" }}
-                  &middot;
-                  {{ suggestion.user.email | mask_email
-                     if suggestion.user else "" }}
-                </p>
-                <a href="{{ suggestion.pdf_url }}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-xs text-primary hover:text-primary-dark
-                         transition-colors mt-1 inline-block"
-                >
-                  View PDF
-                </a>
-              </div>
-            </div>
-
-            <div class="flex gap-2 flex-shrink-0 sm:flex-col lg:flex-row">
-              <button
-                class="btn btn-secondary text-xs py-2 px-4 approve-btn"
-                data-id="{{ suggestion.id }}"
-                data-title="{{ suggestion.title }}"
-                data-cover="{{ suggestion.cover_image_url or '' }}"
-                data-pdf="{{ suggestion.pdf_url }}"
-                data-user="{{ suggestion.user.name
-                              if suggestion.user else 'Unknown' }}"
-              >
-                Approve
-              </button>
-              <button
-                class="btn btn-danger text-xs py-2 px-4 reject-btn"
-                data-id="{{ suggestion.id }}"
-                data-title="{{ suggestion.title }}"
-                data-cover="{{ suggestion.cover_image_url or '' }}"
-                data-pdf="{{ suggestion.pdf_url }}"
-                data-user="{{ suggestion.user.name
-                              if suggestion.user else 'Unknown' }}"
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-
-    {% else %}
-      {% with
-        title   = "No pending suggestions",
-        message = "New suggestions from members will appear here."
-      %}
-        {% include "partials/_empty_state.html" %}
-      {% endwith %}
-    {% endif %}
+    <div id="pending-suggestions-container">
+      {% include "partials/_admin_pending_suggestions.html" %}
+    </div>
   </section>
 
-  {# ── Approved queue ──────────────────────────────────────────────────────── #}
+{# ── Approved queue ──────────────────────────────────────────────────────── #}
   <section class="card p-6 mb-6" aria-labelledby="queue-heading">
     <h2
       id="queue-heading"
       class="font-heading text-lg font-bold text-gray-900 dark:text-white mb-4"
     >
       Approved queue
-      <span id="queue-count-badge" class="ml-2 px-2 py-0.5 text-sm rounded-full
-        bg-primary/10 text-primary font-normal">
-        {{ approved_queue | length }}
-      </span>
     </h2>
 
-    {% if approved_queue %}
-      <div id="approved-queue-list" class="divide-y divide-gray-100 dark:divide-dark-border max-h-80 overflow-y-auto">
-        {% for book in approved_queue %}
-          <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-            {% if book.cover_image_url %}
-              <img
-                src="{{ book.cover_image_url }}"
-                alt="{{ book.title }}"
-                loading="lazy"
-                class="w-10 h-14 object-contain rounded flex-shrink-0
-                       bg-gray-50 dark:bg-dark-elevated"
-                onerror="this.style.display='none'"
-              />
-            {% else %}
-              <div class="w-10 h-14 bg-gray-100 dark:bg-dark-elevated rounded flex-shrink-0
-                          flex items-center justify-center">
-                <svg class="w-4 h-4 text-gray-300 dark:text-gray-600" fill="none"
-                     stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="1.5"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5
-                           5S4.168 5.477 3 6.253v13C4.168 18.477 5.754
-                           18 7.5 18s3.332.477 4.5 1.253m0-13C13.168
-                           5.477 14.754 5 16.5 5c1.747 0 3.332.477
-                           4.5 1.253v13C19.832 18.477 18.247 18 16.5
-                           18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-            {% endif %}
-
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                {{ book.title }}
-              </p>
-              <p class="text-xs text-gray-400 dark:text-gray-500">
-                Added {{ book.created_at.strftime("%d %b %Y") }}
-              </p>
-            </div>
-
-            {% if not current_book %}
-              <button
-                class="btn btn-primary text-xs py-2 px-4 flex-shrink-0
-                       set-current-btn"
-                data-id="{{ book.id }}"
-                data-title="{{ book.title }}"
-                data-cover="{{ book.cover_image_url or '' }}"
-              >
-                Set as current
-              </button>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-
-    {% else %}
-      {% with
-        title   = "Queue is empty",
-        message = "Approved book suggestions will appear here."
-      %}
-        {% include "partials/_empty_state.html" %}
-      {% endwith %}
-    {% endif %}
+    {# HTMX swap target — refreshed after approve without full reload #}
+    <div id="approved-queue-container">
+      {% include "partials/_admin_approved_queue.html" %}
+    </div>
   </section>
 
   {# ── User management ─────────────────────────────────────────────────────── #}

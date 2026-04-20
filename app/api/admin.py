@@ -4,25 +4,80 @@ import secrets
 import string
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Body, Depends, status
+from fastapi import APIRouter, Body, Depends, Request, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import handle_app_error, require_admin
+from app.api.pages import templates
+from app.core.config import settings
 from app.core.exceptions import AppError
 from app.database import get_session
 from app.models.user import User
 from app.schemas.access_code import AccessCodeResponse, AccessCodeUpdate
 from app.schemas.admin import AdminLogDetailResponse, AdminStatsResponse
-from app.schemas.book import BookUpdate, SetCurrentBook, BookResponse
-from app.schemas.common import MessageResponse, SuccessResponse
+from app.schemas.book import BookUpdate, SetCurrentBook
+from app.schemas.common import MessageResponse
 from app.schemas.meeting import MeetingResponse, MeetingUpdate
 from app.schemas.user import UserResponse
 from app.services.admin import AdminService
 from app.services.book import BookService
 from app.services.meeting import MeetingService
+from zoneinfo import ZoneInfo
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
+
+
+def _base_context(request: Request) -> dict:
+    return {
+        "request": request,
+        "whatsapp_link": settings.WHATSAPP_GROUP_LINK,
+        "uk_tz": ZoneInfo("Europe/London"),
+        "now": datetime.now(timezone.utc),
+    }
+
+
+# ── HTMX partial endpoints ────────────────────────────────────────────────────
+
+@router.get("/partials/pending-suggestions", response_class=HTMLResponse)
+async def pending_suggestions_partial(
+    request: Request,
+    admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+):
+    """Return the rendered pending suggestions list partial for HTMX swap."""
+    service = BookService(db)
+    from app.repositories.user import UserRepository
+    pending_suggestions = await service.get_pending_suggestions()
+    return templates.TemplateResponse(
+        "partials/_admin_pending_suggestions.html",
+        {
+            **_base_context(request),
+            "pending_suggestions": pending_suggestions,
+        },
+    )
+
+
+@router.get("/partials/approved-queue", response_class=HTMLResponse)
+async def approved_queue_partial(
+    request: Request,
+    admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+):
+    """Return the rendered approved queue list partial for HTMX swap."""
+    service = BookService(db)
+    current_book = await service.get_current_book()
+    approved_queue = await service.get_queue()
+    return templates.TemplateResponse(
+        "partials/_admin_approved_queue.html",
+        {
+            **_base_context(request),
+            "approved_queue": approved_queue,
+            "current_book": current_book,
+        },
+    )
 
 
 # ── Access code ───────────────────────────────────────────────────────────────
@@ -132,10 +187,6 @@ async def set_current_book(
     db: AsyncSession = Depends(get_session),
 ):
     """Move a queued book to current."""
-    logger.info(
-        "set_current_book: book_id=%s chapter_from=%s chapter_to=%s",
-        book_id, payload.chapter_from, payload.chapter_to,
-    )
     try:
         service = BookService(db)
         book = await service.set_current_book(
@@ -147,7 +198,6 @@ async def set_current_book(
             total_chapters=payload.total_chapters,
         )
     except AppError as exc:
-        logger.error("set_current_book error: %s", exc)
         raise handle_app_error(exc)
 
     return MessageResponse(message=f"'{book.title}' is now the current book.")
@@ -178,31 +228,25 @@ async def get_pending_suggestions(
     return await service.get_pending_suggestions()
 
 
-@router.put("/suggestions/{suggestion_id}/approve", response_model=SuccessResponse)
+@router.put("/suggestions/{suggestion_id}/approve", response_model=MessageResponse)
 async def approve_suggestion(
     suggestion_id: int,
     cover_image_url: Annotated[Optional[str], Body(embed=True)] = None,
     admin: User = Depends(require_admin),
     db: AsyncSession = Depends(get_session),
 ):
-    """Approve a suggestion. Returns the newly created queued book."""
+    """Approve a suggestion and add it to the queue."""
     try:
         service = BookService(db)
-        book = await service.approve_suggestion(
+        await service.approve_suggestion(
             suggestion_id=suggestion_id,
             cover_image_url=cover_image_url or "",
             admin_id=admin.id,
         )
-        # Convert ORM instance to Pydantic schema
-        book_data = BookResponse.model_validate(book)
-        
-        return SuccessResponse(
-            success=True,
-            data=book_data,
-            message="Suggestion approved and added to queue."
-        )
     except AppError as exc:
         raise handle_app_error(exc)
+
+    return MessageResponse(message="Suggestion approved and added to queue.")
 
 
 @router.put("/suggestions/{suggestion_id}/reject", response_model=MessageResponse)

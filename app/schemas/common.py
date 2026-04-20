@@ -1,6 +1,6 @@
 # app/schemas/common.py
-from pydantic import BaseModel
 from typing import Any, Optional
+from pydantic import BaseModel
 
 
 class MessageResponse(BaseModel):
@@ -12,14 +12,19 @@ class MessageResponse(BaseModel):
     success: bool = True
 
 
+class SuccessResponse(BaseModel):
+    """
+    Success response that optionally carries a data payload.
+    Used when the caller needs the created/updated object back.
+    """
+    success: bool = True
+    message: str = ""
+    data: Optional[Any] = None
+
+
 class ErrorResponse(BaseModel):
     """
     Standard error shape returned on all 4xx/5xx responses.
     """
     detail: str
     success: bool = False
-
-class SuccessResponse(BaseModel):
-    success: bool = True
-    data: Optional[Any] = None
-    message: Optional[str] = None
